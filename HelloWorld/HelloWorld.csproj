@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{71751444-649E-43DD-A74F-B41DDDD14FA2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WindowsFormsApplication7</RootNamespace>
+    <AssemblyName>WindowsFormsApplication7</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="SlimDX, Version=2.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="01.Frontend\FontRenderer.cs" />
+    <Compile Include="01.Frontend\Extrapolator.cs" />
+    <Compile Include="02.Business\AxisAlignBoundingBox.cs" />
+    <Compile Include="02.Business\Profiling\Counters.cs" />
+    <Compile Include="02.Business\Profiling\Profiler.cs" />
+    <Compile Include="02.Business\Landscape\Forrest.cs" />
+    <Compile Include="04.CrossCutting\Entities\Block.cs" />
+    <Compile Include="02.Business\BlockRepository.cs" />
+    <Compile Include="02.Business\ChunkCache.cs" />
+    <Compile Include="02.Business\Landscape\ChunkGenerator.cs" />
+    <Compile Include="03.DataAccess\ChunkStorage.cs" />
+    <Compile Include="02.Business\GameSettings.cs" />
+    <Compile Include="02.Business\Material.cs" />
+    <Compile Include="02.Business\MathLibrary.cs" />
+    <Compile Include="04.CrossCutting\Entities\PositionChunk.cs" />
+    <Compile Include="04.CrossCutting\Entities\PositionBlock.cs" />
+    <Compile Include="04.CrossCutting\Entities\FlyingCamera.cs" />
+    <Compile Include="04.CrossCutting\Entities\Player.cs" />
+    <Compile Include="04.CrossCutting\Entities\Entity.cs" />
+    <Compile Include="01.Frontend\BlockColorMap.cs" />
+    <Compile Include="01.Frontend\ChunkCacheRenderer.cs" />
+    <Compile Include="01.Frontend\ChunkRenderer.cs" />
+    <Compile Include="01.Frontend\EffectList.cs" />
+    <Compile Include="01.Frontend\EntityRenderer.cs" />
+    <Compile Include="01.Frontend\GlobalRenderer.cs" />
+    <Compile Include="01.Frontend\Camera.cs" />
+    <Compile Include="04.CrossCutting\Entities\Chunk.cs" />
+    <Compile Include="01.Frontend\TextureList.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="01.Frontend\BlockRenderer.cs" />
+    <Compile Include="01.Frontend\Tessellator.cs" />
+    <Compile Include="TheGame.cs" />
+    <Compile Include="02.Business\Timer.cs" />
+    <Compile Include="02.Business\World.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="App.config" />
+    <None Include="01.Frontend\Shaders\Texture.fx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="01.Frontend\Shaders\Simple.fx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="01.Frontend\Textures\ascii.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Bitmap2.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Bitmap1_old.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Bitmap1.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\sky.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

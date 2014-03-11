@@ -198,7 +198,7 @@ namespace WindowsFormsApplication7
 
             timer = new Timer(20.0F);
             form = new RenderForm("SlimDX - MiniTri Direct3D 11 Sample");
-            int scale = 1;
+            int scale = 3;
             form.Width = 200 * scale;
             form.Height = 150 * scale;
 

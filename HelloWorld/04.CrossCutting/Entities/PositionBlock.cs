@@ -17,13 +17,5 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             this.Y = y;
             this.Z = z;
         }
-
-        internal PositionBlock Add(int x, int y, int z)
-        {
-            X += x;
-            Y += y;
-            Z += z;
-            return this;
-        }
     }
 }

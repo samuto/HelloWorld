@@ -52,7 +52,6 @@
     <Compile Include="02.Business\AxisAlignBoundingBox.cs" />
     <Compile Include="02.Business\Profiling\Counters.cs" />
     <Compile Include="02.Business\Profiling\Profiler.cs" />
-    <Compile Include="02.Business\Landscape\Forrest.cs" />
     <Compile Include="04.CrossCutting\Entities\Block.cs" />
     <Compile Include="02.Business\BlockRepository.cs" />
     <Compile Include="02.Business\ChunkCache.cs" />

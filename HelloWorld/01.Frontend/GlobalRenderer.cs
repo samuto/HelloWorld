@@ -182,6 +182,7 @@ namespace WindowsFormsApplication7.Frontend
         internal void RenderProfiler()
         {
             Profiler p = Profiler.Instance;
+            FontRenderer f = FontRenderer.Instance;
             string report = p.Report();
             float y = TheGame.Instance.Height - 20;
             using (StringReader sr = new StringReader(report))
@@ -189,8 +190,8 @@ namespace WindowsFormsApplication7.Frontend
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    FontRenderer.Instance.RenderTextShadow(line, 0, y);
-                    y -= 12;
+                    f.RenderTextShadow(line, 0, y);
+                    y -= f.LineHeight;
                 }
             }
         }

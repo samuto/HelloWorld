@@ -28,5 +28,10 @@ namespace WindowsFormsApplication7.Business.Profiling
 
 
         }
+
+        internal void SetValue(string key, int newValue)
+        {
+            AllCounters[key] = newValue;
+        }
     }
 }

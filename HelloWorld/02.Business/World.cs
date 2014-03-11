@@ -5,6 +5,7 @@ using System.Text;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business.Landscape;
 using WindowsFormsApplication7.DataAccess;
+using WindowsFormsApplication7.Business.Profiling;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -55,18 +56,21 @@ namespace WindowsFormsApplication7.Business
       
         internal int GetBlock(int x, int y, int z)
         {
-            PositionBlock positionBlock = new PositionBlock(x, y, z);
-            PositionChunk positionChunk = PositionChunk.CreateFrom(positionBlock);
+            PositionBlock pos = new PositionBlock(x, y, z);
+            PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
             Chunk chunk = GetChunk(positionChunk);
-            return chunk.GetLocalBlock(positionChunk.GetLocalPositionBlock(positionBlock));
+            positionChunk.ConvertToLocalPosition(ref pos);
+            int blockId = chunk.GetLocalBlock(pos.X, pos.Y, pos.Z);
+            return blockId;
         }
 
         internal void SetBlock(int x, int y, int z, int blockId)
         {
-            PositionBlock positionBlock = new PositionBlock(x, y, z);
-            PositionChunk positionChunk = PositionChunk.CreateFrom(positionBlock);
+            PositionBlock pos = new PositionBlock(x, y, z);
+            PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
             Chunk chunk = GetChunk(positionChunk);
-            chunk.SetLocalBlock(positionChunk.GetLocalPositionBlock(positionBlock), blockId);
+            positionChunk.ConvertToLocalPosition(ref pos);
+            chunk.SetLocalBlock(pos.X, pos.Y, pos.Z, blockId);
         }
 
         internal bool ReplaceBlock(PositionBlock pos, int oldId, int newId)

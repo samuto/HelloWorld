@@ -18,51 +18,59 @@ namespace WindowsFormsApplication7.Frontend
         {
             Profiler p = Profiler.Instance;
             p.StartSection("setuploop");
-           
+
             Vector3 pos = World.Instance.Player.Position;
             ChunkCache cachedChunks = World.Instance.GetCachedChunks();
             PositionChunk minChunk = cachedChunks.LastMinChunk;
             PositionChunk maxChunk = cachedChunks.LastMaxChunk;
 
             float centerX = (maxChunk.X - minChunk.X) / 2f + minChunk.X;
+            float centerY = (maxChunk.Y - minChunk.Y) / 2f + minChunk.Y;
             float centerZ = (maxChunk.Z - minChunk.Z) / 2f + minChunk.Z;
             float viewRadius = GameSettings.ViewRadius / 16f - 1f;
-            
+
             bool forceCachedRendering = false;
-            chunkRenderers.Values.ToList().ForEach(c => c.Expired = true);
             for (int x = minChunk.X; x <= maxChunk.X; x++)
             {
                 float deltaX = x - centerX;
-                for (int z = minChunk.Z; z <= maxChunk.Z; z++)
+                for (int y = minChunk.Y; y <= maxChunk.Y; y++)
                 {
-                    p.EndStartSection("precheck");
-                    // skip if chunk is out of view range
-                    float deltaZ = z - centerZ;
-                    if ((deltaX * deltaX + deltaZ * deltaZ) > viewRadius * viewRadius)
-                        continue;
-                    p.EndStartSection("getchunk");
-                    // get chunkrenderer for this chunk (create new of it does not exist)
-                    Chunk chunk = cachedChunks.GetChunk(new PositionChunk(x, z));
-                    object key = chunk.Position.Key;
-                    ChunkRenderer chunkRenderer;
-                    if (chunkRenderers.ContainsKey(key))
-                        chunkRenderer = chunkRenderers[key];
-                    else
+                    float deltaY = y - centerY;
+                    for (int z = minChunk.Z; z <= maxChunk.Z; z++)
                     {
-                        chunkRenderer = new ChunkRenderer(chunk);
-                        chunkRenderers.Add(key, chunkRenderer);
-                    }
+                        p.EndStartSection("precheck");
+                        // skip if chunk is out of view range
+                        float deltaZ = z - centerZ;
+                        if ((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) > viewRadius * viewRadius)
+                            continue;
+                        p.EndStartSection("getchunk");
+                        // get chunkrenderer for this chunk (create new of it does not exist)
+                        Chunk chunk = cachedChunks.GetChunk(new PositionChunk(x, y, z));
+                        object key = chunk.Position.Key;
+                        ChunkRenderer chunkRenderer;
+                        if (chunkRenderers.ContainsKey(key))
+                            chunkRenderer = chunkRenderers[key];
+                        else
+                        {
+                            chunkRenderer = new ChunkRenderer(chunk);
+                            chunkRenderers.Add(key, chunkRenderer);
+                        }
 
-                    p.EndStartSection("renderchunk");
-                    forceCachedRendering |= chunkRenderer.Render(forceCachedRendering);
-                    
-                    chunkRenderer.Expired = false;
+                        p.EndStartSection("renderchunk");
+                        forceCachedRendering |= chunkRenderer.Render(forceCachedRendering);
+                    }
                 }
             }
             p.EndStartSection("disposestuff");
             // dispose and remove expired chunks
-            List<ChunkRenderer> expired = chunkRenderers.Values.Where(c => c.Expired).ToList();
-            expired.ForEach(c => { c.Dispose(); chunkRenderers.Remove(c); });
+            var expiredRenderer = chunkRenderers.FirstOrDefault(pair => pair.Value.Expired);
+            if(expiredRenderer.Key != null)
+            {
+                expiredRenderer.Value.Dispose();
+                chunkRenderers.Remove(expiredRenderer.Key);
+            }
+            Counters.Instance.SetValue("expired", chunkRenderers.Values.Where(c => c.Expired).Count());
+            Counters.Instance.SetValue("chunkRenderers", chunkRenderers.Count);
             p.EndSection();
         }
     }

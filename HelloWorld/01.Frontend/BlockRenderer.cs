@@ -22,9 +22,14 @@ namespace WindowsFormsApplication7.Frontend
         {
         }
 
-        internal void RenderBlock(PositionBlock positionBlock)
+        internal void RenderBlock(PositionBlock positionBlock, Chunk chunk)
         {
-            int blockId = world.GetBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
+            int blockId = chunk.SafeGetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
+            PositionBlock globalPosition;
+            chunk.Position.GetGlobalPositionBlock(out globalPosition, positionBlock.X, positionBlock.Y, positionBlock.Z);
+            float vx = globalPosition.X;
+            float vy = globalPosition.Y;
+            float vz = globalPosition.Z;
             if (blockId == 0)
                 return;
 
@@ -64,73 +69,73 @@ namespace WindowsFormsApplication7.Frontend
             float sideShadow = 1f;
 
             Tessellator tessellator = Tessellator.Instance;
-            if (world.GetBlock(x, y, z + 1) == 0)
+            if (chunk.SafeGetLocalBlock(x, y, z + 1) == 0)
             {
                 // front
                 sideShadow = world.GetBlock(x, y-1, z + 1)!=0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 0f, z + 1f, 1.0f), c1 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 1f, z + 1f, 1.0f), c1);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 1f, z + 1f, 1.0f), c1);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 1f, 1.0f), c1 * sideShadow);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1 * sideShadow);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c1 * sideShadow);
             }
 
-            if (world.GetBlock(x, y, z - 1) == 0)
+            if (chunk.SafeGetLocalBlock(x, y, z - 1) == 0)
             {
                 // back
-                sideShadow = world.GetBlock(x, y-1, z - 1) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 0f, 1.0f), c2 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(x + 1, y + 1f, z + 0f, 1.0f), c2);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 1f, z + 0f, 1.0f), c2);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 0f, z + 0f, 1.0f), c2 * sideShadow);
+                sideShadow = chunk.SafeGetLocalBlock(x, y - 1, z - 1) != 0 ? reduction : 1f;
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2 * sideShadow);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1,  vy + 1f, vz + 0f, 1.0f), c2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c2 * sideShadow);
             }
 
-            if (world.GetBlock(x - 1, y, z) == 0)
+            if (chunk.SafeGetLocalBlock(x - 1, y, z) == 0)
             {
                 //left
-                sideShadow = world.GetBlock(x - 1, y-1, z) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 0f, z + 0f, 1.0f), c3 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 1f, z + 0f, 1.0f), c3);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 1f, z + 1f, 1.0f), c3);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 0f, z + 1f, 1.0f), c3 * sideShadow);
+                sideShadow = chunk.SafeGetLocalBlock(x - 1, y - 1, z) != 0 ? reduction : 1f;
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c3 * sideShadow);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c3 * sideShadow);
             }
 
-            if (world.GetBlock(x + 1, y, z) == 0)
+            if (chunk.SafeGetLocalBlock(x + 1, y, z) == 0)
             {
                 //right
-                sideShadow = world.GetBlock(x + 1, y-1, z) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 1f, 1.0f), c4 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 1f, z + 1f, 1.0f), c4);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 1f, z + 0f, 1.0f), c4);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 0f, 1.0f), c4 * sideShadow);
+                sideShadow = chunk.SafeGetLocalBlock(x + 1, y - 1, z) != 0 ? reduction : 1f;
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c4 * sideShadow);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c4);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c4);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c4 * sideShadow);
             }
 
-            if (world.GetBlock(x, y + 1, z) == 0)
+            if (chunk.SafeGetLocalBlock(x, y + 1, z) == 0)
             {
                 //top
                 float a, b, c, d, e, f, g, h;
-                a = world.GetBlock(x - 1, y + 1, z) == 0 ? 1f : reduction;
-                b = world.GetBlock(x, y + 1, z - 1) == 0 ? 1f : reduction;
-                c = world.GetBlock(x + 1, y + 1, z) == 0 ? 1f : reduction;
-                d = world.GetBlock(x, y + 1, z + 1) == 0 ? 1f : reduction;
+                a = chunk.SafeGetLocalBlock(x - 1, y + 1, z) == 0 ? 1f : reduction;
+                b = chunk.SafeGetLocalBlock(x, y + 1, z - 1) == 0 ? 1f : reduction;
+                c = chunk.SafeGetLocalBlock(x + 1, y + 1, z) == 0 ? 1f : reduction;
+                d = chunk.SafeGetLocalBlock(x, y + 1, z + 1) == 0 ? 1f : reduction;
 
-                e = world.GetBlock(x - 1, y + 1, z + 1) == 0 ? 1f : reduction;
-                f = world.GetBlock(x - 1, y + 1, z - 1) == 0 ? 1f : reduction;
-                g = world.GetBlock(x + 1, y + 1, z - 1) == 0 ? 1f : reduction;
-                h = world.GetBlock(x + 1, y + 1, z + 1) == 0 ? 1f : reduction;
+                e = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? 1f : reduction;
+                f = chunk.SafeGetLocalBlock(x - 1, y + 1, z - 1) == 0 ? 1f : reduction;
+                g = chunk.SafeGetLocalBlock(x + 1, y + 1, z - 1) == 0 ? 1f : reduction;
+                h = chunk.SafeGetLocalBlock(x + 1, y + 1, z + 1) == 0 ? 1f : reduction;
 
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 1f, z + 1f, 1.0f), c5 * a * d * e);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 1f, z + 0f, 1.0f), c5 * a * b * f);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 1f, z + 0f, 1.0f), c5 * b * c * g);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 1f, z + 1f, 1.0f), c5 * c * d * h);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c5 * a * d * e);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c5 * a * b * f);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c5 * b * c * g);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c5 * c * d * h);
             }
 
-            if (world.GetBlock(x, y - 1, z) == 0)
+            if (chunk.SafeGetLocalBlock(x, y - 1, z) == 0)
             {
                 //bottom
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 0f, z + 0f, 1.0f), c6);
-                tessellator.AddVertexWithColor(new Vector4(x + 0f, y + 0f, z + 1f, 1.0f), c6);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 1f, 1.0f), c6);
-                tessellator.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 0f, 1.0f), c6);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c6);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c6);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c6);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c6);
             }
 
 

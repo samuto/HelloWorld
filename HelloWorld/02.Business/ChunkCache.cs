@@ -15,13 +15,17 @@ namespace WindowsFormsApplication7.Business
 
         public ChunkCache()
         {
-            
+
         }
 
         internal void Update(Vector3 position, float blockRadius)
         {
             PositionChunk minChunk = PositionChunk.CreateFrom(Vector3.Add(position, new Vector3(-blockRadius, -blockRadius, -blockRadius)));
             PositionChunk maxChunk = PositionChunk.CreateFrom(Vector3.Add(position, new Vector3(blockRadius, blockRadius, blockRadius)));
+
+            // limit y...
+            if (minChunk.Y < 0) minChunk.Y = 0;
+            if (maxChunk.Y >= Chunk.MaxSizeY / 16) maxChunk.Y = Chunk.MaxSizeY / 16 - 1;
 
             // skip updating cache if nothing has changed
             if (LastMinChunk.Equals(minChunk) && LastMaxChunk.Equals(maxChunk))
@@ -33,17 +37,20 @@ namespace WindowsFormsApplication7.Business
             cachedChunks.Values.ToList().ForEach(c => c.Expired = true);
             for (int x = minChunk.X; x <= maxChunk.X; x++)
             {
-                for (int z = minChunk.Z; z <= maxChunk.Z; z++)
+                for (int y = minChunk.Y; y <= maxChunk.Y; y++)
                 {
-                    Chunk chunk = World.Instance.GetChunk(new PositionChunk(x, z));
-                    chunk.Expired = false;
-                    if (!cachedChunks.ContainsKey(chunk.Position.Key))
+                    for (int z = minChunk.Z; z <= maxChunk.Z; z++)
                     {
-                        cachedChunks.Add(chunk.Position.Key, chunk);
-                    }
-                    if (!chunk.Initialized)
-                    {
-                        chunk.Initialize();
+                        Chunk chunk = World.Instance.GetChunk(new PositionChunk(x, y, z));
+                        chunk.Expired = false;
+                        if (!cachedChunks.ContainsKey(chunk.Position.Key))
+                        {
+                            cachedChunks.Add(chunk.Position.Key, chunk);
+                        }
+                        if (!chunk.Initialized)
+                        {
+                            chunk.Initialize();
+                        }
                     }
                 }
             }

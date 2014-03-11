@@ -15,16 +15,6 @@ namespace WindowsFormsApplication7._01.Frontend
             return inputVector = Vector3.Add(inputVector, partialMovement);
         }
 
-        internal static float GetEntityPitch(Entity entity, float partialTicks)
-        {
-            return entity.Pitch + entity.PitchVelocity * partialTicks;
-
-        }
-
-        internal static float GetEntityYaw(Entity entity, float partialTicks)
-        {
-            return entity.Yaw + entity.YawVelocity * partialTicks;
-
-        }
+     
     }
 }

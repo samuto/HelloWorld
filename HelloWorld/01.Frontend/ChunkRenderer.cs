@@ -8,14 +8,21 @@ using SlimDX.Direct3D11;
 using SlimDX;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business.Profiling;
+using System.Diagnostics;
 
 namespace WindowsFormsApplication7.Frontend
 {
     class ChunkRenderer
     {
+        public const int timeout = 10*1000;
         public int debug = 0;
-        public bool Expired;
         private DrawBufferWrapper wrapper;
+        private Stopwatch stopwatch = new Stopwatch();
+        
+        public ChunkRenderer()
+        {
+            stopwatch.Start();
+        }
 
         private class DrawBufferWrapper
         {
@@ -36,20 +43,21 @@ namespace WindowsFormsApplication7.Frontend
                 if (DrawBuffer != null && !DrawBuffer.Disposed)
                     DrawBuffer.Dispose();
                 DrawBuffer = null;
-                Chunk.RequiresRendering = true;
+                Chunk.RendererDetached();
                 Disposed = true;
             }
         }
 
         public ChunkRenderer(Chunk chunk)
         {
-             wrapper = new DrawBufferWrapper(chunk);
+            wrapper = new DrawBufferWrapper(chunk);
         }
 
         internal bool Render(bool forceCachedRendering)
         {
+            RenewLease();
             Profiler p = Profiler.Instance;
-            
+
             bool rerenderingOccured = false;
             Tessellator tessellator = Tessellator.Instance;
             tessellator.StartDrawingQuadsWithFog();
@@ -61,7 +69,7 @@ namespace WindowsFormsApplication7.Frontend
             }
             if ((wrapper.Disposed || wrapper.Chunk.RequiresRendering) && !forceCachedRendering)
             {
-                
+                Counters.Instance.Increment("chunks rebuilded");
                 p.StartSection("init");
                 // safe chunk reference and dispose wrapper
                 Chunk chunkToBeWrapped = wrapper.Chunk;
@@ -69,23 +77,26 @@ namespace WindowsFormsApplication7.Frontend
 
                 // rebuild vertices for cunk
                 BlockRenderer blockRenderer = new BlockRenderer();
-                PositionBlock startCorner = wrapper.Chunk.Position.GetMinCornerBlock();
+                PositionBlock startCorner;
+                wrapper.Chunk.Position.GetMinCornerBlock(out startCorner);
                 int minX = startCorner.X;
+                int minY = startCorner.Y;
                 int minZ = startCorner.Z;
                 int maxX = startCorner.X + 16;
+                int maxY = startCorner.Y + 16;
                 int maxZ = startCorner.Z + 16;
                 PositionBlock blockPos = new PositionBlock(0, 0, 0);
                 p.EndStartSection("allblocks");
-                for (int x = minX; x < maxX; x++)
+                for (int x = 0; x < 16; x++)
                 {
-                    for (int y = 0; y < Chunk.SizeY; y++)
+                    for (int y = 0; y < 16; y++)
                     {
-                        for (int z = minZ; z < maxZ; z++)
+                        for (int z = 0; z < 16; z++)
                         {
                             blockPos.X = x;
                             blockPos.Y = y;
                             blockPos.Z = z;
-                            blockRenderer.RenderBlock(blockPos);
+                            blockRenderer.RenderBlock(blockPos, chunkToBeWrapped);
                         }
                     }
                 }
@@ -95,7 +106,7 @@ namespace WindowsFormsApplication7.Frontend
                 wrapper = new DrawBufferWrapper(chunkToBeWrapped);
                 wrapper.DrawBuffer = tessellator.GetDrawBuffer();
                 wrapper.VertexCount = tessellator.VertexCount;
-                wrapper.Chunk.RequiresRendering = false;
+                wrapper.Chunk.RenderingDone();
                 rerenderingOccured = true;
                 p.EndSection();
 
@@ -112,7 +123,8 @@ namespace WindowsFormsApplication7.Frontend
                 {
                     Tessellator t = Tessellator.Instance;
                     t.StartDrawingLines();
-                    PositionBlock startCorner = wrapper.Chunk.Position.GetMinCornerBlock();
+                    PositionBlock startCorner;
+                    wrapper.Chunk.Position.GetMinCornerBlock(out startCorner);
                     float x = startCorner.X;
                     float y = 64;
                     float z = startCorner.Z;
@@ -136,11 +148,24 @@ namespace WindowsFormsApplication7.Frontend
             return rerenderingOccured;
         }
 
+        private void RenewLease()
+        {
+            stopwatch.Restart();
+        }
+
         internal void Dispose()
         {
             if (!wrapper.Disposed)
             {
                 wrapper.Dispose();
+            }
+        }
+
+        public bool Expired 
+        {
+            get
+            {
+                return stopwatch.ElapsedMilliseconds>timeout;
             }
         }
     }

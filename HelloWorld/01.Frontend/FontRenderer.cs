@@ -21,9 +21,14 @@ pqrstuvwxyz{|}~⌂
 ÇüéâäàåçêëèïîìÄÅ
 ÉæÆôöòûùÿÖÜø£Ø×ƒ
 áíóúñÑªº¿®¬½¼¡«»".Replace(Environment.NewLine, "");
+        public const float CharScale = 1;
+        public float CharWidth;
+        public float LineHeight;
 
         public FontRenderer()
         {
+            CharWidth = 8f * CharScale;
+            LineHeight = 8f * CharScale;
         }
 
         internal void RenderTextShadow(string text, float x, float y)
@@ -42,13 +47,10 @@ pqrstuvwxyz{|}~⌂
             GlobalRenderer.Instance.Setup2dCamera();
             Tessellator t = Tessellator.Instance;
             t.StartDrawingQuadsWithAlphaBlend("ascii");
-            float scale = 1;
-            float width = 8 * scale;
-            float height = 8 * scale;
             foreach (var character in text)
             {
-                RenderChar(color, character, x, y, width, height);
-                x += width;
+                RenderChar(color, character, x, y, CharWidth, LineHeight);
+                x += CharWidth;
             }
             t.Draw();
         }
@@ -61,7 +63,6 @@ pqrstuvwxyz{|}~⌂
             int index = fontMap.IndexOf(character);
             float texX = (int)(index % 16);
             float texY = (int)(index / 16);
-
             t.SetTextureQuad(new Vector2(texX / 16f, texY / 16f), 1f / 16f, 1f / 16f);
             t.AddVertexWithColor(new Vector4(posx + 0f, posy + 0f, 0f, 1.0f), color);
             t.AddVertexWithColor(new Vector4(posx + 0f, posy + height, 0f, 1.0f), color);

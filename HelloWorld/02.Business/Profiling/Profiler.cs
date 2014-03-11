@@ -95,7 +95,7 @@ namespace WindowsFormsApplication7.Business.Profiling
         {
             StringBuilder sb = new StringBuilder();
 
-            int padding = 50;
+            int padding = 40;
             if (ReportCounters)
             {
                 foreach (var pair in Counters.Instance.AllCounters)

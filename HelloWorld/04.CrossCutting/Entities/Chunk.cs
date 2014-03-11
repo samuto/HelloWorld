@@ -8,10 +8,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Chunk
     {
-        public const int SizeY = 128;
+        public const int MaxSizeY = 128;
         public bool Expired;
         public PositionChunk Position;
-        private byte[] blocks = new byte[16 * SizeY * 16];
+        private byte[] blocks = new byte[16 * 16 * 16];
         public bool RequiresRendering = true;
         public bool Initialized;
 
@@ -21,60 +21,52 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         public void SetLocalBlock(int x, int y, int z, int blockId)
         {
-            blocks[x * SizeY * 16 + y * 16 + z] = (byte)blockId;
+            blocks[x * 16 * 16 + y * 16 + z] = (byte)blockId;
         }
 
         public byte GetLocalBlock(int x, int y, int z)
         {
-            if (y < 0 || y >= SizeY) return 0;
-            return blocks[x * SizeY * 16 + y * 16 + z];
+            return blocks[x * 16 * 16 + y * 16 + z];
         }
 
-        public void SafeSetLocalBlock(PositionBlock positionBlock, int blockId)
+        public void SafeSetLocalBlock(int x, int y, int z, int blockId)
         {
-            PositionBlock globalPosition = Position.GetGlobalPositionBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
-            if (positionBlock.X < 0 || positionBlock.X >= 16 ||
-                positionBlock.Z < 0 || positionBlock.Z >= 16)
+            if (x < 0 || x >= 16 ||
+                y < 0 || y >= 16 ||
+                z < 0 || z >= 16)
             {
+                PositionBlock globalPosition;
+                Position.GetGlobalPositionBlock(out globalPosition, x, y, z);
                 World.Instance.SetBlock(globalPosition.X, globalPosition.Y, globalPosition.Z, blockId);
                 return;
             }
-            SetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z, blockId);
-
+            SetLocalBlock(x, y, z, blockId);
         }
 
-        internal int SafeGetLocalBlock(PositionBlock positionBlock)
+        internal int SafeGetLocalBlock(int x, int y, int z)
         {
-            PositionBlock globalPosition = Position.GetGlobalPositionBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
-            if (positionBlock.X < 0 || positionBlock.X >= 16 ||
-                positionBlock.Z < 0 || positionBlock.Z >= 16)
+            if (x < 0 || x >= 16 ||
+                y < 0 || y >= 16 ||
+                z < 0 || z >= 16)
             {
+                PositionBlock globalPosition;
+                Position.GetGlobalPositionBlock(out globalPosition, x, y, z);
                 return World.Instance.GetBlock(globalPosition.X, globalPosition.Y, globalPosition.Z);
             }
-            return GetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
+            return GetLocalBlock(x, y, z);
         }
 
-
-        public void SetLocalBlock(PositionBlock positionBlock, int blockId)
-        {
-            SetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z, blockId);
-        }
-
-        internal int GetLocalBlock(PositionBlock positionBlock)
-        {
-            return GetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
-        }
 
         internal void Dipose()
         {
         }
 
 
-        internal bool ReplaceBlock(PositionBlock pos, int oldId, int newId)
+        internal bool ReplaceBlock(int x, int y, int z, int oldId, int newId)
         {
-            if (oldId == SafeGetLocalBlock(pos))
+            if (oldId == SafeGetLocalBlock(x, y, z))
             {
-                SafeSetLocalBlock(pos, newId);
+                SafeSetLocalBlock(x, y, z, newId);
                 return true;
             }
             return false;
@@ -84,6 +76,16 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             World.Instance.Generate(this);
             Initialized = true;
+        }
+
+        internal void RenderingDone()
+        {
+            RequiresRendering = false;
+        }
+
+        internal void RendererDetached()
+        {
+            RequiresRendering = true;
         }
     }
 }

@@ -10,11 +10,13 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
     struct PositionChunk
     {
         public int X;
+        public int Y;
         public int Z;
 
-        public PositionChunk(int x, int z)
+        public PositionChunk(int x, int y, int z)
         {
             this.X = x;
+            this.Y = y;
             this.Z = z;
         }
 
@@ -23,55 +25,45 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             PositionChunk newChunk = new PositionChunk();
 
             newChunk.X = MathLibrary.FloorToWorldGrid(pos.X / 16f);
+            newChunk.Y = MathLibrary.FloorToWorldGrid(pos.Y / 16f);
             newChunk.Z = MathLibrary.FloorToWorldGrid(pos.Z / 16f);
 
             return newChunk;
         }
 
-        internal PositionChunk AddScalar(int scalar)
-        {
-            X += scalar;
-            Z += scalar;
-            return this;
-        }
-
-        
 
         internal static PositionChunk CreateFrom(PositionBlock positionBlock)
         {
-            PositionChunk newChunk = new PositionChunk();
-
-            newChunk.X = MathLibrary.FloorToWorldGrid(positionBlock.X / 16f);
-            newChunk.Z = MathLibrary.FloorToWorldGrid(positionBlock.Z / 16f);
-
-            return newChunk;
+            return CreateFrom(new Vector3(positionBlock.X, positionBlock.Y, positionBlock.Z));
         }
 
-        internal PositionBlock GetLocalPositionBlock(PositionBlock positionBlock)
+        internal void ConvertToLocalPosition(ref PositionBlock positionBlock)
         {
-            return new PositionBlock(
-                positionBlock.X - X * 16,
-                positionBlock.Y,
-                positionBlock.Z - Z * 16
-            );
+            positionBlock.X = positionBlock.X - X * 16;
+            positionBlock.Y = positionBlock.Y - Y * 16;
+            positionBlock.Z = positionBlock.Z - Z * 16;
         }
 
         public object Key
         {
             get
             {
-                return X+","+Z;
+                return X + "," + Y + "," + Z;
             }
         }
 
-        internal PositionBlock GetMinCornerBlock()
+        internal void GetMinCornerBlock(out PositionBlock positionBlock)
         {
-            return new PositionBlock(X * 16, 0, Z * 16);
+            positionBlock.X = X * 16;
+            positionBlock.Y = Y * 16;
+            positionBlock.Z = Z * 16;
         }
 
-        internal PositionBlock GetGlobalPositionBlock(int x, int y, int z)
+        internal void GetGlobalPositionBlock(out PositionBlock positionBlock, int x, int y, int z)
         {
-            return new PositionBlock(X * 16 + x, y, Z * 16 + z);
+            positionBlock.X = X * 16 + x;
+            positionBlock.Y = Y * 16 + y;
+            positionBlock.Z = Z * 16 + z;
         }
     }
 }

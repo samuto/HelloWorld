@@ -31,11 +31,11 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Update(float partialTicks)
         {
-            EyePosition = attachedEntity.GetEyes();
+            
             if (Enable3d)
             {
                 Vector3 direction = attachedEntity.GetDirection();
-                Vector3 eye = Extrapolator.AdjustByEntity(attachedEntity.GetEyes(), attachedEntity, partialTicks);
+                Vector3 eye = Interpolate.EyePosition(attachedEntity, partialTicks);
                 Vector3 target = Vector3.Add(eye, direction);
 
                 Camera.Instance.View = Matrix.LookAtRH(eye, target, new Vector3(0, 1, 0));

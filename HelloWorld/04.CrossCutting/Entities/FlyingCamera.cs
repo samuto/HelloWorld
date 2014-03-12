@@ -27,6 +27,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             if (moveRight)
                 Velocity = new Vector3(-direction.Z, 0, direction.X);
             Velocity.Normalize();
+            PrevPosition = Position;
             Position.X += Velocity.X;
             Position.Y += Velocity.Y;
             Position.Z += Velocity.Z;

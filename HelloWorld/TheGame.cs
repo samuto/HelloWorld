@@ -20,10 +20,9 @@ namespace WindowsFormsApplication7
     {
         public static TheGame Instance = new TheGame();
 
-        private Timer timer;
         private RenderForm form;
 
-        private long debugUpdateTime = Timer.getSystemTime();
+        private double debugUpdateTime = Timer.ElapsedSeconds();
         private int fpsCounter;
 
         private Keyboard keyboard;
@@ -62,16 +61,22 @@ namespace WindowsFormsApplication7
 
         private void RunGameLoop()
         {
-            timer.updateTimer();
+            Timer.NextFrame();
             Profiler p = Profiler.Instance;
             p.Clear();
 
             p.StartSection("update");
+            
+            
+            
             // update
-            for (int i = 0; i < timer.ElapsedTicks; i++)
+            while(Timer.MoreStepsInFrame())
             {
                 RunTick();
+                Timer.Step();
             }
+
+
             p.EndStartSection("getmouse");
             // get mouse
             mouse.Acquire();
@@ -82,7 +87,7 @@ namespace WindowsFormsApplication7
 
             // render game
             p.EndStartSection("render");
-            GlobalRenderer.Instance.Render(timer.RenderPartialTicks);
+            GlobalRenderer.Instance.Render(Timer.GetPartialStep());
             p.EndSection();
 
             p.EndSection(); // Root
@@ -93,10 +98,10 @@ namespace WindowsFormsApplication7
             GlobalRenderer.Instance.Commit();
 
             // display debuginfo
-            while (Timer.getSystemTime() >= this.debugUpdateTime + 1000L)
+            while (Timer.ElapsedSeconds() >= this.debugUpdateTime + 1d)
             {
                 form.Text = this.fpsCounter + " fps";
-                this.debugUpdateTime += 1000L;
+                this.debugUpdateTime += 1d;
                 this.fpsCounter = 0;
             }
 
@@ -196,14 +201,13 @@ namespace WindowsFormsApplication7
             keyboard = new Keyboard(directInput);
             mouse = new Mouse(directInput);
 
-            timer = new Timer(20.0F);
             form = new RenderForm("SlimDX - MiniTri Direct3D 11 Sample");
             int scale = 3;
             form.Width = 200 * scale;
             form.Height = 150 * scale;
 
             GlobalRenderer.Instance.Initialize(form);
-            World.Instance.Player.Position = new Vector3(-30, 64, 0);
+            World.Instance.Player.PrevPosition = World.Instance.Player.Position = new Vector3(-30, 64, 0);
             World.Instance.FlyingCamera.Position = new Vector3(-30, 35, -25);
             Camera.Instance.AttachTo(World.Instance.FlyingCamera);
             entityToControl = World.Instance.FlyingCamera;

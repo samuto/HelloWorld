@@ -21,6 +21,8 @@ namespace WindowsFormsApplication7.Frontend
 
             Vector3 pos = World.Instance.Player.Position;
             ChunkCache cachedChunks = World.Instance.GetCachedChunks();
+            if (cachedChunks.Count == 0)
+                return;
             PositionChunk minChunk = cachedChunks.LastMinChunk;
             PositionChunk maxChunk = cachedChunks.LastMaxChunk;
 

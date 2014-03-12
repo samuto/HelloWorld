@@ -21,17 +21,16 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         protected bool changePitch = false;
         public float Speed = 1f;
         public Vector4 Color = new Vector4(1, 1, 1, 1);
+        public Vector3 PrevPosition = new Vector3(0, 0, 0);
         public Vector3 Position = new Vector3(0, 0, 0);
         public AxisAlignedBoundingBox AABB = new AxisAlignedBoundingBox(new Vector3(-0.5f, 0f, -0.5f), new Vector3(0.5f, 1f, 0.5f));
-        protected Vector3 EyePosition = new Vector3(0, 0, 0);
+        public Vector3 EyePosition = new Vector3(0, 0, 0);
         private const float Math2Pi = (float)Math.PI * 2f;
         public float Yaw = 0;
         public float Pitch = 0;
 
         public Vector3 accGravity = new Vector3(0, -0.1f, 0);
         public Vector3 Velocity = new Vector3(0, 0, 0);
-        public float YawVelocity = 0f;
-        public float PitchVelocity = 0f;
 
         public Entity(Vector4 color)
         {
@@ -48,11 +47,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return AABB.Max.Y - AABB.Min.Y;
         }
 
-        public Vector3 GetEyes()
-        {
-            return new Vector3(Position.X + EyePosition.X, Position.Y + EyePosition.Y, Position.Z + EyePosition.Z);
-        }
-
+      
         internal virtual void Update()
         {
             CalculateVelocity();
@@ -99,8 +94,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
             else
                 response.Y += Velocity.Y;
-            Velocity = Vector3.Subtract(response, Position);
-            
+            //Velocity = Vector3.Subtract(response, Position);
+            PrevPosition = Position;
             Position.X = response.X;
             Position.Y = response.Y;
             Position.Z = response.Z;

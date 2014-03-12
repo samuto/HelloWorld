@@ -48,10 +48,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="01.Frontend\FontRenderer.cs" />
-    <Compile Include="01.Frontend\Extrapolator.cs" />
+    <Compile Include="01.Frontend\Interpolate.cs" />
     <Compile Include="02.Business\AxisAlignBoundingBox.cs" />
     <Compile Include="02.Business\Profiling\Counters.cs" />
     <Compile Include="02.Business\Profiling\Profiler.cs" />
+    <Compile Include="02.Business\Timer.cs" />
     <Compile Include="04.CrossCutting\Entities\Block.cs" />
     <Compile Include="02.Business\BlockRepository.cs" />
     <Compile Include="02.Business\ChunkCache.cs" />
@@ -79,7 +80,6 @@
     <Compile Include="01.Frontend\BlockRenderer.cs" />
     <Compile Include="01.Frontend\Tessellator.cs" />
     <Compile Include="TheGame.cs" />
-    <Compile Include="02.Business\Timer.cs" />
     <Compile Include="02.Business\World.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -22,7 +22,7 @@ namespace WindowsFormsApplication7.Frontend
         {
             Tessellator t = Tessellator.Instance;
             t.StartDrawingQuadsWithFog();
-            Vector3 position = Extrapolator.AdjustByEntity(entity.Position, entity, partialTicks);
+            Vector3 position = Interpolate.Position(entity, partialTicks);
             Vector4 c = entity.Color;
             Vector3 min = entity.AABB.GetMinFromPosition(position);
             Vector3 max = entity.AABB.GetMaxFromPosition(position);
@@ -79,18 +79,7 @@ namespace WindowsFormsApplication7.Frontend
             t.Draw();
             Camera.Instance.World = Matrix.Identity;
 
-            t.StartDrawingQuadsWithFog();
-            float x = entity.Position.X;
-            float y = entity.Position.Y;
-            float z = entity.Position.Z;
-            t.AddVertexWithColor(new Vector4(x, y, z, 1), new Vector4(1, 0, 0, 1));
-            t.AddVertexWithColor(new Vector4(x + 1, y, z, 1), new Vector4(1, 0, 0, 1));
-            t.AddVertexWithColor(new Vector4(x, y, z, 1), new Vector4(0, 1, 0, 1));
-            t.AddVertexWithColor(new Vector4(x, y + 1, z, 1), new Vector4(0, 1, 0, 1));
-            t.AddVertexWithColor(new Vector4(x, y, z, 1), new Vector4(0, 0, 1, 1));
-            t.AddVertexWithColor(new Vector4(x, y, z + 1, 1), new Vector4(0, 0, 1, 1));
-
-            Tessellator.Instance.Draw();
+            
         }
     }
 }

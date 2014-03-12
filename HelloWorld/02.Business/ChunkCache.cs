@@ -63,5 +63,13 @@ namespace WindowsFormsApplication7.Business
         {
             return cachedChunks[positionChunk.Key];
         }
+
+        public int Count
+        {
+            get
+            {
+                return cachedChunks.Count;
+            }
+        }
     }
 }

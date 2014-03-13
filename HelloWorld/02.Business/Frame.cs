@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace WindowsFormsApplication7.Business
 {
-    static class Timer
+    static class Frame
     {
         private static double t = 0.0;
         private const double dt = 1d / 20d;
@@ -15,20 +15,21 @@ namespace WindowsFormsApplication7.Business
         private static Stopwatch sw = new Stopwatch();
         private static double newTime;
         private static double frameTime;
-        static Timer()
+
+        static Frame()
         {
             sw.Start();
-            currentTime = ElapsedSeconds();
+            currentTime = ElapsedSecondsSinceGameStart();
         }
 
-        internal static double ElapsedSeconds()
+        private static double ElapsedSecondsSinceGameStart()
         {
             return sw.ElapsedTicks / (double)Stopwatch.Frequency;
         }
 
-        internal static void NextFrame()
+        internal static void Next()
         {
-            newTime = ElapsedSeconds();
+            newTime = ElapsedSecondsSinceGameStart();
             frameTime = newTime - currentTime;
             if (frameTime > 0.25)
                 frameTime = 0.25;	  // note: max frame time to avoid spiral of death
@@ -36,12 +37,12 @@ namespace WindowsFormsApplication7.Business
             accumulator += frameTime;
         }
 
-        internal static bool MoreStepsInFrame()
+        internal static bool HasMoreTicks()
         {
             return accumulator >= dt;
         }
 
-        internal static void Step()
+        internal static void Tick()
         {
             t += dt;
             accumulator -= dt;

@@ -8,8 +8,8 @@ namespace WindowsFormsApplication7.Business
 {
     class AxisAlignedBoundingBox
     {
-        public Vector3 Min = new Vector3();
-        public Vector3 Max = new Vector3();
+        public Vector3 Min;
+        public Vector3 Max;
 
         public AxisAlignedBoundingBox(Vector3 min, Vector3 max)
         {
@@ -31,7 +31,6 @@ namespace WindowsFormsApplication7.Business
         {
             return new AxisAlignedBoundingBox(new Vector3(Min.X, Min.Y, Min.Z), new Vector3(Max.X, Max.Y, Max.Z));
         }
-
 
         internal void AlignToWorldGrid()
         {

@@ -9,6 +9,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Entity
     {
+        public float Speed = 1f;
+        public Vector4 Color = new Vector4(1, 1, 1, 1);
+        public Vector3 PrevPosition = new Vector3(0, 0, 0);
+        public Vector3 Position = new Vector3(0, 0, 0);
+        public AxisAlignedBoundingBox AABB = new AxisAlignedBoundingBox(new Vector3(-0.5f, 0f, -0.5f), new Vector3(0.5f, 1f, 0.5f));
+        public Vector3 EyePosition = new Vector3(0, 0, 0);
+        public float Yaw = 0;
+        public float Pitch = 0;
+        public Vector3 accGravity = new Vector3(0, -0.1f, 0);
+        public Vector3 Velocity = new Vector3(0, 0, 0);
+
         protected bool moveLeft = false;
         protected bool moveRight = false;
         protected bool moveForward = false;
@@ -19,18 +30,9 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         protected bool onGround = false;
         protected bool changeYaw = false;
         protected bool changePitch = false;
-        public float Speed = 1f;
-        public Vector4 Color = new Vector4(1, 1, 1, 1);
-        public Vector3 PrevPosition = new Vector3(0, 0, 0);
-        public Vector3 Position = new Vector3(0, 0, 0);
-        public AxisAlignedBoundingBox AABB = new AxisAlignedBoundingBox(new Vector3(-0.5f, 0f, -0.5f), new Vector3(0.5f, 1f, 0.5f));
-        public Vector3 EyePosition = new Vector3(0, 0, 0);
-        private const float Math2Pi = (float)Math.PI * 2f;
-        public float Yaw = 0;
-        public float Pitch = 0;
 
-        public Vector3 accGravity = new Vector3(0, -0.1f, 0);
-        public Vector3 Velocity = new Vector3(0, 0, 0);
+        private const float Math2Pi = (float)Math.PI * 2f;
+
 
         public Entity(Vector4 color)
         {
@@ -68,7 +70,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             else
                 response.Z += Velocity.Z;
 
-
             collidingObjects = GetCollidingObjects(new Vector3(response.X + Velocity.X, response.Y, response.Z));
             if (collidingObjects.Count > 0)
             {
@@ -90,11 +91,14 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                     onGround = true;
                 }
                 else if (Velocity.Y > 0)
+                {
                     response.Y = collidingObjects.Min(o => o.Min.Y) - GetHeight();
+                    Velocity.Y = 0;
+                }
             }
             else
                 response.Y += Velocity.Y;
-            //Velocity = Vector3.Subtract(response, Position);
+
             PrevPosition = Position;
             Position.X = response.X;
             Position.Y = response.Y;
@@ -107,13 +111,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 moveForward = false;
                 moveBackward = false;
             }
-
             moveJump = false;
             moveUp = false;
             moveDown = false;
         }
-
-
 
         private List<AxisAlignedBoundingBox> GetCollidingObjects(Vector3 newPosition)
         {

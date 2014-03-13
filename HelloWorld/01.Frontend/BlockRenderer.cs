@@ -25,13 +25,15 @@ namespace WindowsFormsApplication7.Frontend
         internal void RenderBlock(PositionBlock positionBlock, Chunk chunk)
         {
             int blockId = chunk.SafeGetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
+            if (blockId == 0)
+            {
+                return;
+            }
             PositionBlock globalPosition;
             chunk.Position.GetGlobalPositionBlock(out globalPosition, positionBlock.X, positionBlock.Y, positionBlock.Z);
             float vx = globalPosition.X;
             float vy = globalPosition.Y;
             float vz = globalPosition.Z;
-            if (blockId == 0)
-                return;
 
             Block block = BlockRepository.Blocks[blockId];
             int x = positionBlock.X;
@@ -72,7 +74,7 @@ namespace WindowsFormsApplication7.Frontend
             if (chunk.SafeGetLocalBlock(x, y, z + 1) == 0)
             {
                 // front
-                sideShadow = world.GetBlock(x, y-1, z + 1)!=0 ? reduction : 1f;
+                sideShadow = chunk.SafeGetLocalBlock(x, y - 1, z + 1) != 0 ? reduction : 1f;
                 tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1 * sideShadow);
                 tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c1);
                 tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c1);
@@ -84,7 +86,7 @@ namespace WindowsFormsApplication7.Frontend
                 // back
                 sideShadow = chunk.SafeGetLocalBlock(x, y - 1, z - 1) != 0 ? reduction : 1f;
                 tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1,  vy + 1f, vz + 0f, 1.0f), c2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), c2);
                 tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c2);
                 tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c2 * sideShadow);
             }
@@ -113,16 +115,16 @@ namespace WindowsFormsApplication7.Frontend
             {
                 //top
                 float a, b, c, d, e, f, g, h;
-                a = chunk.SafeGetLocalBlock(x - 1, y + 1, z) == 0 ? 1f : reduction;
-                b = chunk.SafeGetLocalBlock(x, y + 1, z - 1) == 0 ? 1f : reduction;
-                c = chunk.SafeGetLocalBlock(x + 1, y + 1, z) == 0 ? 1f : reduction;
-                d = chunk.SafeGetLocalBlock(x, y + 1, z + 1) == 0 ? 1f : reduction;
+                a = chunk.SafeGetLocalBlock(x - 1,  y + 1, z        ) == 0 ? 1f : reduction;
+                b = chunk.SafeGetLocalBlock(x,      y + 1, z - 1    ) == 0 ? 1f : reduction;
+                c = chunk.SafeGetLocalBlock(x + 1,  y + 1, z        ) == 0 ? 1f : reduction;
+                d = chunk.SafeGetLocalBlock(x,      y + 1, z + 1    ) == 0 ? 1f : reduction;
 
                 e = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? 1f : reduction;
                 f = chunk.SafeGetLocalBlock(x - 1, y + 1, z - 1) == 0 ? 1f : reduction;
                 g = chunk.SafeGetLocalBlock(x + 1, y + 1, z - 1) == 0 ? 1f : reduction;
                 h = chunk.SafeGetLocalBlock(x + 1, y + 1, z + 1) == 0 ? 1f : reduction;
-
+                
                 tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c5 * a * d * e);
                 tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c5 * a * b * f);
                 tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c5 * b * c * g);

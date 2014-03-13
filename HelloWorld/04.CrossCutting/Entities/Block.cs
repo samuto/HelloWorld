@@ -12,7 +12,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
     {
         public int Id;
         public MaterialEnum Material;
-
         public Block(int id, MaterialEnum material)
         {
             this.Id = id;
@@ -55,7 +54,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal AxisAlignedBoundingBox GetBoundingBox()
         {
-            return new AxisAlignedBoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1));  
+            return new AxisAlignedBoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1));
         }
     }
 }

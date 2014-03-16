@@ -24,6 +24,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             blocks[x * 16 * 16 + y * 16 + z] = (byte)blockId;
         }
 
+        public void InvalidateMeAndNeighbors()
+        {
+            RequiresRendering = true;
+            World.Instance.GetChunk(new PositionChunk(Position.X-1, Position.Y, Position.Z)).RequiresRendering = true;
+            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y-1, Position.Z)).RequiresRendering = true;
+            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y, Position.Z-1)).RequiresRendering = true;
+            World.Instance.GetChunk(new PositionChunk(Position.X+1, Position.Y, Position.Z)).RequiresRendering = true;
+            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y+1, Position.Z)).RequiresRendering = true;
+            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y, Position.Z+1)).RequiresRendering = true;
+        }
+
         public byte GetLocalBlock(int x, int y, int z)
         {
             return blocks[x * 16 * 16 + y * 16 + z];

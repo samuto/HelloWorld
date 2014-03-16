@@ -40,28 +40,28 @@ namespace WindowsFormsApplication7.Frontend
             };
 
             // left
-            t.AddVertexWithColor(v[0], c * 0.9f);
-            t.AddVertexWithColor(v[4], c * 0.9f);
-            t.AddVertexWithColor(v[7], c * 0.9f);
-            t.AddVertexWithColor(v[3], c * 0.9f);
+            t.AddVertexWithColor(v[0], c );
+            t.AddVertexWithColor(v[4], c );
+            t.AddVertexWithColor(v[7], c );
+            t.AddVertexWithColor(v[3], c );
 
             //front
-            t.AddVertexWithColor(v[3], c * 0f);
-            t.AddVertexWithColor(v[7], c * 0f);
-            t.AddVertexWithColor(v[6], c * 0.8f);
-            t.AddVertexWithColor(v[2], c * 0.8f);
+            t.AddVertexWithColor(v[3], c );
+            t.AddVertexWithColor(v[7], c );
+            t.AddVertexWithColor(v[6], c );
+            t.AddVertexWithColor(v[2], c );
 
             //right
-            t.AddVertexWithColor(v[2], c * 0.7f);
-            t.AddVertexWithColor(v[6], c * 0.7f);
-            t.AddVertexWithColor(v[5], c * 0.7f);
-            t.AddVertexWithColor(v[1], c * 0.7f);
+            t.AddVertexWithColor(v[2], c );
+            t.AddVertexWithColor(v[6], c );
+            t.AddVertexWithColor(v[5], c );
+            t.AddVertexWithColor(v[1], c );
 
             //back
-            t.AddVertexWithColor(v[1], c * 0.6f);
-            t.AddVertexWithColor(v[5], c * 0.6f);
-            t.AddVertexWithColor(v[4], c * 0.6f);
-            t.AddVertexWithColor(v[0], c * 0.6f);
+            t.AddVertexWithColor(v[1], c );
+            t.AddVertexWithColor(v[5], c );
+            t.AddVertexWithColor(v[4], c );
+            t.AddVertexWithColor(v[0], c );
 
             //top
             t.AddVertexWithColor(v[4], c);
@@ -70,10 +70,10 @@ namespace WindowsFormsApplication7.Frontend
             t.AddVertexWithColor(v[7], c);
 
             //bottom
-            t.AddVertexWithColor(v[0], c * 0.4f);
-            t.AddVertexWithColor(v[3], c * 0.4f);
-            t.AddVertexWithColor(v[2], c * 0.4f);
-            t.AddVertexWithColor(v[1], c * 0.4f);
+            t.AddVertexWithColor(v[0], c );
+            t.AddVertexWithColor(v[3], c );
+            t.AddVertexWithColor(v[2], c );
+            t.AddVertexWithColor(v[1], c );
 
             Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
             t.Draw();

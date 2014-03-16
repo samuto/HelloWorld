@@ -160,12 +160,13 @@ namespace WindowsFormsApplication7.Frontend
 
         public void StartDrawingQuadsWithFog()
         {
+            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
             StartDrawing("bitmap1", "texture", 0, PrimitiveTopology.TriangleList);
         }
 
         internal void StartDrawingLines()
         {
-            StartDrawing("bitmap1", "texture", 0, PrimitiveTopology.LineList);
+            StartDrawing("bitmap1", "texture", 3, PrimitiveTopology.LineList);
         }
 
         public void StartDrawingQuadsNoFog(string activeTexture)

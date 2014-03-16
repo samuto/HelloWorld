@@ -78,6 +78,11 @@ float4 PS_Texture_Fog(VS_OUT pIn) : SV_Target
 
 }
 
+float4 PS_Simple(VS_OUT pIn) : SV_Target
+{
+	return pIn.col;
+}
+
 float4 PS_Texture(VS_OUT pIn) : SV_Target
 {
 	float4 textureColor;
@@ -87,7 +92,7 @@ float4 PS_Texture(VS_OUT pIn) : SV_Target
 
 
 
-technique10 TechTexture
+technique10 TextureWithFog0
 {
     pass P0
     {
@@ -98,7 +103,7 @@ technique10 TechTexture
     }
 }
 
-technique10 TechTextureNoFog
+technique10 TextureNoFog1
 {
     pass P0
     {
@@ -109,7 +114,7 @@ technique10 TechTextureNoFog
     }
 }
 
-technique10 TechTextureNoFogAlphaBlend 
+technique10 TextureNoFogAlphaBlend2
 {     
 	pass P0     
 	{         
@@ -120,3 +125,13 @@ technique10 TechTextureNoFogAlphaBlend
 	} 
 } 
 
+technique10 NoTextureNoFog3
+{
+    pass P0
+    {
+        SetVertexShader( CompileShader( vs_4_0, VS() ) );
+        SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, PS_Simple() ) );
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+    }
+}

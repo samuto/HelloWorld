@@ -6,6 +6,7 @@ using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business.Landscape;
 using WindowsFormsApplication7.DataAccess;
 using WindowsFormsApplication7.Business.Profiling;
+using SlimDX;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -21,14 +22,22 @@ namespace WindowsFormsApplication7.Business
         private ChunkStorage storage = new ChunkStorage();
         private ChunkGenerator generator = new ChunkGenerator();
 
+        public VoxelTrace PlayerVoxelTrace = new VoxelTrace();
+
         internal void Update()
         {
+            
             chunkCache.Update(Player.Position, GameSettings.CachingRadius);
             if (GameSettings.EnableEntityUpdate)
             {
                 Player.Update();
             }
             FlyingCamera.Update();
+
+            // calculate voxel ray
+            Vector3 direction = Player.GetDirection();
+            Vector3 eye = Vector3.Add(Player.EyePosition, Player.Position);
+            PlayerVoxelTrace.Update(eye, direction);
         }
 
         internal ChunkCache GetCachedChunks()

@@ -48,7 +48,7 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("SlimDX - MiniTri Direct3D 11 Sample");
-            int scale = 2;
+            int scale = 4;
             form.Width = 200 * scale;
             form.Height = 150 * scale;
 
@@ -129,6 +129,7 @@ namespace WindowsFormsApplication7
             // handle input
             KeyboardState keyboardNow = input.KeyboardStateNow;
             KeyboardState keyboardLast = input.KeyboardStateLast;
+            MouseState mouseNow = input.MouseStateNow;
             if (keyboardNow.IsPressed(Key.D1))
             {
                 entityToControl = World.Instance.Player;
@@ -196,6 +197,32 @@ namespace WindowsFormsApplication7
                 int index = Profiler.Instance.SelectedSection.LastIndexOf(".");
                 if(index>=0)
                     Profiler.Instance.SelectedSection = Profiler.Instance.SelectedSection.Substring(0, index);
+            }
+
+            // handle mouse
+            if (World.Instance.PlayerVoxelTrace.Hit && !Input.Instance.IsMouseFreezed())
+            {
+                if (mouseNow.IsPressed(1))
+                {
+                    Input.Instance.FreezeMouse();
+                    Vector4 pos = World.Instance.PlayerVoxelTrace.ImpactPosition;
+                    PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
+                    World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, BlockRepository.Sand.Id);
+                    PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
+                    Chunk chunk = World.Instance.GetChunk(posChunk);
+                    chunk.InvalidateMeAndNeighbors();
+                    
+                }
+                else if (mouseNow.IsPressed(0))
+                {
+                    Input.Instance.FreezeMouse();
+                    Vector4 pos = World.Instance.PlayerVoxelTrace.BuildPosition;
+                    PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
+                    World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, 0);
+                    PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
+                    Chunk chunk = World.Instance.GetChunk(posChunk);
+                    chunk.InvalidateMeAndNeighbors();
+                }
             }
 
             // update world

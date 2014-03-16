@@ -15,6 +15,7 @@ namespace WindowsFormsApplication7.Frontend
         public Matrix View;
         public Matrix Projection;
         public Vector3 EyePosition;
+        public Vector3 Direction;
         public bool Enable3d;
         private Entity attachedEntity;
 
@@ -34,11 +35,11 @@ namespace WindowsFormsApplication7.Frontend
             
             if (Enable3d)
             {
-                Vector3 direction = attachedEntity.GetDirection();
-                Vector3 eye = Interpolate.EyePosition(attachedEntity, partialTicks);
-                Vector3 target = Vector3.Add(eye, direction);
+                Direction = attachedEntity.GetDirection();
+                EyePosition = Interpolate.EyePosition(attachedEntity, partialTicks);
+                Vector3 target = Vector3.Add(EyePosition, Direction);
 
-                Camera.Instance.View = Matrix.LookAtRH(eye, target, new Vector3(0, 1, 0));
+                Camera.Instance.View = Matrix.LookAtRH(EyePosition, target, new Vector3(0, 1, 0));
                 Camera.Instance.Projection = Matrix.PerspectiveFovRH(45.0f, (float)TheGame.Instance.Width / (float)TheGame.Instance.Height, 0.05f, 100f);
             }
             else

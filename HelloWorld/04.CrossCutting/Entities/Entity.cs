@@ -17,7 +17,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         public Vector3 EyePosition = new Vector3(0, 0, 0);
         public float Yaw = 0;
         public float Pitch = 0;
-        public Vector3 accGravity = new Vector3(0, -0.1f, 0);
+        public Vector3 accGravity = new Vector3(0, -0.02f, 0);
         public Vector3 Velocity = new Vector3(0, 0, 0);
 
         protected bool moveLeft = false;
@@ -49,7 +49,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return AABB.Max.Y - AABB.Min.Y;
         }
 
-      
+
         internal virtual void Update()
         {
             CalculateVelocity();
@@ -104,13 +104,12 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Position.Y = response.Y;
             Position.Z = response.Z;
 
-            if (onGround)
-            {
-                moveLeft = false;
-                moveRight = false;
-                moveForward = false;
-                moveBackward = false;
-            }
+           
+            moveLeft = false;
+            moveRight = false;
+            moveForward = false;
+            moveBackward = false;
+           
             moveJump = false;
             moveUp = false;
             moveDown = false;
@@ -151,40 +150,31 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         protected void CalculateVelocity()
         {
+
+            Vector3 forward = GetDirection();
+            forward.Y = 0;
+            Vector3 left = new Vector3(forward.Z, 0, -forward.X);
+            Vector3 direction = new Vector3();
+            if (moveLeft)
+                Vector3.Add(ref direction, ref left, out direction);
+            if (moveRight)
+                Vector3.Subtract(ref direction, ref left, out direction);
+            if (moveForward)
+                Vector3.Add(ref direction, ref forward, out direction);
+            if (moveBackward)
+                Vector3.Subtract(ref direction, ref forward, out direction);
+            direction.Normalize();
+            Vector3.Multiply(ref direction, Speed, out direction);
+            Velocity.X = direction.X;
+            Velocity.Z = direction.Z;
+
             if (onGround)
-            {
-                Vector3 forward = GetDirection();
-                forward.Y = 0;
-                Vector3 left = new Vector3(forward.Z, 0, -forward.X);
-                Vector3 direction = new Vector3();
-                if (moveLeft)
-                    Vector3.Add(ref direction, ref left, out direction);
-                if (moveRight)
-                    Vector3.Subtract(ref direction, ref left, out direction);
-                if (moveForward)
-                    Vector3.Add(ref direction, ref forward, out direction);
-                if (moveBackward)
-                    Vector3.Subtract(ref direction, ref forward, out direction);
-                direction.Normalize();
-                Vector3.Multiply(ref direction, Speed, out direction);
-                Velocity.X = direction.X;
-                Velocity.Z = direction.Z;
-                Velocity.Y = 0;
-            }
-           
-
-
+                Velocity.Y = moveJump ? 0.25f : 0;
             if (moveUp)
                 Velocity.Y += Speed;
             if (moveDown)
                 Velocity.Y -= Speed;
 
-            if (moveJump && onGround)
-            {
-                Velocity.Y = 0.6f;
-                Velocity.X *= 0.7f;
-                Velocity.Z *= 0.7f;
-            }
         }
 
 

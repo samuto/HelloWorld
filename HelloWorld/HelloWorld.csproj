@@ -54,6 +54,7 @@
     <Compile Include="02.Business\Profiling\Profiler.cs" />
     <Compile Include="02.Business\Frame.cs" />
     <Compile Include="02.Business\Input.cs" />
+    <Compile Include="02.Business\VoxelTrace.cs" />
     <Compile Include="04.CrossCutting\Entities\TickInput.cs" />
     <Compile Include="04.CrossCutting\Entities\Block.cs" />
     <Compile Include="02.Business\BlockRepository.cs" />
@@ -114,9 +115,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Bitmap2.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="01.Frontend\Textures\Bitmap1_old.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Bitmap1.bmp">

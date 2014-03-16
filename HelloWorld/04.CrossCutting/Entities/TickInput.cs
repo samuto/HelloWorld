@@ -10,5 +10,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
     {
         public KeyboardState KeyboardStateNow;
         public KeyboardState KeyboardStateLast;
+        public MouseState MouseStateNow;
+        public MouseState MouseStateLast;
     }
 }

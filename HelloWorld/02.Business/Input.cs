@@ -16,6 +16,7 @@ namespace WindowsFormsApplication7.Business
         private static DirectInput directInput;
         private static Mouse mouse;
         private TickInput lastInput;
+        private int mouseCooldown = 0;
 
         static Input()
         {
@@ -29,24 +30,41 @@ namespace WindowsFormsApplication7.Business
             // read keyboard state
             keyboard.Acquire();
             KeyboardState ks = keyboard.GetCurrentState();
+            MouseState ms = mouse.GetCurrentState();
             TickInput tickInput = new TickInput();
             tickInput.KeyboardStateNow = ks;
+            tickInput.MouseStateNow = ms;
             if (lastInput == null)
             {
                 lastInput = tickInput;
             }
             // set old state...
             tickInput.KeyboardStateLast = lastInput.KeyboardStateNow;
+            tickInput.MouseStateLast = lastInput.MouseStateNow;
             // save old state for next capture
             lastInput = tickInput;
             return tickInput;
         }
 
+        internal bool IsMouseFreezed()
+        {
+            return mouseCooldown > 0;
+        }
+
         internal MouseState GetMouseState()
         {
+            if (mouseCooldown > 0)
+            {
+                mouseCooldown--;
+            }
             mouse.Acquire();
             MouseState ms = mouse.GetCurrentState();
             return ms;
+        }
+
+        internal void FreezeMouse()
+        {
+            mouseCooldown = 10;
         }
 
         internal static void Dispose()

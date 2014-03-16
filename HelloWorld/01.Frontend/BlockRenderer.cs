@@ -60,84 +60,154 @@ namespace WindowsFormsApplication7.Frontend
                 c5 = blockColors[4];
                 c6 = blockColors[5];
             }
-            float factor = (float)(1d - MathLibrary.Random.NextDouble() * 0.1);
-            c1 = c1 * factor;
-            c2 = c2 * factor;
-            c3 = c3 * factor;
-            c4 = c4 * factor;
-            c5 = c5 * factor;
-            c6 = c6 * factor;
-            const float reduction = 0.5f;
-            float sideShadow = 1f;
+
+            const float reduction = 0.6f;
 
             Tessellator tessellator = Tessellator.Instance;
             if (chunk.SafeGetLocalBlock(x, y, z + 1) == 0)
             {
                 // front
-                sideShadow = chunk.SafeGetLocalBlock(x, y - 1, z + 1) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c1);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c1);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c1 * sideShadow);
+                bool a1 = chunk.SafeGetLocalBlock(x, y - 1, z + 1) == 0 ? false : true;
+                bool a2 = chunk.SafeGetLocalBlock(x - 1, y - 1, z + 1) == 0 ? false : true;
+                bool a3 = chunk.SafeGetLocalBlock(x - 1, y, z + 1) == 0 ? false : true;
+                bool a4 = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? false : true;
+                bool a5 = chunk.SafeGetLocalBlock(x, y + 1, z + 1) == 0 ? false : true;
+                bool a6 = chunk.SafeGetLocalBlock(x + 1, y + 1, z + 1) == 0 ? false : true;
+                bool a7 = chunk.SafeGetLocalBlock(x + 1, y, z + 1) == 0 ? false : true;
+                bool a8 = chunk.SafeGetLocalBlock(x + 1, y - 1, z + 1) == 0 ? false : true;
+
+                float s1, s2, s3, s4;
+                s1 = a1 || a2 || a3 ? reduction : 1f;
+                s2 = a3 || a4 || a5 ? reduction : 1f;
+                s3 = a5 || a6 || a7 ? reduction : 1f;
+                s4 = a7 || a8 || a1 ? reduction : 1f;
+
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1 * s1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c1 * s2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c1 * s3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c1 * s4);
             }
 
             if (chunk.SafeGetLocalBlock(x, y, z - 1) == 0)
             {
                 // back
-                sideShadow = chunk.SafeGetLocalBlock(x, y - 1, z - 1) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), c2);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c2);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c2 * sideShadow);
+                bool a1 = chunk.SafeGetLocalBlock(x, y - 1, z - 1) == 0 ? false : true;
+                bool a2 = chunk.SafeGetLocalBlock(x + 1, y - 1, z - 1) == 0 ? false : true;
+                bool a3 = chunk.SafeGetLocalBlock(x + 1, y, z - 1) == 0 ? false : true;
+                bool a4 = chunk.SafeGetLocalBlock(x + 1, y + 1, z - 1) == 0 ? false : true;
+                bool a5 = chunk.SafeGetLocalBlock(x, y + 1, z - 1) == 0 ? false : true;
+                bool a6 = chunk.SafeGetLocalBlock(x - 1, y + 1, z - 1) == 0 ? false : true;
+                bool a7 = chunk.SafeGetLocalBlock(x - 1, y, z - 1) == 0 ? false : true;
+                bool a8 = chunk.SafeGetLocalBlock(x - 1, y - 1, z - 1) == 0 ? false : true;
+
+                float s1, s2, s3, s4;
+                s1 = a1 || a2 || a3 ? reduction : 1f;
+                s2 = a3 || a4 || a5 ? reduction : 1f;
+                s3 = a5 || a6 || a7 ? reduction : 1f;
+                s4 = a7 || a8 || a1 ? reduction : 1f;
+
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2 * s1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), c2 * s2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c2 * s3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c2 * s4);
             }
 
             if (chunk.SafeGetLocalBlock(x - 1, y, z) == 0)
             {
                 //left
-                sideShadow = chunk.SafeGetLocalBlock(x - 1, y - 1, z) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c3 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c3);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c3);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c3 * sideShadow);
+                bool a1 = chunk.SafeGetLocalBlock(x - 1, y - 1, z) == 0 ? false : true;
+                bool a2 = chunk.SafeGetLocalBlock(x - 1, y - 1, z - 1) == 0 ? false : true;
+                bool a3 = chunk.SafeGetLocalBlock(x - 1, y, z - 1) == 0 ? false : true;
+                bool a4 = chunk.SafeGetLocalBlock(x - 1, y + 1, z - 1) == 0 ? false : true;
+                bool a5 = chunk.SafeGetLocalBlock(x - 1, y + 1, z) == 0 ? false : true;
+                bool a6 = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? false : true;
+                bool a7 = chunk.SafeGetLocalBlock(x - 1, y, z + 1) == 0 ? false : true;
+                bool a8 = chunk.SafeGetLocalBlock(x - 1, y - 1, z + 1) == 0 ? false : true;
+
+                float s1, s2, s3, s4;
+                s1 = a1 || a2 || a3 ? reduction : 1f;
+                s2 = a3 || a4 || a5 ? reduction : 1f;
+                s3 = a5 || a6 || a7 ? reduction : 1f;
+                s4 = a7 || a8 || a1 ? reduction : 1f;
+
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c3 * s1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c3 * s2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c3 * s3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c3 * s4);
             }
 
             if (chunk.SafeGetLocalBlock(x + 1, y, z) == 0)
             {
                 //right
-                sideShadow = chunk.SafeGetLocalBlock(x + 1, y - 1, z) != 0 ? reduction : 1f;
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c4 * sideShadow);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c4);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c4);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c4 * sideShadow);
+                bool a1 = chunk.SafeGetLocalBlock(x + 1, y - 1, z) == 0 ? false : true;
+                bool a2 = chunk.SafeGetLocalBlock(x + 1, y - 1, z + 1) == 0 ? false : true;
+                bool a3 = chunk.SafeGetLocalBlock(x + 1, y, z + 1) == 0 ? false : true;
+                bool a4 = chunk.SafeGetLocalBlock(x + 1, y + 1, z + 1) == 0 ? false : true;
+                bool a5 = chunk.SafeGetLocalBlock(x + 1, y + 1, z) == 0 ? false : true;
+                bool a6 = chunk.SafeGetLocalBlock(x + 1, y + 1, z - 1) == 0 ? false : true;
+                bool a7 = chunk.SafeGetLocalBlock(x + 1, y, z - 1) == 0 ? false : true;
+                bool a8 = chunk.SafeGetLocalBlock(x + 1, y - 1, z - 1) == 0 ? false : true;
+
+                float s1, s2, s3, s4;
+                s1 = a1 || a2 || a3 ? reduction : 1f;
+                s2 = a3 || a4 || a5 ? reduction : 1f;
+                s3 = a5 || a6 || a7 ? reduction : 1f;
+                s4 = a7 || a8 || a1 ? reduction : 1f;
+
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c4 * s1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c4 * s2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c4 * s3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c4 * s4);
             }
 
             if (chunk.SafeGetLocalBlock(x, y + 1, z) == 0)
             {
                 //top
-                float a, b, c, d, e, f, g, h;
-                a = chunk.SafeGetLocalBlock(x - 1,  y + 1, z        ) == 0 ? 1f : reduction;
-                b = chunk.SafeGetLocalBlock(x,      y + 1, z - 1    ) == 0 ? 1f : reduction;
-                c = chunk.SafeGetLocalBlock(x + 1,  y + 1, z        ) == 0 ? 1f : reduction;
-                d = chunk.SafeGetLocalBlock(x,      y + 1, z + 1    ) == 0 ? 1f : reduction;
+                bool a1 = chunk.SafeGetLocalBlock(x, y + 1, z + 1) == 0 ? false : true;
+                bool a2 = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? false : true;
+                bool a3 = chunk.SafeGetLocalBlock(x - 1, y + 1, z) == 0 ? false : true;
+                bool a4 = chunk.SafeGetLocalBlock(x - 1, y + 1, z - 1) == 0 ? false : true;
+                bool a5 = chunk.SafeGetLocalBlock(x, y + 1, z - 1) == 0 ? false : true;
+                bool a6 = chunk.SafeGetLocalBlock(x + 1, y + 1, z - 1) == 0 ? false : true;
+                bool a7 = chunk.SafeGetLocalBlock(x + 1, y + 1, z) == 0 ? false : true;
+                bool a8 = chunk.SafeGetLocalBlock(x + 1, y + 1, z + 1) == 0 ? false : true;
 
-                e = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? 1f : reduction;
-                f = chunk.SafeGetLocalBlock(x - 1, y + 1, z - 1) == 0 ? 1f : reduction;
-                g = chunk.SafeGetLocalBlock(x + 1, y + 1, z - 1) == 0 ? 1f : reduction;
-                h = chunk.SafeGetLocalBlock(x + 1, y + 1, z + 1) == 0 ? 1f : reduction;
-                
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c5 * a * d * e);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c5 * a * b * f);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c5 * b * c * g);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c5 * c * d * h);
+
+                float s1, s2, s3, s4;
+                s1 = a1 || a2 || a3 ? reduction : 1f;
+                s2 = a3 || a4 || a5 ? reduction : 1f;
+                s3 = a5 || a6 || a7 ? reduction : 1f;
+                s4 = a7 || a8 || a1 ? reduction : 1f;
+
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c5 * s1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c5 * s2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c5 * s3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c5 * s4);
             }
 
             if (chunk.SafeGetLocalBlock(x, y - 1, z) == 0)
             {
                 //bottom
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c6);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c6);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c6);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c6);
+                bool a1 = chunk.SafeGetLocalBlock(x, y - 1, z - 1) == 0 ? false : true;
+                bool a2 = chunk.SafeGetLocalBlock(x - 1, y - 1, z - 1) == 0 ? false : true;
+                bool a3 = chunk.SafeGetLocalBlock(x - 1, y - 1, z) == 0 ? false : true;
+                bool a4 = chunk.SafeGetLocalBlock(x - 1, y - 1, z + 1) == 0 ? false : true;
+                bool a5 = chunk.SafeGetLocalBlock(x, y - 1, z + 1) == 0 ? false : true;
+                bool a6 = chunk.SafeGetLocalBlock(x + 1, y - 1, z + 1) == 0 ? false : true;
+                bool a7 = chunk.SafeGetLocalBlock(x + 1, y - 1, z) == 0 ? false : true;
+                bool a8 = chunk.SafeGetLocalBlock(x + 1, y - 1, z - 1) == 0 ? false : true;
+
+
+                float s1, s2, s3, s4;
+                s1 = a1 || a2 || a3 ? reduction : 1f;
+                s2 = a3 || a4 || a5 ? reduction : 1f;
+                s3 = a5 || a6 || a7 ? reduction : 1f;
+                s4 = a7 || a8 || a1 ? reduction : 1f;
+
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c6 * s1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c6 * s2);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c6 * s3);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c6 * s4);
             }
 
 

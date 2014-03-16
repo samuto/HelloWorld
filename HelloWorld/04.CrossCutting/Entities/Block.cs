@@ -28,12 +28,12 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             Vector4 c = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, 1f);
             BlockColorMap.BlockColors[Id] = new SlimDX.Vector4[6]{
-                c * 0.8f,
-                c * 0.7f,
-                c * 0.6f,
-                c * 0.5f,
-                c * 1f,
-                c * 0.4f};
+                c*0.8f,
+                c*0.8f,
+                c*0.8f,
+                c*0.8f,
+                c,
+                c};
             return this;
         }
 

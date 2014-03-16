@@ -9,7 +9,7 @@ namespace WindowsFormsApplication7.Business
     static class Frame
     {
         private static double t = 0.0;
-        private const double dt = 1d / 20d;
+        private const double dt = 1d / 40d;
         private static double currentTime;
         private static double accumulator = 0.0;
         private static Stopwatch sw = new Stopwatch();

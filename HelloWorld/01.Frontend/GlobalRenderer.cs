@@ -47,17 +47,86 @@ namespace WindowsFormsApplication7.Frontend
             p.EndStartSection("entities");
             // 3D: render entities
             entityRenderer.Render(partialTicks);
+            RenderPlayerRayImpact(partialTicks);
 
             p.EndStartSection("HUD");
             // Render 2d stuff
             Setup2dCamera();
-
+            HACK_DRAWCROSSHAIR();
             // 2D: render Heads up display 
             // ....
 
             p.EndSection();
 
-           
+
+        }
+
+        private void HACK_DRAWCROSSHAIR()
+        {
+            Tessellator t = Tessellator.Instance;
+            t.StartDrawingLines();
+            Vector4 c = new Vector4(1, 1, 1, 1);
+            Vector4 center = new Vector4(TheGame.Instance.Width / 2, TheGame.Instance.Height / 2, 0, 1);
+            float size = 15;
+            t.AddVertexWithColor(new Vector4(center.X - size, center.Y, 0, 1), c);
+            t.AddVertexWithColor(new Vector4(center.X + size, center.Y, 0, 1), c);
+            t.AddVertexWithColor(new Vector4(center.X, center.Y - size, 0, 1), c);
+            t.AddVertexWithColor(new Vector4(center.X, center.Y + size, 0, 1), c);
+
+            t.Draw();
+        }
+
+        private void RenderPlayerRayImpact(float partialTicks)
+        {
+
+            if (!World.Instance.PlayerVoxelTrace.Hit)
+                return;
+
+            Tessellator t = Tessellator.Instance;
+            t.StartDrawingLines();
+            Vector4 c = new Vector4(0, 0, 0, 1f);
+            Vector4 v = World.Instance.PlayerVoxelTrace.BuildPosition;
+            float margin = 0.001f;
+            Vector4[] vs = new Vector4[]
+            {
+                new Vector4(v.X-margin, v.Y-margin, v.Z-margin, 1),
+                new Vector4(v.X+1+margin, v.Y-margin, v.Z-margin, 1),
+                new Vector4(v.X+1+margin, v.Y-margin, v.Z+1+margin, 1),
+                new Vector4(v.X-margin, v.Y-margin, v.Z+1+margin, 1),
+
+                new Vector4(v.X-margin, v.Y+1+margin, v.Z-margin, 1),
+                new Vector4(v.X+1+margin, v.Y+1+margin, v.Z-margin, 1),
+                new Vector4(v.X+1+margin, v.Y+1+margin, v.Z+1+margin, 1),
+                new Vector4(v.X-margin, v.Y+1+margin, v.Z+1+margin, 1),
+            };
+            t.AddVertexWithColor(vs[0], c);
+            t.AddVertexWithColor(vs[1], c);
+            t.AddVertexWithColor(vs[1], c);
+            t.AddVertexWithColor(vs[2], c);
+            t.AddVertexWithColor(vs[2], c);
+            t.AddVertexWithColor(vs[3], c);
+            t.AddVertexWithColor(vs[3], c);
+            t.AddVertexWithColor(vs[0], c);
+
+            t.AddVertexWithColor(vs[4], c);
+            t.AddVertexWithColor(vs[5], c);
+            t.AddVertexWithColor(vs[5], c);
+            t.AddVertexWithColor(vs[6], c);
+            t.AddVertexWithColor(vs[6], c);
+            t.AddVertexWithColor(vs[7], c);
+            t.AddVertexWithColor(vs[7], c);
+            t.AddVertexWithColor(vs[4], c);
+
+            t.AddVertexWithColor(vs[0], c);
+            t.AddVertexWithColor(vs[4], c);
+            t.AddVertexWithColor(vs[1], c);
+            t.AddVertexWithColor(vs[5], c);
+            t.AddVertexWithColor(vs[2], c);
+            t.AddVertexWithColor(vs[6], c);
+            t.AddVertexWithColor(vs[3], c);
+            t.AddVertexWithColor(vs[7], c);
+
+            t.Draw();
         }
 
         internal void Commit()
@@ -110,7 +179,7 @@ namespace WindowsFormsApplication7.Frontend
                 Usage = Usage.RenderTargetOutput
             };
             Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, desc, out device, out swapChain);
-            
+
             Factory factory = swapChain.GetParent<Factory>();
             factory.SetWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAll);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.Business;
+using SlimDX;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
@@ -97,6 +98,16 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal void RendererDetached()
         {
             RequiresRendering = true;
+        }
+
+        internal SlimDX.BoundingBox GetBoundingBox()
+        {
+            PositionBlock minGlobalPos, maxGlobalPos;
+            Position.GetGlobalPositionBlock(out minGlobalPos, 0, 0, 0);
+            Position.GetGlobalPositionBlock(out maxGlobalPos, 16, 16, 16);
+            return new SlimDX.BoundingBox(
+                new Vector3(minGlobalPos.X, minGlobalPos.Y, minGlobalPos.Z), 
+                new Vector3(maxGlobalPos.X, maxGlobalPos.Y, maxGlobalPos.Z));
         }
     }
 }

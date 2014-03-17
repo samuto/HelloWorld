@@ -5,6 +5,7 @@ using System.Text;
 using SlimDX;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7._01.Frontend;
+using WindowsFormsApplication7.Business;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -18,7 +19,7 @@ namespace WindowsFormsApplication7.Frontend
         public Vector3 Direction;
         public bool Enable3d;
         private Entity attachedEntity;
-
+        private BoundingFrustum frustum;
 
         private Camera()
         {
@@ -39,8 +40,9 @@ namespace WindowsFormsApplication7.Frontend
                 EyePosition = Interpolate.EyePosition(attachedEntity, partialTicks);
                 Vector3 target = Vector3.Add(EyePosition, Direction);
 
-                Camera.Instance.View = Matrix.LookAtRH(EyePosition, target, new Vector3(0, 1, 0));
-                Camera.Instance.Projection = Matrix.PerspectiveFovRH(45.0f, (float)TheGame.Instance.Width / (float)TheGame.Instance.Height, 0.05f, 100f);
+                View = Matrix.LookAtRH(EyePosition, target, new Vector3(0, 1, 0));
+                Projection = Matrix.PerspectiveFovRH(45.0f, (float)TheGame.Instance.Width / (float)TheGame.Instance.Height, 0.05f, GameSettings.ViewRadius);
+                frustum = new BoundingFrustum(Matrix.Multiply(View, Projection));
             }
             else
             {
@@ -51,6 +53,9 @@ namespace WindowsFormsApplication7.Frontend
             }
         }
 
-       
+        internal bool InsideViewFrustum(BoundingBox boundingBox)
+        {
+            return frustum.Contains(boundingBox);
+        }
     }
 }

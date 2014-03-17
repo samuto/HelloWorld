@@ -50,6 +50,7 @@
     <Compile Include="01.Frontend\FontRenderer.cs" />
     <Compile Include="01.Frontend\Interpolate.cs" />
     <Compile Include="02.Business\AxisAlignBoundingBox.cs" />
+    <Compile Include="02.Business\BoundingFrustum.cs" />
     <Compile Include="02.Business\Profiling\Counters.cs" />
     <Compile Include="02.Business\Profiling\Profiler.cs" />
     <Compile Include="02.Business\Frame.cs" />

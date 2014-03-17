@@ -98,6 +98,7 @@ namespace WindowsFormsApplication7.Business.Profiling
             int padding = 40;
             if (ReportCounters)
             {
+                padding = 10;
                 foreach (var pair in Counters.Instance.AllCounters)
                 {
                     sb.AppendLine(string.Format("{0} = {1}", pair.Key.PadRight(padding), pair.Value));

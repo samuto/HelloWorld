@@ -9,6 +9,12 @@ namespace WindowsFormsApplication7._01.Frontend
 {
     class Interpolate
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="partialTicks">1.0 if this is previous tick position, 0.0 if this is current tick position</param>
+        /// <returns></returns>
         internal static SlimDX.Vector3 Position(Entity entity, float partialTicks)
         {
             float p1 = partialTicks;
@@ -19,8 +25,6 @@ namespace WindowsFormsApplication7._01.Frontend
                 entity.Position.Z * p1 + entity.PrevPosition.Z * p2
                 );
         }
-
-
 
         internal static Vector3 EyePosition(Entity attachedEntity, float partialTicks)
         {

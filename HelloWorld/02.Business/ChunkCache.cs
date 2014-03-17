@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using SlimDX;
+using WindowsFormsApplication7.Business.Profiling;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -55,8 +56,12 @@ namespace WindowsFormsApplication7.Business
                 }
             }
             // dispose and remove expired chunks
-            List<Chunk> expiredChunks = cachedChunks.Values.Where(c => c.Expired).ToList();
-            expiredChunks.ForEach(c => { c.Dipose(); cachedChunks.Remove(c); });
+            var expiredChunks = cachedChunks.Where(pair => pair.Value.Expired).ToList();
+            expiredChunks.ForEach(pair => 
+            { 
+                pair.Value.Dipose(); 
+                cachedChunks.Remove(pair.Key); 
+            });
         }
 
         internal Chunk GetChunk(PositionChunk positionChunk)

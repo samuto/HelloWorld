@@ -48,7 +48,7 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("SlimDX - MiniTri Direct3D 11 Sample");
-            int scale = 4;
+            int scale = 1;
             form.Width = 200 * scale;
             form.Height = 150 * scale;
 

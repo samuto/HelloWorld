@@ -14,15 +14,17 @@ namespace WindowsFormsApplication7.Frontend
 {
     class ChunkRenderer
     {
-        public const int timeout = 10*1000;
+        public const int timeout = 5*1000;
         public int debug = 0;
         private DrawBufferWrapper wrapper;
         private Stopwatch stopwatch = new Stopwatch();
         
-        public ChunkRenderer()
+        public ChunkRenderer(Chunk chunk)
         {
             stopwatch.Start();
+            wrapper = new DrawBufferWrapper(chunk);
         }
+
 
         private class DrawBufferWrapper
         {
@@ -48,28 +50,29 @@ namespace WindowsFormsApplication7.Frontend
             }
         }
 
-        public ChunkRenderer(Chunk chunk)
+        internal static bool InsideViewFrustum(Chunk chunk)
         {
-            wrapper = new DrawBufferWrapper(chunk);
+            if (!Camera.Instance.InsideViewFrustum(chunk.GetBoundingBox()))
+            {
+                Counters.Instance.Increment("chunk !frustum");
+                return false;
+            }
+            return true;
         }
 
         internal bool Render(bool forceCachedRendering)
         {
+            // check if this is inside frustum
             RenewLease();
             Profiler p = Profiler.Instance;
 
-            bool rerenderingOccured = false;
+            bool rebuildOccured = false;
             Tessellator tessellator = Tessellator.Instance;
             tessellator.StartDrawingQuadsWithFog();
             p.StartSection("rebuild");
 
-            if ((wrapper.Disposed || wrapper.Chunk.RequiresRendering))
-            {
-                Counters.Instance.Increment("chunks_to_rebuild");
-            }
             if ((wrapper.Disposed || wrapper.Chunk.RequiresRendering) && !forceCachedRendering)
             {
-                Counters.Instance.Increment("chunks rebuilded");
                 p.StartSection("init");
                 // safe chunk reference and dispose wrapper
                 Chunk chunkToBeWrapped = wrapper.Chunk;
@@ -107,7 +110,7 @@ namespace WindowsFormsApplication7.Frontend
                 wrapper.DrawBuffer = tessellator.GetDrawBuffer();
                 wrapper.VertexCount = tessellator.VertexCount;
                 wrapper.Chunk.RenderingDone();
-                rerenderingOccured = true;
+                rebuildOccured = true;
                 p.EndSection();
 
             }
@@ -145,7 +148,7 @@ namespace WindowsFormsApplication7.Frontend
             }
             p.EndSection();
 
-            return rerenderingOccured;
+            return rebuildOccured;
         }
 
         private void RenewLease()

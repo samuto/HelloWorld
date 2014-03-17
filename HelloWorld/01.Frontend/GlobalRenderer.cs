@@ -29,7 +29,7 @@ namespace WindowsFormsApplication7.Frontend
         private Device device;
         private SwapChain swapChain;
 
-        internal void Render(float partialTicks)
+        internal void Render(float partialTicks) 
         {
             Profiler p = Profiler.Instance;
             p.StartSection("init");
@@ -49,19 +49,17 @@ namespace WindowsFormsApplication7.Frontend
             entityRenderer.Render(partialTicks);
             RenderPlayerRayImpact(partialTicks);
 
-            p.EndStartSection("HUD");
+            p.EndStartSection("2d-stuff");
             // Render 2d stuff
             Setup2dCamera();
-            HACK_DRAWCROSSHAIR();
-            // 2D: render Heads up display 
-            // ....
+            RenderCrossHair();
 
             p.EndSection();
 
 
         }
 
-        private void HACK_DRAWCROSSHAIR()
+        private void RenderCrossHair()
         {
             Tessellator t = Tessellator.Instance;
             t.StartDrawingLines();
@@ -72,7 +70,6 @@ namespace WindowsFormsApplication7.Frontend
             t.AddVertexWithColor(new Vector4(center.X + size, center.Y, 0, 1), c);
             t.AddVertexWithColor(new Vector4(center.X, center.Y - size, 0, 1), c);
             t.AddVertexWithColor(new Vector4(center.X, center.Y + size, 0, 1), c);
-
             t.Draw();
         }
 

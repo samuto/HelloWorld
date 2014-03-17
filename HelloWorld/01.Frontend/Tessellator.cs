@@ -195,8 +195,6 @@ namespace WindowsFormsApplication7.Frontend
             stream.Dispose();
         }
 
-
-
         internal void SetTextureQuad(Vector2 corner, float width, float height)
         {
             uvIndex = 0;

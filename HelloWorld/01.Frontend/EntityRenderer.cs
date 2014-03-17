@@ -77,9 +77,7 @@ namespace WindowsFormsApplication7.Frontend
 
             Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
             t.Draw();
-            Camera.Instance.World = Matrix.Identity;
-
-            
+            Camera.Instance.World = Matrix.Identity;            
         }
     }
 }

@@ -31,6 +31,7 @@ namespace WindowsFormsApplication7
         public void Run()
         {
             this.Initialize();
+            form.DesktopLocation = new Point(100, 700);
 
             MessagePump.Run(form, () =>
             {
@@ -47,16 +48,16 @@ namespace WindowsFormsApplication7
             sw.Start();
             debugUpdateTime = GetTime();
 
-            form = new RenderForm("SlimDX - MiniTri Direct3D 11 Sample");
-            int scale = 1;
-            form.Width = 200 * scale;
-            form.Height = 150 * scale;
+            form = new RenderForm("Hello World");
+            float scale = 1f;
+            form.Width = (int)(200f * scale);
+            form.Height = (int)(150f * scale);
 
             GlobalRenderer.Instance.Initialize(form);
             World.Instance.Player.PrevPosition = World.Instance.Player.Position = new Vector3(-30, 64, 0);
-            World.Instance.FlyingCamera.Position = new Vector3(-30, 35, -25);
-            Camera.Instance.AttachTo(World.Instance.FlyingCamera);
-            entityToControl = World.Instance.FlyingCamera;
+            World.Instance.FlyingCamera.Position = new Vector3(-30, 70, -25);
+            entityToControl = World.Instance.Player;
+            Camera.Instance.AttachTo(entityToControl);
         }
 
 
@@ -124,6 +125,7 @@ namespace WindowsFormsApplication7
         private void RunTick()
         {   
             // get input
+            Input.Instance.Update();
             TickInput input = Input.Instance.Capture();
 
             // handle input
@@ -132,21 +134,51 @@ namespace WindowsFormsApplication7
             MouseState mouseNow = input.MouseStateNow;
             if (keyboardNow.IsPressed(Key.D1))
             {
-                entityToControl = World.Instance.Player;
-                Camera.Instance.AttachTo(entityToControl);
+                World.Instance.Player.SelectedBlockId = BlockRepository.Grass.Id;
+            }
+            else if (keyboardNow.IsPressed(Key.D1))
+            {
+                World.Instance.Player.SelectedBlockId = BlockRepository.Dirt.Id;
             }
             else if (keyboardNow.IsPressed(Key.D2))
             {
+                World.Instance.Player.SelectedBlockId = BlockRepository.Stone.Id;
+            }
+            else if (keyboardNow.IsPressed(Key.D3))
+            {
+                World.Instance.Player.SelectedBlockId = BlockRepository.Brick.Id;
+            }
+            else if (keyboardNow.IsPressed(Key.D4))
+            {
+                World.Instance.Player.SelectedBlockId = BlockRepository.BedRock.Id;
+            }
+            else if (keyboardNow.IsPressed(Key.D5))
+            {
+                World.Instance.Player.SelectedBlockId = BlockRepository.Leaf.Id;
+            }
+            else if (keyboardNow.IsPressed(Key.D6))
+            {
+                World.Instance.Player.SelectedBlockId = BlockRepository.Wood.Id;
+            }
+            else if (keyboardNow.IsPressed(Key.D7))
+            {
+                World.Instance.Player.SelectedBlockId = BlockRepository.Diamond.Id;
+            }
+
+
+            else if (keyboardNow.IsPressed(Key.Comma))
+            {
                 entityToControl = World.Instance.FlyingCamera;
+                Camera.Instance.AttachTo(entityToControl);
+            }
+            else if (keyboardNow.IsPressed(Key.Period))
+            {
+                entityToControl = World.Instance.Player;
                 Camera.Instance.AttachTo(entityToControl);
             }
             if (keyboardNow.IsPressed(Key.W))
             {
                 entityToControl.MoveForward();
-            }
-            if (keyboardNow.IsPressed(Key.E))
-            {
-                GameSettings.EnableEntityUpdate = !GameSettings.EnableEntityUpdate;
             }
             if (keyboardNow.IsPressed(Key.S))
             {
@@ -207,7 +239,8 @@ namespace WindowsFormsApplication7
                     Input.Instance.FreezeMouse();
                     Vector4 pos = World.Instance.PlayerVoxelTrace.ImpactPosition;
                     PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-                    World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, BlockRepository.Sand.Id);
+                    
+                    World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, World.Instance.Player.SelectedBlockId);
                     PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
                     Chunk chunk = World.Instance.GetChunk(posChunk);
                     chunk.InvalidateMeAndNeighbors();

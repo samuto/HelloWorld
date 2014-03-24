@@ -9,9 +9,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
     class FlyingCamera : Entity
     {
         public FlyingCamera()
-            : base(new Vector4(1, 1, 0, 1))
+            : base(new Vector4(0.5f,0.5f,0.5f,1f))
         {
-            accGravity = new Vector3(0, 0, 0);
         }
 
         internal override void Update()

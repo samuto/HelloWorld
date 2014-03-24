@@ -12,7 +12,7 @@ using System.IO;
 
 namespace WindowsFormsApplication7.Frontend
 {
-    class TextureList
+    class Resources
     {
         private Dictionary<string, TextureWrapper> textures = new Dictionary<string, TextureWrapper>();
         private Device device;
@@ -23,25 +23,28 @@ namespace WindowsFormsApplication7.Frontend
             public ShaderResourceView ShaderResourceView;
         }
 
-        public TextureList(Device device)
+        public Resources(Device device)
         {
             this.device = device;
         }
 
-        public void Load(string name)
+        public void LoadAllTextures()
         {
-            string[] files = Directory.GetFiles("01.frontend/Textures/", name + ".*");
-            if(files.Length!=1)
-                throw new FileNotFoundException("unknown texture: "+name);
-            string filename = files[0];
-            TextureWrapper wrapper = new TextureWrapper();
-            wrapper.Texture = Texture2D.FromFile(device, filename);
-            wrapper.ShaderResourceView = new ShaderResourceView(device, wrapper.Texture);
-            textures.Add(name, wrapper);
+            string[] files = Directory.GetFiles("01.frontend/Textures", "*");
+            foreach (var filename in files)
+            {
+                string name = Path.GetFileNameWithoutExtension(filename);
+                TextureWrapper wrapper = new TextureWrapper();
+                wrapper.Texture = Texture2D.FromFile(device, filename);
+                wrapper.ShaderResourceView = new ShaderResourceView(device, wrapper.Texture);
+                textures.Add(name, wrapper);
+            }
         }
 
         internal ShaderResourceView GetShaderResourceView(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                return null;
             return textures[name].ShaderResourceView;
         }
 
@@ -52,6 +55,14 @@ namespace WindowsFormsApplication7.Frontend
                 wrapper.Texture.Dispose();
                 wrapper.ShaderResourceView.Dispose();
             }
+        }
+
+        internal ShaderResourceView GetResource(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return null;
+            else
+                return textures[name].ShaderResourceView;
         }
     }
 }

@@ -15,9 +15,11 @@ namespace WindowsFormsApplication7.Business
         public static World Instance = new World();
 
         // entities
+        public static float TicksPrDay = 5000;
         public Player Player = new Player();
         public FlyingCamera FlyingCamera = new FlyingCamera();
-
+        public Sun Sun = new Sun();
+        public Moon Moon = new Moon();
         private ChunkCache chunkCache = new ChunkCache();
         private ChunkStorage storage = new ChunkStorage();
         private ChunkGenerator generator = new ChunkGenerator();
@@ -26,18 +28,27 @@ namespace WindowsFormsApplication7.Business
 
         internal void Update()
         {
-            
+            // update landscape
             chunkCache.Update(Player.Position, GameSettings.CachingRadius);
-            if (GameSettings.EnableEntityUpdate)
-            {
-                Player.Update();
-            }
+
+            // update entities
+            Player.Update();
             FlyingCamera.Update();
+            Sun.Update();
+            Moon.Update();
 
             // calculate voxel ray
             Vector3 direction = Player.GetDirection();
             Vector3 eye = Vector3.Add(Player.EyePosition, Player.Position);
             PlayerVoxelTrace.Update(eye, direction);
+        }
+
+        public float TimeOfDay
+        {
+            get
+            {
+                return 24f * ((TheGame.Instance.CurrentTick + TicksPrDay / 4f) % TicksPrDay) / TicksPrDay;
+            }
         }
 
         internal ChunkCache GetCachedChunks()

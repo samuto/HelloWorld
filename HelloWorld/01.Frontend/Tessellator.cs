@@ -9,6 +9,7 @@ using SlimDX.Windows;
 using SlimDX.D3DCompiler;
 using Device = SlimDX.Direct3D11.Device;
 using WindowsFormsApplication7.Business;
+using WindowsFormsApplication7._01.Frontend.Effects;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -16,15 +17,15 @@ namespace WindowsFormsApplication7.Frontend
     {
         public static Tessellator Instance = new Tessellator();
         public int VertexCount = 0;
-        public string ActiveTexture = "bitmap1";
-        private string activeEffect = "texture";
-        public int activeEffectTechnique = 0;
+        public FXBase ActiveEffect;
+        private ShaderResourceView activeTexture;
+        public Device Device;
+        public float ArrayIndex = -1;
+
         private DataStream stream;
-        private Device device;
         private int vertexAddCount = 0;
         private PrimitiveTopology mode = PrimitiveTopology.TriangleList;
-        private TextureList textureList;
-        private EffectList effectList;
+        private Resources resources;
         private VS_IN vertex0;
         private VS_IN vertex2;
         private Vector2[] uvVertices = new Vector2[]{
@@ -34,11 +35,13 @@ namespace WindowsFormsApplication7.Frontend
             new Vector2(0,1),
         };
         private int uvIndex = 0;
-        private class VS_IN
+        public struct VS_IN
         {
             public Vector4 Vertex;
             public Vector4 Color;
             public Vector2 Uv;
+            public Vector3 Normal;
+            public float TextureIndex;
         }
 
         public Tessellator()
@@ -47,18 +50,11 @@ namespace WindowsFormsApplication7.Frontend
 
         public void Initialize(int size, Device device)
         {
-            this.device = device;
-            textureList = new TextureList(device);
-            effectList = new EffectList(device);
+            this.Device = device;
+            resources = new Resources(device);
             stream = new DataStream(size, true, true);
-
-            textureList.Load("bitmap1");
-            textureList.Load("bitmap2");
-            textureList.Load("sky");
-            textureList.Load("ascii");
-
-            effectList.Load("simple");
-            effectList.Load("texture");
+            resources.LoadAllTextures();
+            BlockTextures.Instance.Initialize();
         }
 
         public void Draw()
@@ -79,17 +75,32 @@ namespace WindowsFormsApplication7.Frontend
             Reset();
         }
 
+        public void Draw(VertexBuffer vertexBuffer)
+        {
+            VertexCount = vertexBuffer.VertexCount;
+            DrawBuffer(vertexBuffer.Vertices);
+            Reset();
+        }
+
+        public VertexBuffer GetVertexBuffer()
+        {
+            VertexBuffer vertexBuffer = new VertexBuffer();
+            vertexBuffer.Vertices = GetDrawBuffer();
+            vertexBuffer.VertexCount = VertexCount;
+            return vertexBuffer;
+        }
+
         public SlimDX.Direct3D11.Buffer GetDrawBuffer()
         {
             stream.Position = 0;
             if (VertexCount == 0)
                 return null;
-            SlimDX.Direct3D11.Buffer vertices = new SlimDX.Direct3D11.Buffer(device, stream, new BufferDescription()
+            SlimDX.Direct3D11.Buffer vertices = new SlimDX.Direct3D11.Buffer(Device, stream, new BufferDescription()
                 {
                     BindFlags = BindFlags.VertexBuffer,
                     CpuAccessFlags = CpuAccessFlags.None,
                     OptionFlags = ResourceOptionFlags.None,
-                    SizeInBytes = VertexCount * effectList.GetStride(activeEffect),
+                    SizeInBytes = VertexCount * ActiveEffect.GetStride(),
                     Usage = ResourceUsage.Default
                 });
             return vertices;
@@ -100,9 +111,9 @@ namespace WindowsFormsApplication7.Frontend
         {
             if (VertexCount == 0)
                 return;
-            Effect effect = effectList.ApplyEffect(activeEffect, activeEffectTechnique, vertices, textureList.GetShaderResourceView(ActiveTexture));
-            device.ImmediateContext.InputAssembler.PrimitiveTopology = mode;
-            device.ImmediateContext.Draw(VertexCount, 0);
+            ActiveEffect.Apply(vertices);
+            Device.ImmediateContext.InputAssembler.PrimitiveTopology = mode;
+            Device.ImmediateContext.Draw(VertexCount, 0);
 
         }
 
@@ -115,83 +126,81 @@ namespace WindowsFormsApplication7.Frontend
             uvIndex = 0;
         }
 
-
         internal void AddVertexWithColor(Vector4 vertex, Vector4 color)
         {
-            int stride = effectList.GetStride(activeEffect);
-
+            AddVertexWithColor(vertex, color, new Vector3(0, 0, 0));
+        }
+        internal void AddVertexWithColor(Vector4 vertex, Vector4 color, Vector3 normal)
+        {
             vertexAddCount++;
-            Vector2 texture = uvVertices[uvIndex++];
-            uvIndex = uvIndex % 4;
-            VS_IN vsin = new VS_IN() { Vertex = vertex, Color = color, Uv = texture };
             VertexCount++;
-            stream.Write(vsin.Vertex);
-            stream.Write(vsin.Color);
-            stream.Write(vsin.Uv);
+            int stride = ActiveEffect.GetStride();
+            VS_IN vsin = new VS_IN() { Vertex = vertex, Color = color, Uv = uvVertices[uvIndex++], TextureIndex = ArrayIndex, Normal = normal };
+            uvIndex = uvIndex % 4;
+
+            ActiveEffect.WriteVertex(stream, ref vsin);
             if (mode == PrimitiveTopology.TriangleList)
             {
                 if (vertexAddCount % 4 == 1)
                 {
                     vertex0 = vsin;
                 }
-
-                if (vertexAddCount % 4 == 3)
+                else if (vertexAddCount % 4 == 3)
                 {
                     vertex2 = vsin;
                 }
-
-                if (vertexAddCount % 4 == 0)
+                else if (vertexAddCount % 4 == 0)
                 {
                     VertexCount += 2;
-                    stream.Write(vertex0.Vertex);
-                    stream.Write(vertex0.Color);
-                    stream.Write(vertex0.Uv);
-                    stream.Write(vertex2.Vertex);
-                    stream.Write(vertex2.Color);
-                    stream.Write(vertex2.Uv);
+                    ActiveEffect.WriteVertex(stream, ref vertex0);
+                    ActiveEffect.WriteVertex(stream, ref vertex2);
                 }
             }
-
-            if ((VertexCount * stride) >= stream.Length - 32 * stride && vertexAddCount % 4 == 0)
+            bool isStreamAlmostFull = (VertexCount * stride) >= stream.Length - 32 * stride;
+            bool isQuadComplete = vertexAddCount % 4 == 0;
+            bool timeToFlushVertices = isStreamAlmostFull && isQuadComplete;
+            if (timeToFlushVertices)
             {
                 Draw();
             }
         }
 
-        public void StartDrawingQuadsWithFog()
-        {
-            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
-            StartDrawing("bitmap1", "texture", 0, PrimitiveTopology.TriangleList);
-        }
-
         internal void StartDrawingLines()
         {
-            StartDrawing("bitmap1", "texture", 3, PrimitiveTopology.LineList);
+            StartDrawing(null, FXSimple.Instance, 0, PrimitiveTopology.LineList);
         }
 
-        public void StartDrawingQuadsNoFog(string activeTexture)
+        public void StartDrawingTiledQuads()
         {
-            StartDrawing(activeTexture, "texture", 1, PrimitiveTopology.TriangleList);
+            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
+            StartDrawing(null, FXTiles.Instance, 0, PrimitiveTopology.TriangleList);
         }
 
-        public void StartDrawingQuadsWithAlphaBlend(string activeTexture)
+        internal void StartDrawingColoredQuads()
         {
-            StartDrawing(activeTexture, "texture", 2, PrimitiveTopology.TriangleList);
+            StartDrawing(null, FXSimple.Instance, 0, PrimitiveTopology.TriangleList);
         }
 
-        private void StartDrawing(string activeTexture, string activeEffect, int technique, PrimitiveTopology mode)
+        public void StartDrawingAlphaTexturedQuads(string textureName)
         {
-            ActiveTexture = activeTexture;
-            this.activeEffect = activeEffect;
-            activeEffectTechnique = technique;
+            StartDrawing(textureName, FXTexture.Instance, 2, PrimitiveTopology.TriangleList);
+        }
+
+        private void StartDrawing(string textureName, FXBase effect, int technique, PrimitiveTopology mode)
+        {
+            activeTexture = resources.GetResource(textureName);
+            ActiveEffect = effect;
+            ActiveEffect.TechniqueIndex = technique;
             this.mode = mode;
             Reset();
         }
 
         public void Dispose()
         {
-            effectList.Dispose();
-            textureList.Dispose();
+            BlockTextures.Instance.Dispose();
+            FXSimple.Instance.Dispose();
+            FXTexture.Instance.Dispose();
+            resources.Dispose();
             stream.Dispose();
         }
 
@@ -201,14 +210,22 @@ namespace WindowsFormsApplication7.Frontend
             uvVertices[1].X = corner.X;
             uvVertices[1].Y = corner.Y;
 
-            uvVertices[2].X = corner.X+width;
+            uvVertices[2].X = corner.X + width;
             uvVertices[2].Y = corner.Y;
 
-            uvVertices[3].X = corner.X+width;
-            uvVertices[3].Y = corner.Y+height;
+            uvVertices[3].X = corner.X + width;
+            uvVertices[3].Y = corner.Y + height;
 
             uvVertices[0].X = corner.X;
-            uvVertices[0].Y = corner.Y+height;
+            uvVertices[0].Y = corner.Y + height;
+        }
+
+        public ShaderResourceView ActiveTexture
+        {
+            get
+            {
+                return activeTexture;
+            }
         }
     }
 }

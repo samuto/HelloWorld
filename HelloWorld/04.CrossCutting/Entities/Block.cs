@@ -12,6 +12,15 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
     {
         public int Id;
         public MaterialEnum Material;
+        public Vector4[] BlockColors = new Vector4[6]{
+            new Vector4(1,1,1,1),
+            new Vector4(1,1,1,1),
+            new Vector4(1,1,1,1),
+            new Vector4(1,1,1,1),
+            new Vector4(1,1,1,1),
+            new Vector4(0.6f,0.6f,0.6f,1),
+        };
+
         public Block(int id, MaterialEnum material)
         {
             this.Id = id;
@@ -27,28 +36,27 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal Block BlockColor(System.Drawing.Color color)
         {
             Vector4 c = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, 1f);
-            BlockColorMap.BlockColors[Id] = new SlimDX.Vector4[6]{
-                c*0.8f,
-                c*0.8f,
-                c*0.8f,
-                c*0.8f,
-                c,
-                c};
+            BlockColors[0] = c * 0.8f;
+            BlockColors[1] = c * 0.8f;
+            BlockColors[2] = c * 0.8f;
+            BlockColors[3] = c * 0.8f;
+            BlockColors[4] = c;
+            BlockColors[5] = c;
             return this;
         }
 
         internal Block TopColor(System.Drawing.Color color)
         {
             Vector4 c = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, 1f);
-            BlockColorMap.BlockColors[Id][4] = c;
+            BlockColors[4] = c;
             return this;
         }
 
         internal Block TopBottomColor(System.Drawing.Color color)
         {
             Vector4 c = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, 1f);
-            BlockColorMap.BlockColors[Id][4] = c;
-            BlockColorMap.BlockColors[Id][5] = c;
+            BlockColors[4] = c;
+            BlockColors[5] = c;
             return this;
         }
 

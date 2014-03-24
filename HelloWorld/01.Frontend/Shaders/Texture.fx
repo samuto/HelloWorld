@@ -12,7 +12,7 @@ Texture2D intexture;
 
 SamplerState triLinearSample
 {
-	Filter = MIN_MAG_MIP_LINEAR;
+	Filter = MIN_MAG_MIP_POINT;
 
 	AddressU = Wrap;
 	AddressV = Wrap;
@@ -56,12 +56,13 @@ struct VS_OUT
 VS_OUT VS(VS_IN vIn)
 {
 	VS_OUT vOut;
-	
+	float4 pos = mul(vIn.pos, gWorld);
+
 	float4x4 worldViewProj = mul(mul(gWorld, gView), gProj);
 	vOut.pos = mul(vIn.pos, worldViewProj);
 	vOut.col = vIn.col;
 	vOut.uv  = vIn.uv;
-	vOut.distance = length(eye - vIn.pos);
+	vOut.distance = length(eye - pos);
 	return vOut;
 }
 

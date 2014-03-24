@@ -16,39 +16,19 @@ namespace WindowsFormsApplication7.Frontend
     {
         public const int timeout = 5*1000;
         public int debug = 0;
-        private DrawBufferWrapper wrapper;
+        private VertexBuffer vertexBuffer;
         private Stopwatch stopwatch = new Stopwatch();
-        
+        private Chunk chunk;
+
         public ChunkRenderer(Chunk chunk)
         {
+            this.chunk = chunk;
             stopwatch.Start();
-            wrapper = new DrawBufferWrapper(chunk);
+            vertexBuffer = new VertexBuffer();
         }
 
 
-        private class DrawBufferWrapper
-        {
-            public SlimDX.Direct3D11.Buffer DrawBuffer;
-            public int VertexCount = 0;
-            public Chunk Chunk;
-            public bool Disposed = false;
-
-            public DrawBufferWrapper(Chunk chunk)
-            {
-                this.Chunk = chunk;
-            }
-
-            internal void Dispose()
-            {
-                if (Disposed)
-                    return;
-                if (DrawBuffer != null && !DrawBuffer.Disposed)
-                    DrawBuffer.Dispose();
-                DrawBuffer = null;
-                Chunk.RendererDetached();
-                Disposed = true;
-            }
-        }
+        
 
         internal static bool InsideViewFrustum(Chunk chunk)
         {
@@ -68,20 +48,20 @@ namespace WindowsFormsApplication7.Frontend
 
             bool rebuildOccured = false;
             Tessellator tessellator = Tessellator.Instance;
-            tessellator.StartDrawingQuadsWithFog();
+            tessellator.StartDrawingTiledQuads();
             p.StartSection("rebuild");
 
-            if ((wrapper.Disposed || wrapper.Chunk.RequiresRendering) && !forceCachedRendering)
+            if ((vertexBuffer.Disposed || chunk.RequiresRendering) && !forceCachedRendering)
             {
                 p.StartSection("init");
                 // safe chunk reference and dispose wrapper
-                Chunk chunkToBeWrapped = wrapper.Chunk;
-                wrapper.Dispose();
+                 vertexBuffer.Dispose();
+                chunk.OnVertexBufferDisposed();
 
                 // rebuild vertices for cunk
                 BlockRenderer blockRenderer = new BlockRenderer();
                 PositionBlock startCorner;
-                wrapper.Chunk.Position.GetMinCornerBlock(out startCorner);
+                chunk.Position.GetMinCornerBlock(out startCorner);
                 int minX = startCorner.X;
                 int minY = startCorner.Y;
                 int minZ = startCorner.Z;
@@ -99,17 +79,15 @@ namespace WindowsFormsApplication7.Frontend
                             blockPos.X = x;
                             blockPos.Y = y;
                             blockPos.Z = z;
-                            blockRenderer.RenderBlock(blockPos, chunkToBeWrapped);
+                            blockRenderer.RenderBlock(blockPos, chunk);
                         }
                     }
                 }
                 p.EndStartSection("wrapper");
 
                 // create new wrapper object for cunk with updated vertices
-                wrapper = new DrawBufferWrapper(chunkToBeWrapped);
-                wrapper.DrawBuffer = tessellator.GetDrawBuffer();
-                wrapper.VertexCount = tessellator.VertexCount;
-                wrapper.Chunk.RenderingDone();
+                vertexBuffer = tessellator.GetVertexBuffer();
+                chunk.RenderingDone();
                 rebuildOccured = true;
                 p.EndSection();
 
@@ -117,9 +95,9 @@ namespace WindowsFormsApplication7.Frontend
             p.EndStartSection("draw");
 
             // draw chunk if drawbuffer has been calculated
-            if (wrapper.DrawBuffer != null)
+            if (vertexBuffer.Vertices != null)
             {
-                tessellator.Draw(wrapper.DrawBuffer, wrapper.VertexCount);
+                tessellator.Draw(vertexBuffer.Vertices, vertexBuffer.VertexCount);
 
                 // debug-rendering
                 if (GameSettings.ChunkDebuggingEnabled)
@@ -127,11 +105,11 @@ namespace WindowsFormsApplication7.Frontend
                     Tessellator t = Tessellator.Instance;
                     t.StartDrawingLines();
                     PositionBlock startCorner;
-                    wrapper.Chunk.Position.GetMinCornerBlock(out startCorner);
+                    chunk.Position.GetMinCornerBlock(out startCorner);
                     float x = startCorner.X;
                     float y = 64;
                     float z = startCorner.Z;
-                    debug = wrapper.DrawBuffer.Disposed ? 0 : 1;
+                    debug = vertexBuffer.Vertices.Disposed ? 0 : 1;
                     Vector4 c = new Vector4(1, 1, 1, 1);
                     t.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 1f, 1.0f), c);
                     t.AddVertexWithColor(new Vector4(x + 15f, y + 0f, z + 1f, 1.0f), c);
@@ -158,9 +136,10 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Dispose()
         {
-            if (!wrapper.Disposed)
+            if (!vertexBuffer.Disposed)
             {
-                wrapper.Dispose();
+                vertexBuffer.Dispose();
+                chunk.OnVertexBufferDisposed();
             }
         }
 

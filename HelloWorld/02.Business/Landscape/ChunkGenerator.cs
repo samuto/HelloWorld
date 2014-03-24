@@ -24,40 +24,47 @@ namespace WindowsFormsApplication7.Business.Landscape
                     {
                         chunk.Position.GetGlobalPositionBlock(out positionBlock, x, y, z);
                         int globalY = positionBlock.Y;
-                        if (globalY > 20)
+
+                        if (globalY < 32)
+                        {
+                            chunk.SetLocalBlock(x, y, z, BlockRepository.Stone.Id);
                             continue;
-                        else if (globalY < 20)
+                        }
+                        else if (globalY < 64)
                         {
                             chunk.SetLocalBlock(x, y, z, BlockRepository.Dirt.Id);
                             continue;
                         }
-
-                        chunk.SetLocalBlock(x, y, z, BlockRepository.Dirt.Id);
+                        if (globalY == 64)
+                        {
+                            chunk.SetLocalBlock(x, y, z, BlockRepository.Grass.Id);
+                            continue;
+                        }
 
                         // hit me with some artifacts for collision detection:
-                        if (chunk.Position.X == -2 && chunk.Position.Z == -2)
+                        if (chunk.Position.X == -2 && chunk.Position.Z == -2 && globalY == 65)
                         {
                             if (x % 4 + z % 4 == 0)
                             {
-                                chunk.SafeSetLocalBlock(x, y + 1, z, BlockRepository.Sand.Id);
+                                chunk.SafeSetLocalBlock(x, y, z, BlockRepository.Sand.Id);
                             }
                         }
-                        else if (chunk.Position.X == -3 && chunk.Position.Z == -3)
+                        else if (chunk.Position.X == -3 && chunk.Position.Z == -3 && globalY < 16-x -  z + 65)
                         {
-                            chunk.SafeSetLocalBlock(x, y + x + z + 1, z, BlockRepository.Grass.Id);
+                            chunk.SafeSetLocalBlock(x, y, z, globalY == 16-x - z + 64 ? BlockRepository.Grass.Id : BlockRepository.Dirt.Id);
                         }
-                        else if (chunk.Position.X == -1 && chunk.Position.Z == -1)
+                        else if (chunk.Position.X == -1 && chunk.Position.Z == -1 && globalY > 64)
+                        {
+                            if (x % 2 + z % 2 == 0 && y == x+1)
+                            {
+                                chunk.SafeSetLocalBlock(x, y, z, BlockRepository.Stone.Id);
+                            }
+                        }
+                        else if (chunk.Position.X == -2 && chunk.Position.Z == -3 && globalY > 64 && globalY < 68)
                         {
                             if (x % 2 + z % 2 == 0)
                             {
-                                chunk.SafeSetLocalBlock(x, y + x+1, z, BlockRepository.Stone.Id);
-                            }
-                        }
-                        else if (chunk.Position.X == -2 && chunk.Position.Z == -3)
-                        {
-                            if (x % 2 + z % 2 == 0)
-                            {
-                                chunk.SafeSetLocalBlock(x, y + 4, z, BlockRepository.Wood.Id);
+                                chunk.SafeSetLocalBlock(x, y, z, BlockRepository.Wood.Id);
                             }
                         }
                     }

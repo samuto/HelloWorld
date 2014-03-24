@@ -12,22 +12,24 @@ namespace WindowsFormsApplication7.Frontend
 {
     class EntityRenderer
     {
-        internal void Render(float partialTicks)
+        Entity entity;
+        SlimDX.Direct3D11.Buffer vertices;
+        int vertexCount;
+
+        public EntityRenderer(Entity entity)
         {
-            RenderEntity(World.Instance.FlyingCamera, partialTicks);
-            RenderEntity(World.Instance.Player, partialTicks);
+            this.entity = entity;
+            Build();
         }
 
-        private void RenderEntity(Entity entity, float partialTicks)
+        internal void Build()
         {
             Tessellator t = Tessellator.Instance;
-            t.StartDrawingQuadsWithFog();
-            Vector3 position = Interpolate.Position(entity, partialTicks);
+
+            t.StartDrawingColoredQuads();
             Vector4 c = entity.Color;
-            Vector3 min = entity.AABB.GetMinFromPosition(position);
-            Vector3 max = entity.AABB.GetMaxFromPosition(position);
-            min = entity.AABB.Min;
-            max = entity.AABB.Max;
+            Vector3 min = entity.AABB.Min;
+            Vector3 max = entity.AABB.Max;
             Vector4[] v = new Vector4[] {
             new Vector4(min.X, min.Y, min.Z,1),
             new Vector4(max.X, min.Y, min.Z,1),
@@ -40,28 +42,28 @@ namespace WindowsFormsApplication7.Frontend
             };
 
             // left
-            t.AddVertexWithColor(v[0], c );
-            t.AddVertexWithColor(v[4], c );
-            t.AddVertexWithColor(v[7], c );
-            t.AddVertexWithColor(v[3], c );
+            t.AddVertexWithColor(v[0], c);
+            t.AddVertexWithColor(v[4], c);
+            t.AddVertexWithColor(v[7], c);
+            t.AddVertexWithColor(v[3], c);
 
             //front
-            t.AddVertexWithColor(v[3], c );
-            t.AddVertexWithColor(v[7], c );
-            t.AddVertexWithColor(v[6], c );
-            t.AddVertexWithColor(v[2], c );
+            t.AddVertexWithColor(v[3], c);
+            t.AddVertexWithColor(v[7], c);
+            t.AddVertexWithColor(v[6], c);
+            t.AddVertexWithColor(v[2], c);
 
             //right
-            t.AddVertexWithColor(v[2], c );
-            t.AddVertexWithColor(v[6], c );
-            t.AddVertexWithColor(v[5], c );
-            t.AddVertexWithColor(v[1], c );
+            t.AddVertexWithColor(v[2], c);
+            t.AddVertexWithColor(v[6], c);
+            t.AddVertexWithColor(v[5], c);
+            t.AddVertexWithColor(v[1], c);
 
             //back
-            t.AddVertexWithColor(v[1], c );
-            t.AddVertexWithColor(v[5], c );
-            t.AddVertexWithColor(v[4], c );
-            t.AddVertexWithColor(v[0], c );
+            t.AddVertexWithColor(v[1], c);
+            t.AddVertexWithColor(v[5], c);
+            t.AddVertexWithColor(v[4], c);
+            t.AddVertexWithColor(v[0], c);
 
             //top
             t.AddVertexWithColor(v[4], c);
@@ -70,14 +72,44 @@ namespace WindowsFormsApplication7.Frontend
             t.AddVertexWithColor(v[7], c);
 
             //bottom
-            t.AddVertexWithColor(v[0], c );
-            t.AddVertexWithColor(v[3], c );
-            t.AddVertexWithColor(v[2], c );
-            t.AddVertexWithColor(v[1], c );
+            t.AddVertexWithColor(v[0], c);
+            t.AddVertexWithColor(v[3], c);
+            t.AddVertexWithColor(v[2], c);
+            t.AddVertexWithColor(v[1], c);
 
-            Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
-            t.Draw();
-            Camera.Instance.World = Matrix.Identity;            
+            vertices = t.GetDrawBuffer();
+            vertexCount = t.VertexCount;
+        }
+
+        internal void Render(float partialTicks)
+        {
+            Tessellator t = Tessellator.Instance;
+            Vector3 position = Interpolate.Position(entity, partialTicks);
+
+            if (entity != TheGame.Instance.entityToControl)
+            {
+                Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
+                t.StartDrawingColoredQuads();
+                t.Draw(vertices, vertexCount);
+            }
+            if (typeof(Player) == entity.GetType() && World.Instance.Player.SelectedBlockId != 0)
+            {
+                Camera.Instance.World = Matrix.Identity;
+                float scale = 0.1f;
+                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(scale, scale, scale));
+                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(entity.EyePosition+new Vector3(-0.2f,-0.25f,0.4f)));
+                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0));
+                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(position));
+                t.StartDrawingTiledQuads();
+                t.Draw(BlockTextures.Instance.GetVertexBuffer(World.Instance.Player.SelectedBlockId));
+            }
+
+            Camera.Instance.World = Matrix.Identity;
+        }
+
+        public void Dispose()
+        {
+            vertices.Dispose();
         }
     }
 }

@@ -51,12 +51,17 @@ namespace WindowsFormsApplication7.Business
             return mouseCooldown > 0;
         }
 
-        internal MouseState GetMouseState()
+        internal void Update()
         {
             if (mouseCooldown > 0)
             {
                 mouseCooldown--;
             }
+        }
+
+        internal MouseState GetMouseState()
+        {
+           
             mouse.Acquire();
             MouseState ms = mouse.GetCurrentState();
             return ms;
@@ -64,7 +69,7 @@ namespace WindowsFormsApplication7.Business
 
         internal void FreezeMouse()
         {
-            mouseCooldown = 10;
+            mouseCooldown = 5;
         }
 
         internal static void Dispose()

@@ -237,6 +237,14 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             moveRight = true;
         }
+
+        public bool IsMoving
+        {
+            get
+            {
+                return onGround && (PrevPosition - Position).LengthSquared() > 0;
+            }
+        }
     }
 }
 

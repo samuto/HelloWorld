@@ -13,59 +13,71 @@ namespace WindowsFormsApplication7.Frontend
     class ChunkCacheRenderer
     {
         private Dictionary<object, ChunkRenderer> chunkRenderers = new Dictionary<object, ChunkRenderer>();
+        private ChunkCache cachedChunks;
+        private int centerX;
+        private int centerY;
+        private int centerZ;
+        private bool forceCachedRendering;
+        private Profiler p;
+        private int viewRadius;
 
         internal void Render()
         {
-            Profiler p = Profiler.Instance;
+            p = Profiler.Instance;
             p.StartSection("setuploop");
 
-            Vector3 pos = World.Instance.Player.Position;
-            ChunkCache cachedChunks = World.Instance.GetCachedChunks();
+            cachedChunks = World.Instance.GetCachedChunks();
             Counters.Instance.SetValue("total cached", cachedChunks.Count);
-            
+
             if (cachedChunks.Count == 0)
                 return;
             PositionChunk minChunk = cachedChunks.LastMinChunk;
             PositionChunk maxChunk = cachedChunks.LastMaxChunk;
 
-            float centerX = (maxChunk.X - minChunk.X) / 2f + minChunk.X;
-            float centerY = (maxChunk.Y - minChunk.Y) / 2f + minChunk.Y;
-            float centerZ = (maxChunk.Z - minChunk.Z) / 2f + minChunk.Z;
-            float viewRadius = GameSettings.ViewRadius / 16f - 1f;
+            centerX = MathLibrary.FloorToWorldGrid((maxChunk.X - minChunk.X) / 2f + minChunk.X);
+            centerY = MathLibrary.FloorToWorldGrid((maxChunk.Y - minChunk.Y) / 2f + minChunk.Y);
+            centerZ = MathLibrary.FloorToWorldGrid((maxChunk.Z - minChunk.Z) / 2f + minChunk.Z);
+            viewRadius = (int)(GameSettings.ViewRadius / 16 - 1);
 
-            bool forceCachedRendering = false;
-            for (int x = minChunk.X; x <= maxChunk.X; x++)
+            forceCachedRendering = false;
+            
+       
+            int x, y, z;
+            x = centerX;
+            y = centerY;
+            z = centerZ;
+            Magic(x, y, z);
+            for (int r = 1; r <= viewRadius; r++)
             {
-                float deltaX = x - centerX;
-                for (int y = minChunk.Y; y <= maxChunk.Y; y++)
+                // front+back
+                for (int i = -r; i <= r; i++)
                 {
-                    float deltaY = y - centerY;
-                    for (int z = minChunk.Z; z <= maxChunk.Z; z++)
+                    for (int j = -r; j <= r; j++)
                     {
-                        p.EndStartSection("precheck");
-                        // skip if chunk is out of view range
-                        float deltaZ = z - centerZ;
-                        if ((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) > viewRadius * viewRadius)
-                            continue;
-                        Counters.Instance.Increment("possible chunk");
-                        p.EndStartSection("getchunk");
-                        // get chunkrenderer for this chunk (create new of it does not exist)
-                        Chunk chunk = cachedChunks.GetChunk(new PositionChunk(x, y, z));
-                        if (!ChunkRenderer.InsideViewFrustum(chunk))
-                            continue;
-                        object key = chunk.Position.Key;
-                        ChunkRenderer chunkRenderer;
-                        if (chunkRenderers.ContainsKey(key))
-                            chunkRenderer = chunkRenderers[key];
-                        else
-                        {
-                            chunkRenderer = new ChunkRenderer(chunk);
-                            chunkRenderers.Add(key, chunkRenderer);
-                        }
-                        forceCachedRendering |= chunkRenderer.Render(forceCachedRendering);
+                        Magic(x + i, y + j, z + r);
+                        Magic(x + i, y + j, z - r);
+                    }
+                }
+                // left+right
+                for (int i = -r; i <= r; i++)
+                {
+                    for (int j = -r + 1; j <= r - 1; j++)
+                    {
+                        Magic(x - r, y + i, z + j);
+                        Magic(x + r, y + i, z + j);
+                    }
+                }
+                // top+bottom
+                for (int i = -r + 1; i <= r - 1; i++)
+                {
+                    for (int j = -r + 1; j <= r - 1; j++)
+                    {
+                        Magic(x + i, y - r, z + j);
+                        Magic(x + i, y + r, z + j);
                     }
                 }
             }
+
             p.EndStartSection("disposestuff");
             // dispose and remove expired chunks
             var expiredRenderer = chunkRenderers.Where(pair => pair.Value.Expired).ToList();
@@ -77,6 +89,38 @@ namespace WindowsFormsApplication7.Frontend
             Counters.Instance.SetValue("expired", chunkRenderers.Values.Where(c => c.Expired).Count());
             Counters.Instance.SetValue("chunkRenderers", chunkRenderers.Count);
             p.EndSection();
+        }
+
+        private void Magic(int x, int y, int z)
+        {
+            p.EndStartSection("precheck");
+            if (y < 0)
+                return;
+            if (y >= Chunk.MaxSizeY / 16)
+                return;
+            int deltaX = x - centerX;
+            int deltaY = y - centerY;
+            int deltaZ = z - centerZ;
+                        
+            // skip if chunk is out of view range
+            if ((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) > viewRadius * viewRadius) return;
+            
+            Counters.Instance.Increment("possible chunk");
+            Chunk chunk = cachedChunks.GetChunk(new PositionChunk(x, y, z));
+            if (!ChunkRenderer.InsideViewFrustum(chunk)) return;
+
+            // get chunkrenderer for this chunk (create new of it does not exist)
+            p.EndStartSection("getchunk");
+            object key = chunk.Position.Key;
+            ChunkRenderer chunkRenderer;
+            if (chunkRenderers.ContainsKey(key))
+                chunkRenderer = chunkRenderers[key];
+            else
+            {
+                chunkRenderer = new ChunkRenderer(chunk);
+                chunkRenderers.Add(key, chunkRenderer);
+            }
+            forceCachedRendering |= chunkRenderer.Render(forceCachedRendering);
         }
     }
 }

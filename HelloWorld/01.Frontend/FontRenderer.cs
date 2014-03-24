@@ -9,6 +9,7 @@ namespace WindowsFormsApplication7.Frontend
     class FontRenderer
     {
         public static FontRenderer Instance = new FontRenderer();
+        private Tessellator t = Tessellator.Instance;
         string fontMap = @"
                 
                 
@@ -21,7 +22,7 @@ pqrstuvwxyz{|}~⌂
 ÇüéâäàåçêëèïîìÄÅ
 ÉæÆôöòûùÿÖÜø£Ø×ƒ
 áíóúñÑªº¿®¬½¼¡«»".Replace(Environment.NewLine, "");
-        public const float CharScale = 1;
+        public const float CharScale = 1f;
         public float CharWidth;
         public float LineHeight;
 
@@ -33,7 +34,7 @@ pqrstuvwxyz{|}~⌂
 
         internal void RenderTextShadow(string text, float x, float y)
         {
-            RenderText(new Vector4(0, 0, 0, 1), text, x + 1, y - 1);
+            RenderText(new Vector4(0, 0, 0, 1), text, x + CharScale, y - CharScale);
             RenderText(new Vector4(1, 1, 1, 1), text, x, y);
         }
 
@@ -45,8 +46,7 @@ pqrstuvwxyz{|}~⌂
         private void RenderText(Vector4 color, string text, float x, float y)
         {
             GlobalRenderer.Instance.Setup2dCamera();
-            Tessellator t = Tessellator.Instance;
-            t.StartDrawingQuadsWithAlphaBlend("ascii");
+            t.StartDrawingAlphaTexturedQuads("ascii");
             foreach (var character in text)
             {
                 RenderChar(color, character, x, y, CharWidth, LineHeight);
@@ -59,7 +59,6 @@ pqrstuvwxyz{|}~⌂
         {
             if (character == ' ')
                 return;
-            Tessellator t = Tessellator.Instance;
             int index = fontMap.IndexOf(character);
             float texX = (int)(index % 16);
             float texY = (int)(index / 16);

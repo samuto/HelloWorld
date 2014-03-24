@@ -10,6 +10,5 @@ namespace WindowsFormsApplication7.Business
         public const int CachingRadius = 160;
         public const int ViewRadius = 120;
         public static bool ChunkDebuggingEnabled = false;
-        public static bool EnableEntityUpdate = true;
     }
 }

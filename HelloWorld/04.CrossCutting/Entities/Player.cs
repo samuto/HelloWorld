@@ -9,6 +9,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Player : Entity
     {
+        public int SelectedBlockId = 0;
+
         public Player()
             : base(new Vector4(1, 0, 0, 1))
         {

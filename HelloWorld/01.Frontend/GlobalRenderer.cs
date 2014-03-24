@@ -18,10 +18,10 @@ namespace WindowsFormsApplication7.Frontend
 {
     class GlobalRenderer
     {
-        public Color4 BackgroundColor = new Color4(Color.LightBlue);
+        public Color4 BackgroundColor = new Color4(Color.White);
         public static GlobalRenderer Instance = new GlobalRenderer();
         private ChunkCacheRenderer chunkCacheRenderer = new ChunkCacheRenderer();
-        private EntityRenderer entityRenderer = new EntityRenderer();
+        private EntityRenderers entityRenderers = new EntityRenderers();
         private RenderTargetView renderView;
         private DepthStencilView depthView;
         private Texture2D backBuffer;
@@ -29,10 +29,13 @@ namespace WindowsFormsApplication7.Frontend
         private Device device;
         private SwapChain swapChain;
 
-        internal void Render(float partialTicks) 
+        internal void Render(float partialTicks)
         {
             Profiler p = Profiler.Instance;
             p.StartSection("init");
+
+            DayWatch watch = DayWatch.Now;
+            BackgroundColor = Color4.Lerp(new Color4(0.8f, 0.8f, 1f), new Color4(0f, 0f, 0f), 1f - watch.SunHeight);
             device.ImmediateContext.ClearRenderTargetView(renderView, BackgroundColor);
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1.0f, 0);
 
@@ -46,7 +49,11 @@ namespace WindowsFormsApplication7.Frontend
 
             p.EndStartSection("entities");
             // 3D: render entities
-            entityRenderer.Render(partialTicks);
+
+            entityRenderers.GetRenderer(World.Instance.Player).Render(partialTicks);
+            entityRenderers.GetRenderer(World.Instance.FlyingCamera).Render(partialTicks);
+            entityRenderers.GetRenderer(World.Instance.Sun).Render(partialTicks);
+            entityRenderers.GetRenderer(World.Instance.Moon).Render(partialTicks);
             RenderPlayerRayImpact(partialTicks);
 
             p.EndStartSection("2d-stuff");
@@ -250,7 +257,7 @@ namespace WindowsFormsApplication7.Frontend
             Profiler p = Profiler.Instance;
             FontRenderer f = FontRenderer.Instance;
             string report = p.Report();
-            float y = TheGame.Instance.Height - 20;
+            float y = TheGame.Instance.Height - FontRenderer.Instance.LineHeight;
             using (StringReader sr = new StringReader(report))
             {
                 string line;

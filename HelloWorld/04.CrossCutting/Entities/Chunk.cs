@@ -95,7 +95,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             RequiresRendering = false;
         }
 
-        internal void RendererDetached()
+        internal void OnVertexBufferDisposed()
         {
             RequiresRendering = true;
         }

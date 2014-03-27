@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SlimDX;
 
-namespace WindowsFormsApplication7.Business
+namespace WindowsFormsApplication7.Business.Geometry
 {
     /// <summary>
     /// Represents a bounding frustum in three dimensional space.

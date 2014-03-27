@@ -29,20 +29,22 @@ namespace WindowsFormsApplication7.Frontend
         private Device device;
         private SwapChain swapChain;
 
-        internal void Render(float partialTicks)
+        internal void ClearTarget()
         {
-            Profiler p = Profiler.Instance;
-            p.StartSection("init");
-
             DayWatch watch = DayWatch.Now;
             BackgroundColor = Color4.Lerp(new Color4(0.8f, 0.8f, 1f), new Color4(0f, 0f, 0f), 1f - watch.SunHeight);
             device.ImmediateContext.ClearRenderTargetView(renderView, BackgroundColor);
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth, 1.0f, 0);
+        }
 
+        internal void Render(float partialStep)
+        {
+            Profiler p = Profiler.Instance;
+            p.StartSection("init");
 
             p.EndStartSection("cached");
             // Render 3d stuff
-            Setup3dCamera(partialTicks);
+            Setup3dCamera(partialStep);
 
             // 3D: render chunks
             chunkCacheRenderer.Render();
@@ -50,11 +52,11 @@ namespace WindowsFormsApplication7.Frontend
             p.EndStartSection("entities");
             // 3D: render entities
 
-            entityRenderers.GetRenderer(World.Instance.Player).Render(partialTicks);
-            entityRenderers.GetRenderer(World.Instance.FlyingCamera).Render(partialTicks);
-            entityRenderers.GetRenderer(World.Instance.Sun).Render(partialTicks);
-            entityRenderers.GetRenderer(World.Instance.Moon).Render(partialTicks);
-            RenderPlayerRayImpact(partialTicks);
+            entityRenderers.GetRenderer(World.Instance.Player).Render(partialStep);
+            entityRenderers.GetRenderer(World.Instance.FlyingCamera).Render(partialStep);
+            entityRenderers.GetRenderer(World.Instance.Sun).Render(partialStep);
+            entityRenderers.GetRenderer(World.Instance.Moon).Render(partialStep);
+            RenderPlayerRayImpact(partialStep);
 
             p.EndStartSection("2d-stuff");
             // Render 2d stuff
@@ -80,7 +82,7 @@ namespace WindowsFormsApplication7.Frontend
             t.Draw();
         }
 
-        private void RenderPlayerRayImpact(float partialTicks)
+        private void RenderPlayerRayImpact(float partialStep)
         {
 
             if (!World.Instance.PlayerVoxelTrace.Hit)
@@ -154,8 +156,10 @@ namespace WindowsFormsApplication7.Frontend
             Camera.Instance.Update(0);
         }
 
-        private void Setup3dCamera(float partialTicks)
+        private void Setup3dCamera(float partialStep)
         {
+
+
             Camera.Instance.Enable3d = true;
             DepthStencilStateDescription dsStateDesc = new DepthStencilStateDescription()
             {
@@ -166,7 +170,7 @@ namespace WindowsFormsApplication7.Frontend
             };
             DepthStencilState depthState = DepthStencilState.FromDescription(device, dsStateDesc);
             device.ImmediateContext.OutputMerger.DepthStencilState = depthState;
-            Camera.Instance.Update(partialTicks);
+            Camera.Instance.Update(partialStep);
         }
 
         internal void Initialize(SlimDX.Windows.RenderForm form)
@@ -267,6 +271,12 @@ namespace WindowsFormsApplication7.Frontend
                     y -= f.LineHeight;
                 }
             }
+        }
+
+        internal void RenderGui(float partialStep)
+        {
+            TheGame.Instance.ActiveGui.Render(partialStep);
+            TheGame.Instance.Cursor.Render(partialStep);
         }
     }
 }

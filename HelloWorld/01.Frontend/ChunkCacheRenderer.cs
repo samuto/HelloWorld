@@ -7,6 +7,7 @@ using System.Diagnostics;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business.Profiling;
 using SlimDX;
+using WindowsFormsApplication7.Business.Geometry;
 
 namespace WindowsFormsApplication7.Frontend
 {

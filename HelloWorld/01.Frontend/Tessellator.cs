@@ -126,6 +126,11 @@ namespace WindowsFormsApplication7.Frontend
             uvIndex = 0;
         }
 
+        internal void AddVertexWithColorAndOffset(Vector4 vertex, Vector4 color, Vector2 offset)
+        {
+            AddVertexWithColor(new Vector4(vertex.X + offset.X, vertex.Y + offset.Y, vertex.Z, vertex.W), color);
+        }
+
         internal void AddVertexWithColor(Vector4 vertex, Vector4 color)
         {
             AddVertexWithColor(vertex, color, new Vector3(0, 0, 0));
@@ -181,14 +186,14 @@ namespace WindowsFormsApplication7.Frontend
             StartDrawing(null, FXSimple.Instance, 0, PrimitiveTopology.TriangleList);
         }
 
-        public void StartDrawingAlphaTexturedQuads(string textureName)
+        public void StartDrawingAlphaTexturedQuads(string name)
         {
-            StartDrawing(textureName, FXTexture.Instance, 2, PrimitiveTopology.TriangleList);
+            StartDrawing(name, FXTexture.Instance, 2, PrimitiveTopology.TriangleList);
         }
 
-        private void StartDrawing(string textureName, FXBase effect, int technique, PrimitiveTopology mode)
+        private void StartDrawing(string name, FXBase effect, int technique, PrimitiveTopology mode)
         {
-            activeTexture = resources.GetResource(textureName);
+            activeTexture = resources.GetResource(name);
             ActiveEffect = effect;
             ActiveEffect.TechniqueIndex = technique;
             this.mode = mode;

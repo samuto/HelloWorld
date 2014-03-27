@@ -81,10 +81,10 @@ namespace WindowsFormsApplication7.Frontend
             vertexCount = t.VertexCount;
         }
 
-        internal void Render(float partialTicks)
+        internal void Render(float partialStep)
         {
             Tessellator t = Tessellator.Instance;
-            Vector3 position = Interpolate.Position(entity, partialTicks);
+            Vector3 position = Interpolate.Position(entity, partialStep);
 
             if (entity != TheGame.Instance.entityToControl)
             {

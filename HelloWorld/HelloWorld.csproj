@@ -53,27 +53,40 @@
     <Compile Include="01.Frontend\Effects\FXBase.cs" />
     <Compile Include="01.Frontend\Effects\FXSimple.cs" />
     <Compile Include="01.Frontend\FontRenderer.cs" />
+    <Compile Include="01.Frontend\Gui\GuiMovableControl.cs" />
+    <Compile Include="01.Frontend\Gui\GuiPanel.cs" />
+    <Compile Include="01.Frontend\Gui\GuiButton.cs" />
+    <Compile Include="01.Frontend\Gui\GuiForm.cs" />
+    <Compile Include="01.Frontend\Gui\GuiControl.cs" />
+    <Compile Include="01.Frontend\Gui\GuiCursor.cs" />
     <Compile Include="01.Frontend\Interpolate.cs" />
     <Compile Include="01.Frontend\BlockTexture.cs" />
     <Compile Include="01.Frontend\VertexBuffer.cs" />
-    <Compile Include="02.Business\AxisAlignBoundingBox.cs" />
-    <Compile Include="02.Business\BoundingFrustum.cs" />
+    <Compile Include="02.Business\Geometry\AxisAlignBoundingBox.cs" />
+    <Compile Include="02.Business\Geometry\BoundingFrustum.cs" />
+    <Compile Include="02.Business\Repositories\ItemRepository.cs" />
+    <Compile Include="02.Business\CraftingTable.cs" />
     <Compile Include="02.Business\DayWatch.cs" />
     <Compile Include="02.Business\Profiling\Counters.cs" />
     <Compile Include="02.Business\Profiling\Profiler.cs" />
     <Compile Include="02.Business\Frame.cs" />
     <Compile Include="02.Business\Input.cs" />
+    <Compile Include="02.Business\Repositories\RecepeRepository.cs" />
     <Compile Include="02.Business\VoxelTrace.cs" />
+    <Compile Include="04.CrossCutting\Entities\Recepe.cs" />
+    <Compile Include="04.CrossCutting\Entities\Item.cs" />
+    <Compile Include="04.CrossCutting\Entities\Inventory.cs" />
+    <Compile Include="04.CrossCutting\Entities\ItemStack.cs" />
     <Compile Include="04.CrossCutting\Entities\Moon.cs" />
+    <Compile Include="04.CrossCutting\Entities\Slot.cs" />
     <Compile Include="04.CrossCutting\Entities\Sun.cs" />
-    <Compile Include="04.CrossCutting\Entities\TickInput.cs" />
+    <Compile Include="04.CrossCutting\Entities\FrameInput.cs" />
     <Compile Include="04.CrossCutting\Entities\Block.cs" />
-    <Compile Include="02.Business\BlockRepository.cs" />
+    <Compile Include="02.Business\Repositories\BlockRepository.cs" />
     <Compile Include="02.Business\ChunkCache.cs" />
     <Compile Include="02.Business\Landscape\ChunkGenerator.cs" />
     <Compile Include="03.DataAccess\ChunkStorage.cs" />
     <Compile Include="02.Business\GameSettings.cs" />
-    <Compile Include="02.Business\Material.cs" />
     <Compile Include="02.Business\MathLibrary.cs" />
     <Compile Include="04.CrossCutting\Entities\PositionChunk.cs" />
     <Compile Include="04.CrossCutting\Entities\PositionBlock.cs" />
@@ -87,6 +100,7 @@
     <Compile Include="01.Frontend\Camera.cs" />
     <Compile Include="04.CrossCutting\Entities\Chunk.cs" />
     <Compile Include="01.Frontend\Resources.cs" />
+    <Compile Include="01.Frontend\Gui\GuiCraftingForm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="01.Frontend\BlockRenderer.cs" />
@@ -154,6 +168,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\wood_top.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Items\stick.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Items\stone_pickaxe.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\terrain.png">

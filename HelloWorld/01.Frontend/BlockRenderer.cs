@@ -11,6 +11,7 @@ using Device = SlimDX.Direct3D11.Device;
 using System.Drawing;
 using WindowsFormsApplication7.Business;
 using WindowsFormsApplication7.CrossCutting.Entities;
+using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Frontend
 {

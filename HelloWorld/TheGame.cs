@@ -13,15 +13,24 @@ using SlimDX.Windows;
 using SlimDX.Multimedia;
 using SlimDX;
 using SlimDX.DirectInput;
+using WindowsFormsApplication7.Frontend.Gui;
+using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7
 {
     class TheGame
     {
+        public enum GameMode
+        {
+            Gui,
+            InGame
+        }
         public static TheGame Instance = new TheGame();
         public Entity entityToControl;
         public int CurrentTick = 0;
-
+        public GameMode Mode = GameMode.InGame;
+        public GuiForm ActiveGui = null;
+        public GuiCursor Cursor = new GuiCursor();
         private RenderForm form;
         private double debugUpdateTime;
         private int fpsCounter;
@@ -31,7 +40,7 @@ namespace WindowsFormsApplication7
         public void Run()
         {
             this.Initialize();
-            form.DesktopLocation = new Point(100, 700);
+            form.DesktopLocation = new Point(100, 100);
 
             MessagePump.Run(form, () =>
             {
@@ -49,7 +58,7 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("Hello World");
-            float scale = 1f;
+            float scale = 4f;
             form.Width = (int)(200f * scale);
             form.Height = (int)(150f * scale);
 
@@ -58,12 +67,13 @@ namespace WindowsFormsApplication7
             World.Instance.FlyingCamera.Position = new Vector3(-30, 70, -25);
             entityToControl = World.Instance.Player;
             Camera.Instance.AttachTo(entityToControl);
+            Input.Instance.Initialize();
         }
 
 
         private void Dispose()
         {
-            Input.Dispose();
+            Input.Instance.Dispose();
             Tessellator.Instance.Dispose();
             GlobalRenderer.Instance.Dispose();
         }
@@ -73,7 +83,7 @@ namespace WindowsFormsApplication7
             Frame.Next();
             Profiler p = Profiler.Instance;
             p.Clear();
-            
+
             // update
             p.StartSection("update");
             while (Frame.HasMoreTicks())
@@ -81,17 +91,19 @@ namespace WindowsFormsApplication7
                 RunTick();
                 Frame.Tick();
             }
-            
-            // get mouse
-            p.EndStartSection("getmouse");
-            MouseState ms = Input.Instance.GetMouseState();
-            float mousedx = -ms.X * 0.002f;
-            float mousedy = ms.Y * 0.002f;
-            entityToControl.SetViewAngles(mousedx, mousedy);
+
+            float partialStep = Frame.GetPartialStep();
+            float mousedx = -Input.Instance.InterpolatedMouseDeltaX(partialStep) * GameSettings.MouseSensitivity * 0.001f;
+            float mousedy = Input.Instance.InterpolatedMouseDeltaY(partialStep) * GameSettings.MouseSensitivity * 0.001f;
+            if (Mode == GameMode.InGame)
+            {
+                entityToControl.SetViewAngles(mousedx, mousedy);
+            }
 
             // render game
             p.EndStartSection("render");
-            GlobalRenderer.Instance.Render(Frame.GetPartialStep());
+            GlobalRenderer.Instance.ClearTarget();
+            //GlobalRenderer.Instance.Render(partialStep);
             p.EndSection();
 
             p.EndSection(); // end root-section
@@ -102,13 +114,18 @@ namespace WindowsFormsApplication7
                 GlobalRenderer.Instance.RenderProfiler();
             }
 
+            if (ActiveGui != null)
+            {
+                GlobalRenderer.Instance.RenderGui(partialStep);
+            }
+
             // commit the graphics (swap buffer)
             GlobalRenderer.Instance.Commit();
 
             // display debuginfo
             while (GetTime() >= this.debugUpdateTime + 1d)
             {
-                form.Text = this.fpsCounter + " fps ("+CurrentTick+")";
+                form.Text = this.fpsCounter + " fps (" + CurrentTick + ")";
                 this.debugUpdateTime += 1d;
                 this.fpsCounter = 0;
             }
@@ -123,130 +140,137 @@ namespace WindowsFormsApplication7
         }
 
         private void RunTick()
-        {   
+        {
             // get input
             Input.Instance.Update();
-            TickInput input = Input.Instance.Capture();
 
             // handle input
-            KeyboardState keyboardNow = input.KeyboardStateNow;
-            KeyboardState keyboardLast = input.KeyboardStateLast;
-            MouseState mouseNow = input.MouseStateNow;
-            if (keyboardNow.IsPressed(Key.D1))
+            KeyboardState prevKeyboardState = Input.Instance.CurrentInput.KeyboardState;
+            KeyboardState keyboardState = Input.Instance.LastInput.KeyboardState;
+            MouseState mouseState = Input.Instance.CurrentInput.MouseState;
+            if (prevKeyboardState.IsPressed(Key.E) && Mode == GameMode.InGame)
+            {
+                // Launch crafting gui
+                OpenGui(new GuiCraftingForm());
+            }
+            else if (prevKeyboardState.IsPressed(Key.D1))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Grass.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D1))
+            else if (prevKeyboardState.IsPressed(Key.D1))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Dirt.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D2))
+            else if (prevKeyboardState.IsPressed(Key.D2))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Stone.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D3))
+            else if (prevKeyboardState.IsPressed(Key.D3))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Brick.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D4))
+            else if (prevKeyboardState.IsPressed(Key.D4))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.BedRock.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D5))
+            else if (prevKeyboardState.IsPressed(Key.D5))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Leaf.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D6))
+            else if (prevKeyboardState.IsPressed(Key.D6))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Wood.Id;
             }
-            else if (keyboardNow.IsPressed(Key.D7))
+            else if (prevKeyboardState.IsPressed(Key.D7))
             {
                 World.Instance.Player.SelectedBlockId = BlockRepository.Diamond.Id;
             }
-
-
-            else if (keyboardNow.IsPressed(Key.Comma))
+            else if (prevKeyboardState.IsPressed(Key.Comma))
             {
                 entityToControl = World.Instance.FlyingCamera;
                 Camera.Instance.AttachTo(entityToControl);
             }
-            else if (keyboardNow.IsPressed(Key.Period))
+            else if (prevKeyboardState.IsPressed(Key.Period))
             {
                 entityToControl = World.Instance.Player;
                 Camera.Instance.AttachTo(entityToControl);
             }
-            if (keyboardNow.IsPressed(Key.W))
+            if (prevKeyboardState.IsPressed(Key.W))
             {
                 entityToControl.MoveForward();
             }
-            if (keyboardNow.IsPressed(Key.S))
+            if (prevKeyboardState.IsPressed(Key.S))
             {
                 entityToControl.MoveBackward();
             }
-            if (keyboardNow.IsPressed(Key.A))
+            if (prevKeyboardState.IsPressed(Key.A))
             {
                 entityToControl.MoveLeft();
             }
-            if (keyboardNow.IsPressed(Key.D))
+            if (prevKeyboardState.IsPressed(Key.D))
             {
                 entityToControl.MoveRight();
             }
-            if (keyboardNow.IsPressed(Key.F))
+            if (prevKeyboardState.IsPressed(Key.F))
             {
                 entityToControl.MoveDown();
             }
-            if (keyboardNow.IsPressed(Key.R))
+            if (prevKeyboardState.IsPressed(Key.R))
             {
                 entityToControl.MoveUp();
             }
-            if (keyboardNow.IsPressed(Key.Space))
+            if (prevKeyboardState.IsPressed(Key.Space))
             {
                 entityToControl.Jump();
             }
-            if (keyboardNow.IsPressed(Key.Escape))
+            if (prevKeyboardState.IsPressed(Key.Escape) && Mode == GameMode.Gui)
             {
-                shutdown = true;
+                CloseGui();
             }
-            else if (keyboardNow.IsReleased(Key.V) && keyboardLast.IsPressed(Key.V))
+            else if (prevKeyboardState.IsReleased(Key.V) && keyboardState.IsPressed(Key.V))
             {
                 Profiler.Instance.ToggleReport();
             }
-            else if (keyboardNow.IsReleased(Key.C) && keyboardLast.IsPressed(Key.C))
+            else if (prevKeyboardState.IsReleased(Key.C) && keyboardState.IsPressed(Key.C))
             {
                 Profiler.Instance.ToggleEnabled();
             }
-            else if (keyboardNow.IsReleased(Key.Z) && keyboardLast.IsPressed(Key.Z))
+            else if (prevKeyboardState.IsReleased(Key.Z) && keyboardState.IsPressed(Key.Z))
             {
                 Profiler.Instance.ToggleMarkedSection();
             }
-            else if (keyboardNow.IsReleased(Key.X) && keyboardLast.IsPressed(Key.X))
+            else if (prevKeyboardState.IsReleased(Key.X) && keyboardState.IsPressed(Key.X))
             {
                 Profiler.Instance.SelectedSection = Profiler.Instance.MarkedSection;
             }
-            else if (keyboardNow.IsReleased(Key.Backspace) && keyboardLast.IsPressed(Key.Backspace))
+            else if (prevKeyboardState.IsReleased(Key.Backspace) && keyboardState.IsPressed(Key.Backspace))
             {
                 int index = Profiler.Instance.SelectedSection.LastIndexOf(".");
-                if(index>=0)
+                if (index >= 0)
                     Profiler.Instance.SelectedSection = Profiler.Instance.SelectedSection.Substring(0, index);
+            }
+
+            if (ActiveGui != null)
+            {
+                ActiveGui.Update();
             }
 
             // handle mouse
             if (World.Instance.PlayerVoxelTrace.Hit && !Input.Instance.IsMouseFreezed())
             {
-                if (mouseNow.IsPressed(1))
+                if (mouseState.IsPressed(1))
                 {
                     Input.Instance.FreezeMouse();
                     Vector4 pos = World.Instance.PlayerVoxelTrace.ImpactPosition;
                     PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-                    
+
                     World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, World.Instance.Player.SelectedBlockId);
                     PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
                     Chunk chunk = World.Instance.GetChunk(posChunk);
                     chunk.InvalidateMeAndNeighbors();
-                    
+
                 }
-                else if (mouseNow.IsPressed(0))
+                else if (mouseState.IsPressed(0))
                 {
                     Input.Instance.FreezeMouse();
                     Vector4 pos = World.Instance.PlayerVoxelTrace.BuildPosition;
@@ -269,7 +293,24 @@ namespace WindowsFormsApplication7
             CurrentTick++;
         }
 
-        
+        private void CloseGui()
+        {
+            // Close gui
+            ActiveGui.Close();
+            // Restore parent gui
+            ActiveGui = (GuiForm) ActiveGui.Parent;
+            Mode = ActiveGui == null ? GameMode.InGame : GameMode.Gui;
+        }
+
+        private void OpenGui(GuiForm gui)
+        {
+            // Save parent
+            gui.Parent = ActiveGui;
+            // Open new gui
+            ActiveGui = gui;
+            gui.Show();
+            Mode = GameMode.Gui;
+        }
 
         public int Width
         {

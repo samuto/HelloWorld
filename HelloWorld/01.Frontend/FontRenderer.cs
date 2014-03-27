@@ -38,6 +38,11 @@ pqrstuvwxyz{|}~⌂
             RenderText(new Vector4(1, 1, 1, 1), text, x, y);
         }
 
+        internal Vector2 TextSize(string text)
+        {
+            return new Vector2(text.Length * CharWidth, LineHeight);
+        }
+
         internal void RenderText(string text, float x, float y)
         {
             RenderText(new Vector4(1, 1, 1, 1), text, x, y);

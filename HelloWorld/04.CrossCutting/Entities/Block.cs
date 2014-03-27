@@ -5,13 +5,15 @@ using System.Text;
 using WindowsFormsApplication7.Frontend;
 using WindowsFormsApplication7.Business;
 using SlimDX;
+using WindowsFormsApplication7.Business.Repositories;
+using WindowsFormsApplication7.Business.Geometry;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Block
     {
         public int Id;
-        public MaterialEnum Material;
+
         public Vector4[] BlockColors = new Vector4[6]{
             new Vector4(1,1,1,1),
             new Vector4(1,1,1,1),
@@ -21,16 +23,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             new Vector4(0.6f,0.6f,0.6f,1),
         };
 
-        public Block(int id, MaterialEnum material)
+        public Block(int id)
         {
             this.Id = id;
-            this.Material = material;
-        }
-
-        internal Block AddToRepository()
-        {
             BlockRepository.Blocks[Id] = this;
-            return this;
         }
 
         internal Block BlockColor(System.Drawing.Color color)

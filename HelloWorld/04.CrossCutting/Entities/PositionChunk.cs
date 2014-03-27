@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.Business;
 using SlimDX;
+using WindowsFormsApplication7.Business.Geometry;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {

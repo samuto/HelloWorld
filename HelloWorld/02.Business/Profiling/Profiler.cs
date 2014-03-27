@@ -15,7 +15,7 @@ namespace WindowsFormsApplication7.Business.Profiling
         public ProfileSection activeSection;
         public string SelectedSection = "root";
         public string MarkedSection = "root";
-        public bool Enabled = true;
+        public bool Enabled = false;
         public bool ReportCounters = false;
 
         public Profiler()

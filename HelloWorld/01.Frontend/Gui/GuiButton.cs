@@ -16,9 +16,10 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
             Color = ColorDeactivated;
             CustomRendering = true;
+            this.OnRender += new EventHandler<EventArgs>(GuiButton_OnRender);
         }
 
-        internal override void OnRender(float partialStep)
+        void GuiButton_OnRender(object sender, EventArgs e)
         {
             Tessellator t = Tessellator.Instance;
             t.StartDrawingColoredQuads();

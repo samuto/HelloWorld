@@ -66,7 +66,6 @@ VS_OUT VS(VS_IN vIn)
 	return vOut;
 }
 
-
 float threshold = 0.1;
 
 float4 PS_Texture_Fog(VS_OUT pIn) : SV_Target
@@ -75,8 +74,8 @@ float4 PS_Texture_Fog(VS_OUT pIn) : SV_Target
 	textureColor = pIn.col * intexture.Sample(triLinearSample, pIn.uv);
 	float fog = saturate((pIn.distance - fogNear) / (fogNear-fogFar));    
 	float4 color = lerp(fogColor, textureColor, fog);
+	color = textureColor;
 	return color;
-
 }
 
 float4 PS_Simple(VS_OUT pIn) : SV_Target
@@ -90,8 +89,6 @@ float4 PS_Texture(VS_OUT pIn) : SV_Target
 	textureColor = pIn.col * intexture.Sample(triLinearSample, pIn.uv);
 	return textureColor;
 }
-
-
 
 technique10 TextureWithFog0
 {

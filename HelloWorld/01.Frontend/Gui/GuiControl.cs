@@ -19,7 +19,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         public bool CustomRendering;
         public Vector2 ParentLocation = new Vector2();
         public GuiControl Parent = null;
-
+        public event EventHandler<EventArgs> OnRender;
         protected List<GuiControl> controls = new List<GuiControl>();
         public bool SkipUpdate = true;
 
@@ -52,6 +52,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         internal virtual void Render(float partialStep)
         {
+
             if (!Visible)
                 return;
 
@@ -64,15 +65,16 @@ namespace WindowsFormsApplication7.Frontend.Gui
                 t.AddVertexWithColorAndOffset(new Vector4(Location.X, Location.Y + Size.Y, 0f, 1f), Color, ParentLocation);
                 t.AddVertexWithColorAndOffset(new Vector4(Location.X + Size.X, Location.Y + Size.Y, 0f, 1f), Color, ParentLocation);
                 t.AddVertexWithColorAndOffset(new Vector4(Location.X + Size.X, Location.Y, 0f, 1f), Color, ParentLocation);
-                FontRenderer f = FontRenderer.Instance;
                 t.Draw();
 
+                FontRenderer f = FontRenderer.Instance;
                 t.StartDrawingAlphaTexturedQuads("ascii");
                 Vector2 textSize = f.TextSize(Text);
                 f.RenderText(Text, Location.X + (Size.X - textSize.X) / 2f + ParentLocation.X, Location.Y + (Size.Y - textSize.Y) / 2f + ParentLocation.Y);
                 t.Draw();
             }
-            OnRender(partialStep);
+            if(OnRender != null)
+                OnRender(this, new EventArgs());
             
             foreach (GuiControl control in controls)
             {
@@ -80,10 +82,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             }
         }
 
-        internal virtual void OnRender(float partialStep)
-        {
-        }
-
+     
         internal void CenterInParent()
         {
             if(Parent == null)
@@ -107,7 +106,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
             GuiControl control = this;
             bool mouseOverPrev = control.MouseIsOver;
-            bool mouseOver = MouseInRect(Input.Instance.CurrentInput.MouseLocation, control.Location+ParentLocation, control.Size);
+            bool mouseOver = MouseInRect(GuiScaling.Instance.CalcMouseLocation(Input.Instance.CurrentInput.MouseLocation), control.Location+ParentLocation, control.Size);
             control.MouseIsOver = mouseOver;
 
             // Fire events

@@ -9,8 +9,8 @@ namespace WindowsFormsApplication7.Frontend.Gui
     class GuiPanel : GuiControl
     {
         public event EventHandler<EventArgs> OnClick;
-        private Vector4 ColorActivated = new Vector4(1f, 0.5f, 0.5f, 1);
-        private Vector4 ColorDeactivated = new Vector4(0.8f, 0.3f, 0.3f, 1);
+        private Vector4 ColorActivated = new Vector4(0.5f, 0.5f, 0.5f, 1);
+        private Vector4 ColorDeactivated = new Vector4(0.4f, 0.4f, 0.4f, 1);
 
         public GuiPanel()
         {

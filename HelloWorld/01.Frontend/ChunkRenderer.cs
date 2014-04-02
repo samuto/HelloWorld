@@ -27,9 +27,6 @@ namespace WindowsFormsApplication7.Frontend
             vertexBuffer = new VertexBuffer();
         }
 
-
-        
-
         internal static bool InsideViewFrustum(Chunk chunk)
         {
             if (!Camera.Instance.InsideViewFrustum(chunk.GetBoundingBox()))

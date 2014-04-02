@@ -44,8 +44,18 @@ namespace WindowsFormsApplication7.Frontend
             public float TextureIndex;
         }
 
+        public Vector3 Scale;
+        public Vector3 Translate;
+
         public Tessellator()
         {
+            ResetTransformation();
+        }
+
+        public void ResetTransformation()
+        {
+            Scale = new Vector3(1, 1, 1);
+            Translate = new Vector3(0, 0, 0);
         }
 
         public void Initialize(int size, Device device)
@@ -54,7 +64,6 @@ namespace WindowsFormsApplication7.Frontend
             resources = new Resources(device);
             stream = new DataStream(size, true, true);
             resources.LoadAllTextures();
-            BlockTextures.Instance.Initialize();
         }
 
         public void Draw()
@@ -111,6 +120,9 @@ namespace WindowsFormsApplication7.Frontend
         {
             if (VertexCount == 0)
                 return;
+
+            Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(Scale));
+            Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(Translate));
             ActiveEffect.Apply(vertices);
             Device.ImmediateContext.InputAssembler.PrimitiveTopology = mode;
             Device.ImmediateContext.Draw(VertexCount, 0);
@@ -193,6 +205,7 @@ namespace WindowsFormsApplication7.Frontend
 
         private void StartDrawing(string name, FXBase effect, int technique, PrimitiveTopology mode)
         {
+            Camera.Instance.World = Matrix.Identity;
             activeTexture = resources.GetResource(name);
             ActiveEffect = effect;
             ActiveEffect.TechniqueIndex = technique;
@@ -202,7 +215,7 @@ namespace WindowsFormsApplication7.Frontend
 
         public void Dispose()
         {
-            BlockTextures.Instance.Dispose();
+            TileTextures.Instance.Dispose();
             FXSimple.Instance.Dispose();
             FXTexture.Instance.Dispose();
             resources.Dispose();

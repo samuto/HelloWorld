@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.Business;
 using WindowsFormsApplication7.CrossCutting.Entities;
+using SlimDX;
 
 namespace WindowsFormsApplication7.Frontend.Gui
 {
     class GuiCraftingForm : GuiForm
     {
-        private const float slotSize = 50;
+        private const float slotSize = itemSize+2;
+        private const float itemSize = 16;
         private Inventory inventory;
         private CraftingTable craftingTable;
         private GuiPanel guiCraftingProduct;
@@ -23,21 +25,18 @@ namespace WindowsFormsApplication7.Frontend.Gui
             inventory = World.Instance.Player.Inventory;
             craftingTable = new CraftingTable();
             Initialize();
+
         }
 
         private void Initialize()
         {
             // Create gui stack in hand and bind it to local variable
             guiStackInHand = new GuiMovableControl();
-            guiStackInHand.Size = new SlimDX.Vector2(slotSize - 10, slotSize - 10);
+            guiStackInHand.Size = new SlimDX.Vector2(itemSize, itemSize);
             guiStackInHand.Tag = stackInHand;
             guiStackInHand.AttachToCursor();
+            guiStackInHand.OnRender += new EventHandler<EventArgs>(guiStack_OnRender);
             BindControl(guiStackInHand);
-
-            // Add some random buttons for testing puposes...
-            AddControl(new GuiButton() { Location = new SlimDX.Vector2(10, 20), Size = new SlimDX.Vector2(16, 16), Text = "b1" });
-            AddControl(new GuiButton() { Location = new SlimDX.Vector2(30, 20), Size = new SlimDX.Vector2(16, 16), Text = "b2" });
-            AddControl(new GuiButton() { Location = new SlimDX.Vector2(50, 20), Size = new SlimDX.Vector2(16, 16), Text = "b3" });
 
             // setup crafting table
             GuiPanel panel;
@@ -45,13 +44,13 @@ namespace WindowsFormsApplication7.Frontend.Gui
             {
                 int x = i % 3;
                 int y = 2 - i / 3;
-                panel = CreateAndBindGuiSlot(craftingTable.Grid[i], x, y+4);
+                panel = CreateAndBindGuiSlot(craftingTable.Grid[i], x, y + 5);
                 panel.OnClick += new EventHandler<EventArgs>(craftingTableSlot_OnClick);
                 CreateAndBindGuiStack(craftingTable.Grid[i].Content, panel);
                 craftingSlots.Add(panel);
             }
             // setup crafting table product
-            guiCraftingProduct = CreateAndBindGuiSlot(craftingTable.Product, 5, 5);
+            guiCraftingProduct = CreateAndBindGuiSlot(craftingTable.Product, 4, 6);
             guiCraftingProduct.OnClick += new EventHandler<EventArgs>(guiCraftingProduct_OnClick);
             CreateAndBindGuiStack(craftingTable.Product.Content, guiCraftingProduct);
 
@@ -60,6 +59,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             {
                 int x = i % 9;
                 int y = i / 9;
+                if (y > 0) y++; 
                 panel = CreateAndBindGuiSlot(inventory.Slots[i], x, y);
                 panel.OnClick += new EventHandler<EventArgs>(inventorySlot_OnClick);
                 CreateAndBindGuiStack(inventory.Slots[i].Content, panel);
@@ -72,8 +72,8 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
             GuiPanel panel = new GuiPanel()
             {
-                Location = new SlimDX.Vector2((x+1) * slotSize, (y+1) * slotSize),
-                Size = new SlimDX.Vector2(slotSize - 5, slotSize - 5),
+                Location = new SlimDX.Vector2((x + 1) * slotSize, (y + 1) * slotSize),
+                Size = new SlimDX.Vector2(slotSize, slotSize),
                 Text = "",
                 Tag = slot
 
@@ -85,12 +85,14 @@ namespace WindowsFormsApplication7.Frontend.Gui
         private void CreateAndBindGuiStack(ItemStack stack, GuiPanel parent)
         {
             GuiMovableControl guiStack = new GuiMovableControl();
-            guiStack.Size = new SlimDX.Vector2(slotSize - 10, slotSize - 10);
+            guiStack.Size = new SlimDX.Vector2(itemSize, itemSize);
             guiStack.Tag = stack;
             parent.AddControl(guiStack);
             guiStack.CenterInParent();
+            guiStack.OnRender += new EventHandler<EventArgs>(guiStack_OnRender);
             BindControl(guiStack);
         }
+
 
         private void BindControl(GuiPanel guiCraftingProduct)
         {
@@ -103,6 +105,31 @@ namespace WindowsFormsApplication7.Frontend.Gui
             control.Text = stack.Id + "#" + stack.Count.ToString();
             control.Visible = stack.Count > 0;
         }
+
+        void guiStack_OnRender(object sender, EventArgs e)
+        {
+            GuiMovableControl control = (GuiMovableControl)sender;
+            Vector3 pos = new Vector3(
+                control.Location.X+control.ParentLocation.X, 
+                control.Location.Y+control.ParentLocation.Y, 
+                0);
+            Tessellator t = Tessellator.Instance;
+            t.StartDrawingTiledQuads();
+            Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(new Vector3(itemSize, itemSize, itemSize)));
+            Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(pos));
+            ItemStack stack = (ItemStack)control.Tag;
+            t.Draw(TileTextures.Instance.GetItemVertexBuffer(stack.Id));
+            
+            FontRenderer f = FontRenderer.Instance;
+            t.StartDrawingAlphaTexturedQuads("ascii");
+            string text = stack.Count.ToString();
+            Vector2 textSize = f.TextSize(text);
+            f.RenderText(text, 
+                control.Location.X + control.ParentLocation.X,
+                control.Location.Y + control.ParentLocation.Y);
+            t.Draw();
+        }
+
 
         void guiCraftingProduct_OnClick(object sender, EventArgs e)
         {
@@ -138,7 +165,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
             slot_OnClick(sender, e);
         }
-        
+
         void slot_OnClick(object sender, EventArgs e)
         {
             bool pickingUp = stackInHand.IsEmpty;

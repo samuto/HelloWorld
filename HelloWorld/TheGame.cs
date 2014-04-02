@@ -58,9 +58,8 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("Hello World");
-            float scale = 4f;
-            form.Width = (int)(200f * scale);
-            form.Height = (int)(150f * scale);
+            float scale = 1.5f;
+            form.ClientSize = new Size((int)(320f * scale), (int)(240f * scale));
 
             GlobalRenderer.Instance.Initialize(form);
             World.Instance.Player.PrevPosition = World.Instance.Player.Position = new Vector3(-30, 64, 0);
@@ -69,7 +68,6 @@ namespace WindowsFormsApplication7
             Camera.Instance.AttachTo(entityToControl);
             Input.Instance.Initialize();
         }
-
 
         private void Dispose()
         {
@@ -103,7 +101,7 @@ namespace WindowsFormsApplication7
             // render game
             p.EndStartSection("render");
             GlobalRenderer.Instance.ClearTarget();
-            //GlobalRenderer.Instance.Render(partialStep);
+            GlobalRenderer.Instance.Render(partialStep);
             p.EndSection();
 
             p.EndSection(); // end root-section
@@ -148,44 +146,8 @@ namespace WindowsFormsApplication7
             KeyboardState prevKeyboardState = Input.Instance.CurrentInput.KeyboardState;
             KeyboardState keyboardState = Input.Instance.LastInput.KeyboardState;
             MouseState mouseState = Input.Instance.CurrentInput.MouseState;
-            if (prevKeyboardState.IsPressed(Key.E) && Mode == GameMode.InGame)
-            {
-                // Launch crafting gui
-                OpenGui(new GuiCraftingForm());
-            }
-            else if (prevKeyboardState.IsPressed(Key.D1))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Grass.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D1))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Dirt.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D2))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Stone.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D3))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Brick.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D4))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.BedRock.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D5))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Leaf.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D6))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Wood.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D7))
-            {
-                World.Instance.Player.SelectedBlockId = BlockRepository.Diamond.Id;
-            }
-            else if (prevKeyboardState.IsPressed(Key.Comma))
+           
+            if (prevKeyboardState.IsPressed(Key.Comma))
             {
                 entityToControl = World.Instance.FlyingCamera;
                 Camera.Instance.AttachTo(entityToControl);
@@ -195,6 +157,7 @@ namespace WindowsFormsApplication7
                 entityToControl = World.Instance.Player;
                 Camera.Instance.AttachTo(entityToControl);
             }
+            
             if (prevKeyboardState.IsPressed(Key.W))
             {
                 entityToControl.MoveForward();
@@ -252,34 +215,8 @@ namespace WindowsFormsApplication7
 
             if (ActiveGui != null)
             {
+                GuiScaling.Instance.Update();
                 ActiveGui.Update();
-            }
-
-            // handle mouse
-            if (World.Instance.PlayerVoxelTrace.Hit && !Input.Instance.IsMouseFreezed())
-            {
-                if (mouseState.IsPressed(1))
-                {
-                    Input.Instance.FreezeMouse();
-                    Vector4 pos = World.Instance.PlayerVoxelTrace.ImpactPosition;
-                    PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-
-                    World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, World.Instance.Player.SelectedBlockId);
-                    PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
-                    Chunk chunk = World.Instance.GetChunk(posChunk);
-                    chunk.InvalidateMeAndNeighbors();
-
-                }
-                else if (mouseState.IsPressed(0))
-                {
-                    Input.Instance.FreezeMouse();
-                    Vector4 pos = World.Instance.PlayerVoxelTrace.BuildPosition;
-                    PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-                    World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, 0);
-                    PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
-                    Chunk chunk = World.Instance.GetChunk(posChunk);
-                    chunk.InvalidateMeAndNeighbors();
-                }
             }
 
             // update world
@@ -302,7 +239,7 @@ namespace WindowsFormsApplication7
             Mode = ActiveGui == null ? GameMode.InGame : GameMode.Gui;
         }
 
-        private void OpenGui(GuiForm gui)
+        internal void OpenGui(GuiForm gui)
         {
             // Save parent
             gui.Parent = ActiveGui;

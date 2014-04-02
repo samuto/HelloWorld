@@ -53,7 +53,7 @@ namespace WindowsFormsApplication7._01.Frontend.Effects
             effect.GetVariableByName("gWorld").AsMatrix().SetMatrix(Camera.Instance.World);
             effect.GetVariableByName("gView").AsMatrix().SetMatrix(Camera.Instance.View);
             effect.GetVariableByName("gProj").AsMatrix().SetMatrix(Camera.Instance.Projection);
-            effect.GetVariableByName("textureArray").AsResource().SetResource(BlockTextures.Instance.View);
+            effect.GetVariableByName("textureArray").AsResource().SetResource(TileTextures.Instance.View);
             float timeOfDay = World.Instance.TimeOfDay;
             Vector3 lightDirection = new Vector3(0, 0, 0);
             DayWatch watch = DayWatch.Now;

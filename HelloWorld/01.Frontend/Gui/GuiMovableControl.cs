@@ -16,12 +16,10 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         public GuiMovableControl()
         {
-            CustomRendering = false;
+            CustomRendering = true;
         }
 
-       
 
-       
         internal override void OnMouseMoved()
         {
             if (dragMode)
@@ -32,9 +30,8 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         private void FollowMouseLocation()
         {
-            Location = Input.Instance.CurrentInput.MouseLocation - ParentLocation - Size / 2;
+            Location = GuiScaling.Instance.CalcMouseLocation(Input.Instance.CurrentInput.MouseLocation) - ParentLocation - Size / 2;
         }
-
 
         internal void AttachToCursor()
         {

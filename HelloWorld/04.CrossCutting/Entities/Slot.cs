@@ -33,5 +33,13 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 return !IsNotEmpty;
             }
         }
+
+        public bool IsFull
+        {
+            get
+            {
+                return Content.Count == 64;
+            }
+        }
     }
 }

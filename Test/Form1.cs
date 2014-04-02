@@ -26,17 +26,17 @@ namespace WindowsFormsApplication1
             using (Image img = Image.FromFile(Path.Combine(path, "terrain.png")))
             {
                 Size outsize = new System.Drawing.Size(64, 64);
-                Unstitch(img, 0, 0, outsize, "grass");
+                Unstitch(img, 0, 0, outsize, "grass_top");
                 Unstitch(img, 2, 0, outsize, "dirt");
                 Unstitch(img, 3, 0, outsize, "grass_side");
                 Unstitch(img, 2, 1, outsize, "sand");
                 Unstitch(img, 1, 0, outsize, "stone");
-                Unstitch(img, 5, 1, outsize, "wood_top");
-                Unstitch(img, 4, 1, outsize, "wood_side");
-                Unstitch(img, 5, 3, outsize, "leaf");
+                Unstitch(img, 5, 1, outsize, "log_oak_top");
+                Unstitch(img, 4, 1, outsize, "log_oak");
+                Unstitch(img, 5, 3, outsize, "leaves_oak_opaque");
                 Unstitch(img, 7, 0, outsize, "brick");
                 Unstitch(img, 1, 1, outsize, "bedrock");
-                Unstitch(img, 2, 3, outsize, "diamond");
+                Unstitch(img, 2, 3, outsize, "diamond_ore");
             }
 
 

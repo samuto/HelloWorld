@@ -23,7 +23,7 @@ namespace WindowsFormsApplication7.Frontend
         {
         }
 
-      
+
         internal void RenderBlock(PositionBlock positionBlock, Chunk chunk)
         {
             int blockId = chunk.SafeGetLocalBlock(positionBlock.X, positionBlock.Y, positionBlock.Z);
@@ -54,7 +54,7 @@ namespace WindowsFormsApplication7.Frontend
                 c6 = c1;
             }
             else
-            {  
+            {
                 c1 = blockColors[0];
                 c2 = blockColors[1];
                 c3 = blockColors[2];
@@ -69,7 +69,7 @@ namespace WindowsFormsApplication7.Frontend
             if (chunk.SafeGetLocalBlock(x, y, z + 1) == 0)
             {
                 // front
-                tessellator.ArrayIndex = BlockTextures.Instance.SideIndex(blockId);
+                tessellator.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
                 bool a1 = chunk.SafeGetLocalBlock(x, y - 1, z + 1) == 0 ? false : true;
                 bool a2 = chunk.SafeGetLocalBlock(x - 1, y - 1, z + 1) == 0 ? false : true;
                 bool a3 = chunk.SafeGetLocalBlock(x - 1, y, z + 1) == 0 ? false : true;
@@ -85,17 +85,17 @@ namespace WindowsFormsApplication7.Frontend
                 s3 = a5 || a6 || a7 ? reduction : 1f;
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
-                Vector3 normal = new Vector3(0,0,1);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1 * s1, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c1 * s2, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c1 * s3, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c1 * s4, normal);
+                Vector3 normal = new Vector3(0, 0, 1);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c1, s1), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c1, s2), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c1, s3), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c1, s4), normal);
             }
 
             if (chunk.SafeGetLocalBlock(x, y, z - 1) == 0)
             {
                 // back
-                tessellator.ArrayIndex = BlockTextures.Instance.SideIndex(blockId);
+                tessellator.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
                 bool a1 = chunk.SafeGetLocalBlock(x, y - 1, z - 1) == 0 ? false : true;
                 bool a2 = chunk.SafeGetLocalBlock(x + 1, y - 1, z - 1) == 0 ? false : true;
                 bool a3 = chunk.SafeGetLocalBlock(x + 1, y, z - 1) == 0 ? false : true;
@@ -112,16 +112,16 @@ namespace WindowsFormsApplication7.Frontend
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
                 Vector3 normal = new Vector3(0, 0, -1);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2 * s1, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), c2 * s2, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c2 * s3, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c2 * s4, normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c2, s1), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), AdjustColor(c2, s2), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c2, s3), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c2, s4), normal);
             }
 
             if (chunk.SafeGetLocalBlock(x - 1, y, z) == 0)
             {
                 //left
-                tessellator.ArrayIndex = BlockTextures.Instance.SideIndex(blockId);
+                tessellator.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
                 bool a1 = chunk.SafeGetLocalBlock(x - 1, y - 1, z) == 0 ? false : true;
                 bool a2 = chunk.SafeGetLocalBlock(x - 1, y - 1, z - 1) == 0 ? false : true;
                 bool a3 = chunk.SafeGetLocalBlock(x - 1, y, z - 1) == 0 ? false : true;
@@ -138,16 +138,16 @@ namespace WindowsFormsApplication7.Frontend
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
                 Vector3 normal = new Vector3(-1, 0, 0);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c3 * s1, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c3 * s2, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c3 * s3, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c3 * s4, normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c3, s1), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c3, s2), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c3, s3), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c3, s4), normal);
             }
 
             if (chunk.SafeGetLocalBlock(x + 1, y, z) == 0)
             {
                 //right
-                tessellator.ArrayIndex = BlockTextures.Instance.SideIndex(blockId);
+                tessellator.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
                 bool a1 = chunk.SafeGetLocalBlock(x + 1, y - 1, z) == 0 ? false : true;
                 bool a2 = chunk.SafeGetLocalBlock(x + 1, y - 1, z + 1) == 0 ? false : true;
                 bool a3 = chunk.SafeGetLocalBlock(x + 1, y, z + 1) == 0 ? false : true;
@@ -164,16 +164,16 @@ namespace WindowsFormsApplication7.Frontend
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
                 Vector3 normal = new Vector3(1, 0, 0);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c4 * s1, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c4 * s2, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c4 * s3, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c4 * s4, normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c4, s1), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c4, s2), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c4, s3), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c4, s4), normal);
             }
 
             if (chunk.SafeGetLocalBlock(x, y + 1, z) == 0)
             {
                 //top
-                tessellator.ArrayIndex = BlockTextures.Instance.TopIndex(blockId);
+                tessellator.ArrayIndex = TileTextures.Instance.TopIndex(blockId);
                 bool a1 = chunk.SafeGetLocalBlock(x, y + 1, z + 1) == 0 ? false : true;
                 bool a2 = chunk.SafeGetLocalBlock(x - 1, y + 1, z + 1) == 0 ? false : true;
                 bool a3 = chunk.SafeGetLocalBlock(x - 1, y + 1, z) == 0 ? false : true;
@@ -192,16 +192,16 @@ namespace WindowsFormsApplication7.Frontend
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
                 Vector3 normal = new Vector3(0, 1, 0);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c5 * s1, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c5 * s2, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c5 * s3, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c5 * s4, normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c5, s1), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c5, s2), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c5, s3), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c5, s4), normal);
             }
 
             if (chunk.SafeGetLocalBlock(x, y - 1, z) == 0)
             {
                 //bottom
-                tessellator.ArrayIndex = BlockTextures.Instance.BottomIndex(blockId);
+                tessellator.ArrayIndex = TileTextures.Instance.BottomIndex(blockId);
                 bool a1 = chunk.SafeGetLocalBlock(x, y - 1, z - 1) == 0 ? false : true;
                 bool a2 = chunk.SafeGetLocalBlock(x - 1, y - 1, z - 1) == 0 ? false : true;
                 bool a3 = chunk.SafeGetLocalBlock(x - 1, y - 1, z) == 0 ? false : true;
@@ -219,13 +219,18 @@ namespace WindowsFormsApplication7.Frontend
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
                 Vector3 normal = new Vector3(0, -1, 0);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c6 * s1, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c6 * s2, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c6 * s3, normal);
-                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c6 * s4, normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c6, s1), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c6, s2), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c6, s3), normal);
+                tessellator.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c6, s4), normal);
             }
 
             tessellator.ArrayIndex = -1;
+        }
+
+        private Vector4 AdjustColor(Vector4 c1, float s1)
+        {
+            return new Vector4(c1.X * s1, c1.Y * s1, c1.Z * s1, 1);
         }
     }
 }

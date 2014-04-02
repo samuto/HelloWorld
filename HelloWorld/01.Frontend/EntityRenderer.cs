@@ -88,23 +88,20 @@ namespace WindowsFormsApplication7.Frontend
 
             if (entity != TheGame.Instance.entityToControl)
             {
-                Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
                 t.StartDrawingColoredQuads();
+                Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
                 t.Draw(vertices, vertexCount);
             }
-            if (typeof(Player) == entity.GetType() && World.Instance.Player.SelectedBlockId != 0)
+            if (typeof(Player) == entity.GetType() && World.Instance.Player.IsSelectedItemABlock())
             {
-                Camera.Instance.World = Matrix.Identity;
+                t.StartDrawingTiledQuads();
                 float scale = 0.1f;
                 Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(scale, scale, scale));
-                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(entity.EyePosition+new Vector3(-0.2f,-0.25f,0.4f)));
+                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(entity.EyePosition + new Vector3(-0.2f, -0.25f, 0.4f)));
                 Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0));
                 Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(position));
-                t.StartDrawingTiledQuads();
-                t.Draw(BlockTextures.Instance.GetVertexBuffer(World.Instance.Player.SelectedBlockId));
+                t.Draw(TileTextures.Instance.GetBlockVertexBuffer(World.Instance.Player.SelectedItemStack.Id));
             }
-
-            Camera.Instance.World = Matrix.Identity;
         }
 
         public void Dispose()

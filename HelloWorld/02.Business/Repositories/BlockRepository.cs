@@ -21,6 +21,7 @@ namespace WindowsFormsApplication7.Business.Repositories
         public static Block BedRock = new Block(8);
         public static Block Diamond = new Block(9);
         public static Block Plank = new Block(10);
+        public static Block CobbleStone = new Block(11);
        
     }
 }

@@ -53,6 +53,7 @@
     <Compile Include="01.Frontend\Effects\FXBase.cs" />
     <Compile Include="01.Frontend\Effects\FXSimple.cs" />
     <Compile Include="01.Frontend\FontRenderer.cs" />
+    <Compile Include="01.Frontend\Gui\GuiScaling.cs" />
     <Compile Include="01.Frontend\Gui\GuiMovableControl.cs" />
     <Compile Include="01.Frontend\Gui\GuiPanel.cs" />
     <Compile Include="01.Frontend\Gui\GuiButton.cs" />
@@ -60,7 +61,7 @@
     <Compile Include="01.Frontend\Gui\GuiControl.cs" />
     <Compile Include="01.Frontend\Gui\GuiCursor.cs" />
     <Compile Include="01.Frontend\Interpolate.cs" />
-    <Compile Include="01.Frontend\BlockTexture.cs" />
+    <Compile Include="01.Frontend\TileTextures.cs" />
     <Compile Include="01.Frontend\VertexBuffer.cs" />
     <Compile Include="02.Business\Geometry\AxisAlignBoundingBox.cs" />
     <Compile Include="02.Business\Geometry\BoundingFrustum.cs" />
@@ -143,19 +144,31 @@
     <Content Include="01.Frontend\Textures\Blocks\brick.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="01.Frontend\Textures\Blocks\diamond.png">
+    <Content Include="01.Frontend\Textures\Blocks\cobblestone.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\diamond_ore.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\dirt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="01.Frontend\Textures\Blocks\grass.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="01.Frontend\Textures\Blocks\grass_side.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="01.Frontend\Textures\Blocks\leaf.png">
+    <Content Include="01.Frontend\Textures\Blocks\grass_top.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\leaves_oak_opaque.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\log_oak.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\log_oak_top.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\planks_oak.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\sand.png">
@@ -164,10 +177,7 @@
     <Content Include="01.Frontend\Textures\Blocks\stone.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="01.Frontend\Textures\Blocks\wood_side.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="01.Frontend\Textures\Blocks\wood_top.png">
+    <Content Include="01.Frontend\Textures\Items\empty.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Items\stick.png">

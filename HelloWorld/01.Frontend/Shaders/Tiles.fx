@@ -32,7 +32,7 @@ struct PS_IN
 // ---------------------
 SamplerState samplerState
 {
-	Filter = MIN_MAG_MIP_LINEAR;
+	Filter = MIN_MAG_MIP_POINT;
 
 	AddressU = Clamp;
 	AddressV = Clamp;
@@ -43,6 +43,19 @@ BlendState NoBlend
   AlphaToCoverageEnable = FALSE;
   BlendEnable[0] = FALSE;
 };
+
+BlendState SrcAlphaBlendingAdd 
+{     
+	BlendEnable[0] = TRUE;
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
+	BlendOp = ADD;
+	SrcBlendAlpha = ZERO;
+	DestBlendAlpha = ZERO;
+	BlendOpAlpha = ADD;
+	RenderTargetWriteMask[0] = 0x0F;
+}; 
+
 
 // ------------------------------------
 //         shader functions...
@@ -57,10 +70,11 @@ PS_IN VS( VS_IN input )
 	output.index = input.index;
 	output.col = input.col;
 
-	// NEW!!
 	float3 L = normalize(-lightDirection);
     float diffuseLight = max(dot(input.normal, L), 0.5);
+	float alpha = input.col.w;
     output.col = input.col * diffuseLight;
+	output.col.w = alpha;
    
 	return output;
 }
@@ -70,7 +84,6 @@ float4 PS( PS_IN input ) : SV_Target
 	return input.col * textureArray.Sample(samplerState, float3(input.tex, input.index));
 }
 
-
 technique10 NoTextureNoFog3
 {
     pass P0
@@ -78,6 +91,6 @@ technique10 NoTextureNoFog3
         SetVertexShader( CompileShader( vs_4_0, VS() ) );
         SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, PS() ) );
-		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetBlendState( SrcAlphaBlendingAdd, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
     }
 }

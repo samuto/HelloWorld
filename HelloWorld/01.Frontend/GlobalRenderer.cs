@@ -13,6 +13,7 @@ using WindowsFormsApplication7.Frontend;
 using WindowsFormsApplication7.Business;
 using System.IO;
 using WindowsFormsApplication7.Business.Profiling;
+using WindowsFormsApplication7.Frontend.Gui;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -243,7 +244,7 @@ namespace WindowsFormsApplication7.Frontend
             device.ImmediateContext.Rasterizer.SetViewports(new Viewport(0, 0, form.ClientSize.Width, form.ClientSize.Height, 0.0f, 0.01f));
 
             Tessellator.Instance.Initialize(1024 * 1024 * 10, device);
-
+            TileTextures.Instance.Initialize();
         }
 
         internal void Dispose()
@@ -275,7 +276,12 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void RenderGui(float partialStep)
         {
+            Tessellator t = Tessellator.Instance;
+            t.Scale = GuiScaling.Instance.Scale3;
+            t.Translate = GuiScaling.Instance.Translate3;
             TheGame.Instance.ActiveGui.Render(partialStep);
+            t.ResetTransformation();
+
             TheGame.Instance.Cursor.Render(partialStep);
         }
     }

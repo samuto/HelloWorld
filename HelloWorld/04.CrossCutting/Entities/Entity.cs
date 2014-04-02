@@ -6,6 +6,8 @@ using WindowsFormsApplication7.Business;
 using SlimDX;
 using WindowsFormsApplication7.Business.Repositories;
 using WindowsFormsApplication7.Business.Geometry;
+using SlimDX.DirectInput;
+using WindowsFormsApplication7.Frontend.Gui;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
@@ -116,6 +118,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             moveUp = false;
             moveDown = false;
         }
+
+       
 
         private List<AxisAlignedBoundingBox> GetCollidingObjects(Vector3 newPosition)
         {

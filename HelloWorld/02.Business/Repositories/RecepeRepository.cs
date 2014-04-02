@@ -15,7 +15,7 @@ namespace WindowsFormsApplication7.Business.Repository
         {
             AddToRepository(new Recepe().Input("1", BlockRepository.Wood.Id).Output(BlockRepository.Plank.Id, 4));
             AddToRepository(new Recepe().Input("1,1", BlockRepository.Plank.Id).Output(ItemRepository.Stick.Id, 4));
-            AddToRepository(new Recepe().Input("111,020,020", BlockRepository.Stone.Id, ItemRepository.Stick.Id).Output(ItemRepository.StonePickAxe.Id, 1));
+            AddToRepository(new Recepe().Input("111,020,020", BlockRepository.CobbleStone.Id, ItemRepository.Stick.Id).Output(ItemRepository.StonePickAxe.Id, 1));
         }
 
         private static void AddToRepository(Recepe recepe)

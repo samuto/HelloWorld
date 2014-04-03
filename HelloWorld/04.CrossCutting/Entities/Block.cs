@@ -22,6 +22,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             new Vector4(1,1,1,1),
             new Vector4(0.6f,0.6f,0.6f,1),
         };
+        public const int PunchesToBreak = 100;
 
         public Block(int id)
         {
@@ -59,6 +60,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal AxisAlignedBoundingBox GetBoundingBox()
         {
             return new AxisAlignedBoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1));
+        }
+
+        internal Block SetAlpha(float alpha)
+        {
+            BlockColors[0].W = alpha;
+            BlockColors[1].W = alpha;
+            BlockColors[2].W = alpha;
+            BlockColors[3].W = alpha;
+            BlockColors[4].W = alpha;
+            BlockColors[5].W = alpha;
+            return this;
         }
     }
 }

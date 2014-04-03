@@ -24,7 +24,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             Tessellator t = Tessellator.Instance;
             t.StartDrawingColoredQuads();
             Vector4 black = new Vector4(0, 0, 0, 1f);
-            float ofs = FontRenderer.CharScale;
+            float ofs = FontRenderer.Instance.CharScale;
             if (!Pressed)
             {
                 t.AddVertexWithColor(new Vector4(Location.X + ofs, Location.Y - ofs, 0f, 1f), black);

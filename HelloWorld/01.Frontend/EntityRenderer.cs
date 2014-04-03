@@ -7,6 +7,7 @@ using WindowsFormsApplication7.CrossCutting.Entities;
 using SlimDX;
 using SlimDX.Direct3D11;
 using WindowsFormsApplication7._01.Frontend;
+using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -94,6 +95,7 @@ namespace WindowsFormsApplication7.Frontend
             }
             if (typeof(Player) == entity.GetType() && World.Instance.Player.IsSelectedItemABlock())
             {
+                /*
                 t.StartDrawingTiledQuads();
                 float scale = 0.1f;
                 Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(scale, scale, scale));
@@ -101,6 +103,18 @@ namespace WindowsFormsApplication7.Frontend
                 Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0));
                 Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(position));
                 t.Draw(TileTextures.Instance.GetBlockVertexBuffer(World.Instance.Player.SelectedItemStack.Id));
+                 */
+            }
+            if (typeof(Player) == entity.GetType() && World.Instance.Player.BreakCompletePercentage > 0)
+            {
+                t.StartDrawingTiledQuads2();
+                t.Translate.X = World.Instance.Player.BreakPosition.X + 0.5f;
+                t.Translate.Y = World.Instance.Player.BreakPosition.Y + 0.5f;
+                t.Translate.Z = World.Instance.Player.BreakPosition.Z + 0.5f;
+                float s =1.05f;
+                t.Scale = new Vector3(s, s, s);
+                t.Draw(TileTextures.Instance.GetDestroyBlockVertexBuffer(World.Instance.Player.BreakCompletePercentage));
+                t.ResetTransformation();
             }
         }
 

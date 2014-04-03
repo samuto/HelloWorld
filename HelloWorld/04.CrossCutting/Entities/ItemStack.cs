@@ -136,5 +136,15 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             return new ItemStack(0, 0);
         }
+
+        internal void Swap(ItemStack itemStack)
+        {
+            int tempCount = this.count;
+            int tempId = this.Id;
+            this.count = itemStack.count;
+            this.Id = itemStack.Id;
+            itemStack.count = tempCount;
+            itemStack.Id = tempId;
+        }
     }
 }

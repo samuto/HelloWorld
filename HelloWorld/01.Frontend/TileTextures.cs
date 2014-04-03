@@ -24,8 +24,9 @@ namespace WindowsFormsApplication7.Frontend
         private Dictionary<string, int> indexMap = new Dictionary<string, int>();
         private Dictionary<int, VertexBuffer> blockVertexBuffers = new Dictionary<int, VertexBuffer>();
         private Dictionary<int, VertexBuffer> itemVertexBuffers = new Dictionary<int, VertexBuffer>();
+        private VertexBuffer[] destroyBlocks = new VertexBuffer[10];
         public ShaderResourceView View;
-        
+
         internal void Initialize()
         {
             LoadAllTileTextures();
@@ -42,10 +43,41 @@ namespace WindowsFormsApplication7.Frontend
             DefineBlock(BlockRepository.Diamond.Id, "diamond_ore");
             DefineBlock(BlockRepository.Plank.Id, "planks_oak");
             DefineBlock(BlockRepository.CobbleStone.Id, "cobblestone");
-            
+
+            // Define destroy blocks...
+            DefineDestroyBlocks();
+
             // define items
             BuildItemVertexBuffer(ItemRepository.Stick.Id, "stick");
+            BuildItemVertexBuffer(ItemRepository.StoneAxe.Id, "stone_axe");
+            BuildItemVertexBuffer(ItemRepository.StoneHoe.Id, "stone_hoe");
             BuildItemVertexBuffer(ItemRepository.StonePickAxe.Id, "stone_pickaxe");
+            BuildItemVertexBuffer(ItemRepository.StoneShovel.Id, "stone_shovel");
+            BuildItemVertexBuffer(ItemRepository.StoneSword.Id, "stone_sword");
+        }
+
+        private void DefineDestroyBlocks()
+        {
+            float alpha = 0.0f;
+            Vector4[] BlockColors = new Vector4[] { 
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha)};
+            for (int i = 0; i < 10; i++)
+            {
+                int tileIndex = indexMap["destroy_stage_" + i];
+                destroyBlocks[i] = GenerateBlockVertices(
+                tileIndex,
+                tileIndex,
+                tileIndex,
+                tileIndex,
+                tileIndex,
+                tileIndex,
+                BlockColors);
+            }
         }
 
         private void BuildItemVertexBuffer(int itemId, string name)
@@ -70,11 +102,32 @@ namespace WindowsFormsApplication7.Frontend
 
         private void BuildBlockVertexBuffer(int blockId)
         {
+            int tileIndexFront = TileTextures.Instance.SideIndex(blockId);
+            int tileIndexTop = TileTextures.Instance.TopIndex(blockId);
+            int tileIndexBottom = TileTextures.Instance.BottomIndex(blockId);
+
+            blockVertexBuffers.Add(blockId, GenerateBlockVertices(
+                tileIndexFront,
+                tileIndexFront,
+                tileIndexFront,
+                tileIndexFront,
+                tileIndexTop,
+                tileIndexBottom,
+                BlockRepository.Blocks[blockId].BlockColors));
+        }
+
+        private VertexBuffer GenerateBlockVertices(
+            int tileIndexFront,
+            int tileIndexBack,
+            int tileIndexLeft,
+            int tileIndexRight,
+            int tileIndexTop,
+            int tileIndexBottom,
+            Vector4[] blockColors)
+        {
             Tessellator t = Tessellator.Instance;
             t.StartDrawingTiledQuads();
             Vector4 c1, c2, c3, c4, c5, c6;
-            Block block = BlockRepository.Blocks[blockId];
-            Vector4[] blockColors = block.BlockColors;
             float vx = -0.5f;
             float vy = -0.5f;
             float vz = -0.5f;
@@ -88,13 +141,13 @@ namespace WindowsFormsApplication7.Frontend
             float s2 = 1f;
             float s3 = 1f;
             float s4 = 1f;
-            t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+            t.ArrayIndex = tileIndexFront;
             Vector3 normal = new Vector3(0, 0, 1);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1 * s1, normal);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c1 * s2, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c1 * s3, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c1 * s4, normal);
-             normal = new Vector3(0, 0, -1);
+            normal = new Vector3(0, 0, -1);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2 * s1, normal);
             t.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), c2 * s2, normal);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c2 * s3, normal);
@@ -109,19 +162,19 @@ namespace WindowsFormsApplication7.Frontend
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c4 * s2, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c4 * s3, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c4 * s4, normal);
-            t.ArrayIndex = TileTextures.Instance.TopIndex(blockId);
+            t.ArrayIndex = tileIndexTop;
             normal = new Vector3(0, 1, 0);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), c5 * s1, normal);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), c5 * s2, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), c5 * s3, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), c5 * s4, normal);
-            t.ArrayIndex = TileTextures.Instance.BottomIndex(blockId);
+            t.ArrayIndex = tileIndexBottom;
             normal = new Vector3(0, -1, 0);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c6 * s1, normal);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c6 * s2, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c6 * s3, normal);
             t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c6 * s4, normal);
-            blockVertexBuffers.Add(blockId, t.GetVertexBuffer());
+            return t.GetVertexBuffer();
         }
 
         private void DefineBlock(int blockid, string top, string side, string bottom)
@@ -206,6 +259,16 @@ namespace WindowsFormsApplication7.Frontend
         internal VertexBuffer GetItemVertexBuffer(int itemId)
         {
             return itemVertexBuffers[itemId];
+        }
+
+        internal VertexBuffer GetDestroyBlockVertexBuffer(float breakPercentage)
+        {
+            int index = (int)(breakPercentage / 10f);
+            if (index < 0)
+                index = 0;
+            else if (index > 9)
+                index = 9;
+            return destroyBlocks[index];
         }
     }
 }

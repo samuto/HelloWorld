@@ -22,7 +22,20 @@ pqrstuvwxyz{|}~⌂
 ÇüéâäàåçêëèïîìÄÅ
 ÉæÆôöòûùÿÖÜø£Ø×ƒ
 áíóúñÑªº¿®¬½¼¡«»".Replace(Environment.NewLine, "");
-        public const float CharScale = 1f;
+        private float charScale = 1f;
+        public float CharScale
+        {
+            get
+            {
+                return charScale;
+            }
+            set
+            {
+                charScale = value;
+                CharWidth = 8f * charScale;
+                LineHeight = 8f * charScale;
+            }
+        }
         public float CharWidth;
         public float LineHeight;
 

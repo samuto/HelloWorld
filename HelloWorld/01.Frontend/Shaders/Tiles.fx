@@ -44,7 +44,7 @@ BlendState NoBlend
   BlendEnable[0] = FALSE;
 };
 
-BlendState SrcAlphaBlendingAdd 
+BlendState Blending1 
 {     
 	BlendEnable[0] = TRUE;
 	SrcBlend = SRC_ALPHA;
@@ -56,6 +56,17 @@ BlendState SrcAlphaBlendingAdd
 	RenderTargetWriteMask[0] = 0x0F;
 }; 
 
+BlendState Blending2
+{     
+	BlendEnable[0] = TRUE;
+	SrcBlend = DEST_COLOR;
+	DestBlend = ZERO;
+	BlendOp = ADD;
+	SrcBlendAlpha = ZERO;
+	DestBlendAlpha = ZERO;
+	BlendOpAlpha = ADD;
+	RenderTargetWriteMask[0] = 0x0F;
+}; 
 
 // ------------------------------------
 //         shader functions...
@@ -70,12 +81,26 @@ PS_IN VS( VS_IN input )
 	output.index = input.index;
 	output.col = input.col;
 
+	/*
 	float3 L = normalize(-lightDirection);
     float diffuseLight = max(dot(input.normal, L), 0.5);
 	float alpha = input.col.w;
     output.col = input.col * diffuseLight;
 	output.col.w = alpha;
-   
+	*/
+	return output;
+}
+
+PS_IN VS_SIMPLE( VS_IN input )
+{
+	PS_IN output = (PS_IN)0;
+
+	float4x4 worldViewProj = mul(mul(gWorld, gView), gProj);
+	output.pos = mul(input.pos, worldViewProj);
+	output.tex = input.tex;
+	output.index = input.index;
+	output.col = input.col;
+
 	return output;
 }
 
@@ -84,13 +109,33 @@ float4 PS( PS_IN input ) : SV_Target
 	return input.col * textureArray.Sample(samplerState, float3(input.tex, input.index));
 }
 
-technique10 NoTextureNoFog3
+float4 PS_SIMPLE( PS_IN input ) : SV_Target
+{
+	
+	float4 color = input.col * textureArray.Sample(samplerState, float3(input.tex, input.index));
+	color.w = 0.0;
+	return color;
+
+}
+
+technique10 tech0
 {
     pass P0
     {
         SetVertexShader( CompileShader( vs_4_0, VS() ) );
         SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, PS() ) );
-		SetBlendState( SrcAlphaBlendingAdd, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetBlendState( Blending1, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+    }
+}
+
+technique10 tech1
+{
+    pass P0
+    {
+        SetVertexShader( CompileShader( vs_4_0, VS_SIMPLE() ) );
+        SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, PS_SIMPLE() ) );
+		SetBlendState( Blending2, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
     }
 }

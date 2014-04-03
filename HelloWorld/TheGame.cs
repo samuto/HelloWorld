@@ -40,7 +40,7 @@ namespace WindowsFormsApplication7
         public void Run()
         {
             this.Initialize();
-            form.DesktopLocation = new Point(100, 100);
+            form.DesktopLocation = new Point(10, 600);
 
             MessagePump.Run(form, () =>
             {
@@ -58,7 +58,7 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("Hello World");
-            float scale = 1.5f;
+            float scale = 0.75f;
             form.ClientSize = new Size((int)(320f * scale), (int)(240f * scale));
 
             GlobalRenderer.Instance.Initialize(form);
@@ -112,6 +112,7 @@ namespace WindowsFormsApplication7
                 GlobalRenderer.Instance.RenderProfiler();
             }
 
+            // render 2d gui
             if (ActiveGui != null)
             {
                 GlobalRenderer.Instance.RenderGui(partialStep);
@@ -120,7 +121,7 @@ namespace WindowsFormsApplication7
             // commit the graphics (swap buffer)
             GlobalRenderer.Instance.Commit();
 
-            // display debuginfo
+            // display debuginfo in widows caption
             while (GetTime() >= this.debugUpdateTime + 1d)
             {
                 form.Text = this.fpsCounter + " fps (" + CurrentTick + ")";

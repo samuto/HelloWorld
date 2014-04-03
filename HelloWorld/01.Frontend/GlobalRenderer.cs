@@ -282,7 +282,9 @@ namespace WindowsFormsApplication7.Frontend
             TheGame.Instance.ActiveGui.Render(partialStep);
             t.ResetTransformation();
 
+            FontRenderer.Instance.CharScale = GuiScaling.Instance.Scale;
             TheGame.Instance.Cursor.Render(partialStep);
+            FontRenderer.Instance.CharScale = 1f;
         }
     }
 }

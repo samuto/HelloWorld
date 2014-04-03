@@ -18,7 +18,6 @@ namespace WindowsFormsApplication7.Business
         private DirectInput directInput;
         private Keyboard keyboard;
         private Mouse mouse;
-        private int mouseCooldown = 0;
         private Vector2 MouseLocation = new Vector2();
 
         public FrameInput LastInput;
@@ -29,11 +28,6 @@ namespace WindowsFormsApplication7.Business
             directInput = new DirectInput();
             keyboard = new Keyboard(directInput);
             mouse = new Mouse(directInput);
-        }
-
-        internal bool IsMouseFreezed()
-        {
-            return mouseCooldown > 0;
         }
 
         internal void Update()
@@ -61,16 +55,6 @@ namespace WindowsFormsApplication7.Business
                 MouseLocation.X = TheGame.Instance.Width - 1;
             frameInput.MouseLocation = MouseLocation;
             CurrentInput = frameInput;
-
-            if (mouseCooldown > 0)
-            {
-                mouseCooldown--;
-            }
-        }
-
-        internal void FreezeMouse()
-        {
-            mouseCooldown = 5;
         }
 
         internal void Dispose()

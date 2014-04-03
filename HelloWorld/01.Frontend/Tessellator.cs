@@ -193,6 +193,12 @@ namespace WindowsFormsApplication7.Frontend
             StartDrawing(null, FXTiles.Instance, 0, PrimitiveTopology.TriangleList);
         }
 
+        public void StartDrawingTiledQuads2()
+        {
+            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
+            StartDrawing(null, FXTiles.Instance, 1, PrimitiveTopology.TriangleList);
+        }
+
         internal void StartDrawingColoredQuads()
         {
             StartDrawing(null, FXSimple.Instance, 0, PrimitiveTopology.TriangleList);

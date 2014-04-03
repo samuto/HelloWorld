@@ -133,7 +133,6 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         void guiCraftingProduct_OnClick(object sender, EventArgs e)
         {
-            // TODO: Handle picking products up in hand!
             Slot craftingProductSlot = (Slot)guiCraftingProduct.Tag;
             ItemStack craftingProductStack = craftingProductSlot.Content;
             if (craftingProductStack.IsEmpty)
@@ -191,7 +190,13 @@ namespace WindowsFormsApplication7.Frontend.Gui
             else
             {
                 int transferCount = leftMouse ? stackInHand.Count : 1;
+                int beforeCount = stackInHand.Count;
                 stackInHand.TransferItems(selectedSlot.Content, transferCount);
+                bool stackInHandUnchanged = beforeCount == stackInHand.Count;
+                if (stackInHandUnchanged && leftMouse)
+                {
+                    stackInHand.Swap(selectedSlot.Content);
+                }
                 BindControl(guiStackInHand);
                 BindControl(guiSelectedStack);
             }

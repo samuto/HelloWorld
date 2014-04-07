@@ -14,5 +14,10 @@ namespace WindowsFormsApplication7.Business.Geometry
             int pos = (int)posF;
             return pos > posF ? pos - 1 : pos;
         }
+
+        internal static float RandomSign()
+        {
+            return GlobalRandom.NextDouble() < 0.5 ? -1 : 1;
+        }
     }
 }

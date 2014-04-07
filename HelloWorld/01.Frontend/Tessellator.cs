@@ -46,6 +46,7 @@ namespace WindowsFormsApplication7.Frontend
 
         public Vector3 Scale;
         public Vector3 Translate;
+        public Vector3 Rotate;
 
         public Tessellator()
         {
@@ -56,6 +57,7 @@ namespace WindowsFormsApplication7.Frontend
         {
             Scale = new Vector3(1, 1, 1);
             Translate = new Vector3(0, 0, 0);
+            Rotate = new Vector3(0, 0, 0);
         }
 
         public void Initialize(int size, Device device)
@@ -122,6 +124,7 @@ namespace WindowsFormsApplication7.Frontend
                 return;
 
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(Scale));
+            Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(Rotate.Y, Rotate.X, Rotate.Z));
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(Translate));
             ActiveEffect.Apply(vertices);
             Device.ImmediateContext.InputAssembler.PrimitiveTopology = mode;
@@ -197,6 +200,18 @@ namespace WindowsFormsApplication7.Frontend
         {
             SetTextureQuad(new Vector2(0, 0), 1f, 1f);
             StartDrawing(null, FXTiles.Instance, 1, PrimitiveTopology.TriangleList);
+        }
+
+        public void StartDrawingTiledQuadsPass2()
+        {
+            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
+            StartDrawing(null, FXTiles.Instance, 2, PrimitiveTopology.TriangleList);
+        }
+
+        public void StartDrawingTiledQuadsWTF()
+        {
+            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
+            StartDrawing(null, FXTiles.Instance, 3, PrimitiveTopology.TriangleList);
         }
 
         internal void StartDrawingColoredQuads()

@@ -18,7 +18,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         private List<GuiPanel> craftingSlots = new List<GuiPanel>();
 
         private GuiMovableControl guiStackInHand;
-        private ItemStack stackInHand = ItemStack.CreateEmptyStack();
+        private EntityStack stackInHand = EntityStack.CreateEmptyStack();
 
         public GuiCraftingForm()
         {
@@ -82,7 +82,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             return panel;
         }
 
-        private void CreateAndBindGuiStack(ItemStack stack, GuiPanel parent)
+        private void CreateAndBindGuiStack(EntityStack stack, GuiPanel parent)
         {
             GuiMovableControl guiStack = new GuiMovableControl();
             guiStack.Size = new SlimDX.Vector2(itemSize, itemSize);
@@ -101,7 +101,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         private void BindControl(GuiMovableControl control)
         {
-            ItemStack stack = (ItemStack)control.Tag;
+            EntityStack stack = (EntityStack)control.Tag;
             control.Text = stack.Id + "#" + stack.Count.ToString();
             control.Visible = stack.Count > 0;
         }
@@ -114,10 +114,10 @@ namespace WindowsFormsApplication7.Frontend.Gui
                 control.Location.Y+control.ParentLocation.Y, 
                 0);
             Tessellator t = Tessellator.Instance;
-            t.StartDrawingTiledQuads();
+            t.StartDrawingTiledQuadsWTF();
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(new Vector3(itemSize, itemSize, itemSize)));
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(pos));
-            ItemStack stack = (ItemStack)control.Tag;
+            EntityStack stack = (EntityStack)control.Tag;
             t.Draw(TileTextures.Instance.GetItemVertexBuffer(stack.Id));
             
             FontRenderer f = FontRenderer.Instance;
@@ -134,7 +134,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         void guiCraftingProduct_OnClick(object sender, EventArgs e)
         {
             Slot craftingProductSlot = (Slot)guiCraftingProduct.Tag;
-            ItemStack craftingProductStack = craftingProductSlot.Content;
+            EntityStack craftingProductStack = craftingProductSlot.Content;
             if (craftingProductStack.IsEmpty)
                 return;
             if (!stackInHand.IsEmpty && !craftingProductStack.Compatible(stackInHand))
@@ -183,7 +183,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             if (pickingUp)
             {
                 int transferCount = leftMouse ? selectedSlot.Content.Count : selectedSlot.Content.Count / 2;
-                selectedSlot.Content.TransferItems(stackInHand, transferCount);
+                selectedSlot.Content.TransferEntities(stackInHand, transferCount);
                 BindControl(guiStackInHand);
                 BindControl(guiSelectedStack);
             }
@@ -191,7 +191,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             {
                 int transferCount = leftMouse ? stackInHand.Count : 1;
                 int beforeCount = stackInHand.Count;
-                stackInHand.TransferItems(selectedSlot.Content, transferCount);
+                stackInHand.TransferEntities(selectedSlot.Content, transferCount);
                 bool stackInHandUnchanged = beforeCount == stackInHand.Count;
                 if (stackInHandUnchanged && leftMouse)
                 {

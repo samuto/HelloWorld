@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.Business.Repositories;
+using WindowsFormsApplication7.Business.Geometry;
+using SlimDX;
+using WindowsFormsApplication7.Business;
+using WindowsFormsApplication7.CrossCutting.Entities.Items;
+using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
-    class ItemStack
+    class EntityStack : Entity
     {
         private int count;
         public int Id;
@@ -19,13 +24,15 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        public ItemStack(int blockId, int count)
+        public EntityStack(int id, int count)
         {
-            this.Id = blockId;
+            this.Id = id;
             this.count = count;
+            AABB = new AxisAlignedBoundingBox(new Vector3(-0.25f, -0.25f, -0.25f), new Vector3(0.25f, 0.25f, 0.25f));
+            collisionSystem = new CollisionSimple(this);
         }
 
-        internal bool Compatible(ItemStack otherStack)
+        internal bool Compatible(EntityStack otherStack)
         {
             return otherStack.Id == Id || this.Id == 0 || otherStack.Id == 0;
         }
@@ -37,6 +44,9 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 return Id > 0 && Id < ItemRepository.ItemIdOffset;
             }
         }
+
+
+       
 
         internal bool IsItem
         {
@@ -74,7 +84,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        internal void TransferItems(ItemStack destinationStack, int transferCount)
+        internal void TransferEntities(EntityStack destinationStack, int transferCount)
         {
             if (!Compatible(destinationStack))
                 return;
@@ -83,16 +93,16 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             {
                 transferCount = 64 - destinationStack.Count;
             }
-            destinationStack.AddItems(transferCount);
-            RemoveItems(transferCount);
+            destinationStack.Add(transferCount);
+            Remove(transferCount);
         }
 
-        internal void AddItems(int addCount)
+        internal void Add(int addCount)
         {
             count += addCount;
         }
 
-        internal void RemoveItems(int consumeCount)
+        internal void Remove(int consumeCount)
         {
             count -= consumeCount;
             if (Count <= 0)
@@ -102,11 +112,11 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        internal bool TransferAll(ItemStack destinationStack)
+        internal bool TransferAll(EntityStack destinationStack)
         {
             if (destinationStack.Count + Count > 64)
                 return false;
-            TransferItems(destinationStack, Count);
+            TransferEntities(destinationStack, Count);
             return true;
         }
 
@@ -121,30 +131,31 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             ReplaceWith(0, 0);
         }
 
-        internal void ReplaceWith(ItemStack itemStack)
+        internal void ReplaceWith(EntityStack newStack)
         {
-            Id = itemStack.Id;
-            count = itemStack.Count;
+            Id = newStack.Id;
+            count = newStack.Count;
         }
 
-        internal void ReplaceWithEmptyCompatibleStack(ItemStack stackInHand)
+        internal void ReplaceWithEmptyCompatibleStack(EntityStack stackInHand)
         {
             ReplaceWith(stackInHand.Id, 0);
         }
 
-        internal static ItemStack CreateEmptyStack()
+        internal static EntityStack CreateEmptyStack()
         {
-            return new ItemStack(0, 0);
+            return new EntityStack(0, 0);
         }
 
-        internal void Swap(ItemStack itemStack)
+        internal void Swap(EntityStack swapStack)
         {
             int tempCount = this.count;
             int tempId = this.Id;
-            this.count = itemStack.count;
-            this.Id = itemStack.Id;
-            itemStack.count = tempCount;
-            itemStack.Id = tempId;
+            this.count = swapStack.count;
+            this.Id = swapStack.Id;
+            swapStack.count = tempCount;
+            swapStack.Id = tempId;
         }
+
     }
 }

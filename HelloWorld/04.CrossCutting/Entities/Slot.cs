@@ -8,9 +8,9 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Slot
     {
-        private ItemStack content = new ItemStack(0, 0);
+        private EntityStack content = new EntityStack(0, 0);
 
-        public ItemStack Content
+        public EntityStack Content
         {
             get
             {

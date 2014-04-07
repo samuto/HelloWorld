@@ -46,5 +46,16 @@ namespace WindowsFormsApplication7.Frontend
             float p2 = (1 - partialStep);
             return current * p1 + last * p2;
         }
+
+        internal static Vector3 Vector(Vector3 prev, Vector3 now, float partialStep)
+        {
+            float p1 = partialStep;
+            float p2 = (1 - partialStep);
+            return new Vector3(
+                now.X * p1 + prev.X * p2,
+                now.Y * p1 + prev.Y * p2,
+                now.Z * p1 + prev.Z * p2
+                );
+        }
     }
 }

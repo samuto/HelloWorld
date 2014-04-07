@@ -20,6 +20,7 @@ namespace WindowsFormsApplication7.Business.Repository
             AddToRepository(new Recepe().Input("111,020,020", BlockRepository.CobbleStone.Id, ItemRepository.Stick.Id).Output(ItemRepository.StonePickAxe.Id, 1));
             AddToRepository(new Recepe().Input("1,2,2", BlockRepository.CobbleStone.Id, ItemRepository.Stick.Id).Output(ItemRepository.StoneShovel.Id, 1));
             AddToRepository(new Recepe().Input("1,1,2", BlockRepository.CobbleStone.Id, ItemRepository.Stick.Id).Output(ItemRepository.StoneSword.Id, 1));
+            AddToRepository(new Recepe().Input("111", ItemRepository.Wheat.Id).Output(ItemRepository.Bread.Id, 1));
         }
 
         private static void AddToRepository(Recepe recepe)

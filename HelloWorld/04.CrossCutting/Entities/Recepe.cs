@@ -8,7 +8,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Recepe
     {
-        public ItemStack Product;
+        public EntityStack Product;
         private string rows;
         private int[] ids;
         private string key;
@@ -23,7 +23,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal Recepe Output(int id, int count)
         {
-            Product = new ItemStack(id, count);
+            Product = new EntityStack(id, count);
             return this;
         }
 

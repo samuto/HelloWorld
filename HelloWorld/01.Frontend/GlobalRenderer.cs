@@ -14,6 +14,8 @@ using WindowsFormsApplication7.Business;
 using System.IO;
 using WindowsFormsApplication7.Business.Profiling;
 using WindowsFormsApplication7.Frontend.Gui;
+using WindowsFormsApplication7.CrossCutting;
+using WindowsFormsApplication7.CrossCutting.Entities;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -40,17 +42,12 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Render(float partialStep)
         {
-            Profiler p = Profiler.Instance;
-            p.StartSection("init");
-
-            p.EndStartSection("cached");
             // Render 3d stuff
             Setup3dCamera(partialStep);
 
             // 3D: render chunks
             chunkCacheRenderer.Render();
 
-            p.EndStartSection("entities");
             // 3D: render entities
 
             entityRenderers.GetRenderer(World.Instance.Player).Render(partialStep);
@@ -59,14 +56,9 @@ namespace WindowsFormsApplication7.Frontend
             entityRenderers.GetRenderer(World.Instance.Moon).Render(partialStep);
             RenderPlayerRayImpact(partialStep);
 
-            p.EndStartSection("2d-stuff");
             // Render 2d stuff
             Setup2dCamera();
             RenderCrossHair();
-
-            p.EndSection();
-
-
         }
 
         private void RenderCrossHair()
@@ -85,55 +77,20 @@ namespace WindowsFormsApplication7.Frontend
 
         private void RenderPlayerRayImpact(float partialStep)
         {
-
             if (!World.Instance.PlayerVoxelTrace.Hit)
                 return;
 
             Tessellator t = Tessellator.Instance;
-            t.StartDrawingLines();
-            Vector4 c = new Vector4(0, 0, 0, 1f);
-            Vector4 v = World.Instance.PlayerVoxelTrace.BuildPosition;
-            float margin = 0.001f;
-            Vector4[] vs = new Vector4[]
-            {
-                new Vector4(v.X-margin, v.Y-margin, v.Z-margin, 1),
-                new Vector4(v.X+1+margin, v.Y-margin, v.Z-margin, 1),
-                new Vector4(v.X+1+margin, v.Y-margin, v.Z+1+margin, 1),
-                new Vector4(v.X-margin, v.Y-margin, v.Z+1+margin, 1),
-
-                new Vector4(v.X-margin, v.Y+1+margin, v.Z-margin, 1),
-                new Vector4(v.X+1+margin, v.Y+1+margin, v.Z-margin, 1),
-                new Vector4(v.X+1+margin, v.Y+1+margin, v.Z+1+margin, 1),
-                new Vector4(v.X-margin, v.Y+1+margin, v.Z+1+margin, 1),
-            };
-            t.AddVertexWithColor(vs[0], c);
-            t.AddVertexWithColor(vs[1], c);
-            t.AddVertexWithColor(vs[1], c);
-            t.AddVertexWithColor(vs[2], c);
-            t.AddVertexWithColor(vs[2], c);
-            t.AddVertexWithColor(vs[3], c);
-            t.AddVertexWithColor(vs[3], c);
-            t.AddVertexWithColor(vs[0], c);
-
-            t.AddVertexWithColor(vs[4], c);
-            t.AddVertexWithColor(vs[5], c);
-            t.AddVertexWithColor(vs[5], c);
-            t.AddVertexWithColor(vs[6], c);
-            t.AddVertexWithColor(vs[6], c);
-            t.AddVertexWithColor(vs[7], c);
-            t.AddVertexWithColor(vs[7], c);
-            t.AddVertexWithColor(vs[4], c);
-
-            t.AddVertexWithColor(vs[0], c);
-            t.AddVertexWithColor(vs[4], c);
-            t.AddVertexWithColor(vs[1], c);
-            t.AddVertexWithColor(vs[5], c);
-            t.AddVertexWithColor(vs[2], c);
-            t.AddVertexWithColor(vs[6], c);
-            t.AddVertexWithColor(vs[3], c);
-            t.AddVertexWithColor(vs[7], c);
-
-            t.Draw();
+            t.StartDrawingTiledQuadsWTF();
+            Vector4 buildPos = World.Instance.PlayerVoxelTrace.ImpactPosition;
+            t.Translate.X = buildPos.X + 0.5f;
+            t.Translate.Y = buildPos.Y + 0.5f;
+            t.Translate.Z = buildPos.Z + 0.5f;
+            float s = 1.01f;
+            t.Scale = new Vector3(s, s, s);
+            t.Draw(TileTextures.Instance.GetSelectionBlockVertexBuffer());
+            t.ResetTransformation();
+            return;
         }
 
         internal void Commit()
@@ -185,7 +142,7 @@ namespace WindowsFormsApplication7.Frontend
                 OutputHandle = form.Handle,
                 SampleDescription = new SampleDescription(1, 0),
                 SwapEffect = SwapEffect.Discard,
-                Usage = Usage.RenderTargetOutput
+                Usage = Usage.RenderTargetOutput,
             };
             Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, desc, out device, out swapChain);
 
@@ -259,8 +216,8 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void RenderProfiler()
         {
-            Profiler p = Profiler.Instance;
             FontRenderer f = FontRenderer.Instance;
+            Profiler p = Profiler.Instance;
             string report = p.Report();
             float y = TheGame.Instance.Height - FontRenderer.Instance.LineHeight;
             using (StringReader sr = new StringReader(report))
@@ -285,6 +242,45 @@ namespace WindowsFormsApplication7.Frontend
             FontRenderer.Instance.CharScale = GuiScaling.Instance.Scale;
             TheGame.Instance.Cursor.Render(partialStep);
             FontRenderer.Instance.CharScale = 1f;
+        }
+
+        internal void RenderLog()
+        {
+            FontRenderer f = FontRenderer.Instance;
+            float y = 0;
+
+            if (World.Instance.PlayerVoxelTrace.Hit)
+            {
+                string line = string.Format("impact:    x={0}y={1}z={2} ({3})",
+                        World.Instance.PlayerVoxelTrace.ImpactPosition.X.ToString().PadRight(5),
+                        World.Instance.PlayerVoxelTrace.ImpactPosition.Y.ToString().PadRight(5),
+                        World.Instance.PlayerVoxelTrace.ImpactPosition.Z.ToString().PadRight(5),
+                        World.Instance.PlayerVoxelTrace.ImpactBlock.Id);
+                f.RenderTextShadow(line, 0, y);
+                y += f.LineHeight;
+            }
+            else
+            {
+                f.RenderTextShadow("no impact", 0, y);
+                y += f.LineHeight;
+            }
+            f.RenderTextShadow(string.Format("direction: x={0}z={2}y={1}",
+                        World.Instance.Player.Direction.X.ToString("#.##").PadRight(5),
+                        World.Instance.Player.Direction.Y.ToString("#.##").PadRight(5),
+                        World.Instance.Player.Direction.Z.ToString("#.##").PadRight(5)), 0, y);
+            y += f.LineHeight;
+            f.RenderTextShadow(string.Format("position: x={0}z={2}y={1}",
+                       World.Instance.Player.Position.X.ToString("#.##").PadRight(5),
+                       World.Instance.Player.Position.Y.ToString("#.##").PadRight(5),
+                       World.Instance.Player.Position.Z.ToString("#.##").PadRight(5)), 0, y);
+            y += f.LineHeight;
+            y += f.LineHeight;
+            string[] lastLines = Log.Instance.Last(30);
+            foreach (string line in lastLines)
+            {
+                f.RenderTextShadow(line, 0, y);
+                y += f.LineHeight;
+            }
         }
     }
 }

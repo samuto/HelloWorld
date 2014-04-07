@@ -19,15 +19,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        internal void AddBlock(int blockId)
+        internal void CollectStack(EntityStack stackToCollect)
         {
+            int id = stackToCollect.Id;
             // find first stack of same type
             foreach (Slot slot in Slots)
             {
-                if (slot.Content.Id == blockId && !slot.IsFull)
+                if (slot.Content.Id == id && !slot.IsFull)
                 {
-                    slot.Content.AddItems(1);
-                    return;
+                    stackToCollect.TransferAll(slot.Content);
+                    if (stackToCollect.IsEmpty)
+                        return;
                 }
             }
 
@@ -36,8 +38,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             {
                 if (slot.IsEmpty)
                 {
-                    slot.Content.Id = blockId;
-                    slot.Content.AddItems(1);
+                    slot.Content.Id = id;
+                    stackToCollect.TransferAll(slot.Content);
                     return;
                 }
             }

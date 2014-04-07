@@ -63,8 +63,11 @@
     <Compile Include="01.Frontend\Interpolate.cs" />
     <Compile Include="01.Frontend\TileTextures.cs" />
     <Compile Include="01.Frontend\VertexBuffer.cs" />
+    <Compile Include="02.Business\CollisionComplex.cs" />
+    <Compile Include="02.Business\CollisionSimple.cs" />
     <Compile Include="02.Business\Geometry\AxisAlignBoundingBox.cs" />
     <Compile Include="02.Business\Geometry\BoundingFrustum.cs" />
+    <Compile Include="02.Business\ICollisionSystem.cs" />
     <Compile Include="02.Business\Repositories\ItemRepository.cs" />
     <Compile Include="02.Business\CraftingTable.cs" />
     <Compile Include="02.Business\DayWatch.cs" />
@@ -75,15 +78,20 @@
     <Compile Include="02.Business\Repositories\RecepeRepository.cs" />
     <Compile Include="02.Business\ToolMatrix.cs" />
     <Compile Include="02.Business\VoxelTrace.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockGrass.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockWheat.cs" />
+    <Compile Include="04.CrossCutting\Entities\Items\ItemFood.cs" />
+    <Compile Include="04.CrossCutting\Entities\Items\ItemSeeds.cs" />
+    <Compile Include="04.CrossCutting\Entities\Items\ItemHoe.cs" />
     <Compile Include="04.CrossCutting\Entities\Recepe.cs" />
-    <Compile Include="04.CrossCutting\Entities\Item.cs" />
+    <Compile Include="04.CrossCutting\Entities\Items\Item.cs" />
     <Compile Include="04.CrossCutting\Entities\Inventory.cs" />
-    <Compile Include="04.CrossCutting\Entities\ItemStack.cs" />
+    <Compile Include="04.CrossCutting\Entities\EntityStack.cs" />
     <Compile Include="04.CrossCutting\Entities\Moon.cs" />
     <Compile Include="04.CrossCutting\Entities\Slot.cs" />
     <Compile Include="04.CrossCutting\Entities\Sun.cs" />
     <Compile Include="04.CrossCutting\Entities\FrameInput.cs" />
-    <Compile Include="04.CrossCutting\Entities\Block.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\Block.cs" />
     <Compile Include="02.Business\Repositories\BlockRepository.cs" />
     <Compile Include="02.Business\ChunkCache.cs" />
     <Compile Include="02.Business\Landscape\ChunkGenerator.cs" />
@@ -103,6 +111,7 @@
     <Compile Include="04.CrossCutting\Entities\Chunk.cs" />
     <Compile Include="01.Frontend\Resources.cs" />
     <Compile Include="01.Frontend\Gui\GuiCraftingForm.cs" />
+    <Compile Include="04.CrossCutting\Log.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="01.Frontend\BlockRenderer.cs" />
@@ -146,6 +155,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\cobblestone.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\farmland_dry.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\farmland_wet.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\selection_box.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\destroy_stage_0.png">
@@ -208,7 +226,37 @@
     <Content Include="01.Frontend\Textures\Blocks\stone.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="01.Frontend\Textures\Blocks\tallgrass.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_0.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_5.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_6.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\wheat_stage_7.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="01.Frontend\Textures\Items\empty.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Items\seeds_wheat.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Items\stick.png">
@@ -229,6 +277,9 @@
     <Content Include="01.Frontend\Textures\Items\stone_sword.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="01.Frontend\Textures\Items\wheat.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="01.Frontend\Textures\terrain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -236,6 +287,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\default.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Items\bread.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

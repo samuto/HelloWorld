@@ -15,8 +15,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal override void Update()
         {
+            UpdateDirection();
+            UpdateViewAngles();
             Velocity = new Vector3();
-            Vector3 direction = Vector3.Multiply(GetDirection(), Speed);
+            Vector3 direction = Vector3.Multiply(Direction, Speed);
             if (moveForward)
                 Velocity = direction;
             if(moveBackward)

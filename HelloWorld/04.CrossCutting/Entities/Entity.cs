@@ -8,6 +8,8 @@ using WindowsFormsApplication7.Business.Repositories;
 using WindowsFormsApplication7.Business.Geometry;
 using SlimDX.DirectInput;
 using WindowsFormsApplication7.Frontend.Gui;
+using WindowsFormsApplication7.Frontend;
+using WindowsFormsApplication7.Business.Profiling;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
@@ -21,9 +23,12 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         public Vector3 EyePosition = new Vector3(0, 0, 0);
         public float Yaw = 0;
         public float Pitch = 0;
+        public float PrevYaw = 0;
+        public float PrevPitch = 0;
         public Vector3 accGravity = new Vector3(0, -0.02f, 0);
         public Vector3 Velocity = new Vector3(0, 0, 0);
-
+        public Vector3 Direction = new Vector3();
+        public Vector3 PrevDirection = new Vector3();
         protected bool moveLeft = false;
         protected bool moveRight = false;
         protected bool moveForward = false;
@@ -31,12 +36,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         protected bool moveJump = false;
         protected bool moveUp = false;
         protected bool moveDown = false;
-        protected bool onGround = false;
+        public bool onGround = false;
         protected bool changeYaw = false;
         protected bool changePitch = false;
+        protected ICollisionSystem collisionSystem = null;
 
         private const float Math2Pi = (float)Math.PI * 2f;
 
+
+        public Entity()
+        {
+        }
 
         public Entity(Vector4 color)
         {
@@ -56,145 +66,57 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal virtual void Update()
         {
-            CalculateVelocity();
+            UpdateDirection();
+            if (TheGame.Instance.IsEntityControlled(this) && TheGame.Instance.Mode == TheGame.GameMode.InGame)
+            {
+                UpdateViewAngles();
+            }
             Vector3.Add(ref Velocity, ref accGravity, out Velocity);
 
-            List<AxisAlignedBoundingBox> collidingObjects;
             Vector3 response = Position;
-            float halfWidth = GetWidth() / 2f;
-
-            collidingObjects = GetCollidingObjects(new Vector3(response.X, response.Y, response.Z + Velocity.Z));
-            if (collidingObjects.Count > 0)
-            {
-                if (Velocity.Z < 0)
-                    response.Z = collidingObjects.Max(o => o.Max.Z) + halfWidth;
-                else if (Velocity.Z > 0)
-                    response.Z = collidingObjects.Min(o => o.Min.Z) - halfWidth;
-            }
-            else
-                response.Z += Velocity.Z;
-
-            collidingObjects = GetCollidingObjects(new Vector3(response.X + Velocity.X, response.Y, response.Z));
-            if (collidingObjects.Count > 0)
-            {
-                if (Velocity.X < 0)
-                    response.X = collidingObjects.Max(o => o.Max.X) + halfWidth;
-                else if (Velocity.X > 0)
-                    response.X = collidingObjects.Min(o => o.Min.X) - halfWidth;
-            }
-            else
-                response.X += Velocity.X;
-
-            onGround = false;
-            collidingObjects = GetCollidingObjects(new Vector3(response.X, response.Y + Velocity.Y, response.Z));
-            if (collidingObjects.Count > 0)
-            {
-                if (Velocity.Y < 0)
-                {
-                    response.Y = collidingObjects.Max(o => o.Max.Y);
-                    onGround = true;
-                }
-                else if (Velocity.Y > 0)
-                {
-                    response.Y = collidingObjects.Min(o => o.Min.Y) - GetHeight();
-                    Velocity.Y = 0;
-                }
-            }
-            else
-                response.Y += Velocity.Y;
-
+            if (collisionSystem != null)
+                response = collisionSystem.Resolve(this);
+            
             PrevPosition = Position;
             Position.X = response.X;
             Position.Y = response.Y;
             Position.Z = response.Z;
 
-           
+
             moveLeft = false;
             moveRight = false;
             moveForward = false;
             moveBackward = false;
-           
+
             moveJump = false;
             moveUp = false;
             moveDown = false;
+            
         }
+
+
+
+        
 
        
 
-        private List<AxisAlignedBoundingBox> GetCollidingObjects(Vector3 newPosition)
-        {
-            List<AxisAlignedBoundingBox> collidingObjects = new List<AxisAlignedBoundingBox>();
 
-            World theWorld = World.Instance;
-            AxisAlignedBoundingBox thisAABB = AABB.Clone();
-            thisAABB.Translate(newPosition);
-
-            AxisAlignedBoundingBox sweepAABB = thisAABB.Clone();
-            sweepAABB.Min.Y--;
-            sweepAABB.AlignToWorldGrid();
-            for (int x = (int)sweepAABB.Min.X; x <= (int)sweepAABB.Max.X; x++)
-            {
-                for (int y = (int)sweepAABB.Min.Y; y <= (int)sweepAABB.Max.Y; y++)
-                {
-                    for (int z = (int)sweepAABB.Min.Z; z <= (int)sweepAABB.Max.Z; z++)
-                    {
-                        int blockId = theWorld.GetBlock(x, y, z);
-                        if (blockId == 0)
-                            continue;
-                        Block alien = BlockRepository.Blocks[blockId];
-                        AxisAlignedBoundingBox collidingObject = alien.GetBoundingBox();
-                        collidingObject.Translate(new Vector3(x, y, z));
-                        if (thisAABB.OverLaps(collidingObject))
-                        {
-                            collidingObjects.Add(collidingObject);
-                        }
-                    }
-                }
-            }
-            return collidingObjects;
-        }
-
-        protected void CalculateVelocity()
-        {
-
-            Vector3 forward = GetDirection();
-            forward.Y = 0;
-            Vector3 left = new Vector3(forward.Z, 0, -forward.X);
-            Vector3 direction = new Vector3();
-            if (moveLeft)
-                Vector3.Add(ref direction, ref left, out direction);
-            if (moveRight)
-                Vector3.Subtract(ref direction, ref left, out direction);
-            if (moveForward)
-                Vector3.Add(ref direction, ref forward, out direction);
-            if (moveBackward)
-                Vector3.Subtract(ref direction, ref forward, out direction);
-            direction.Normalize();
-            Vector3.Multiply(ref direction, Speed, out direction);
-            Velocity.X = direction.X;
-            Velocity.Z = direction.Z;
-
-            if (onGround)
-                Velocity.Y = moveJump ? 0.25f : 0;
-            if (moveUp)
-                Velocity.Y += Speed;
-            if (moveDown)
-                Velocity.Y -= Speed;
-
-        }
-
-
-        internal Vector3 GetDirection()
+        internal void UpdateDirection()
         {
             Matrix m = Matrix.RotationYawPitchRoll(Yaw, Pitch, 0);
             Vector4 v = new Vector4(0, 0, 1, 1);
             v = Vector4.Transform(v, m);
             Vector3 v3 = new Vector3(v.X, v.Y, v.Z);
-            return v3;
+            PrevDirection = Direction;
+            Direction = v3;
         }
 
-        internal void SetViewAngles(float deltaYaw, float deltaPitch)
+        internal void UpdateViewAngles()
         {
+            float deltaYaw = -Input.Instance.CurrentInput.MouseState.X * GameSettings.MouseSensitivity * 0.002f;
+            float deltaPitch = Input.Instance.CurrentInput.MouseState.Y * GameSettings.MouseSensitivity * 0.002f;
+            PrevYaw = Yaw;
+            PrevPitch = Pitch;
             Yaw += deltaYaw;
             if (Yaw > Math2Pi)
                 Yaw -= Math2Pi;

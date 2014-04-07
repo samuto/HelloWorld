@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SlimDX;
+using WindowsFormsApplication7.CrossCutting.Entities;
+using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
 
 namespace WindowsFormsApplication7.Business
 {
     class VoxelTrace
     {
         public bool Hit = false;
-        public Vector4 ImpactPosition = new Vector4();
         public Vector4 BuildPosition = new Vector4();
+        public Vector4 ImpactPosition = new Vector4();
+        private float raylengthSquared = 5 * 5;
+        public Block ImpactBlock;    
 
         public void Update(Vector3 point, Vector3 direction)
         {
@@ -19,10 +23,12 @@ namespace WindowsFormsApplication7.Business
             for (int i = 1; i < voxels.Count; i++)
             {
                 var v = voxels[i];
-                if (World.Instance.GetBlock((int)v.X, (int)v.Y, (int)v.Z) != 0)
+                int impactBlockId = World.Instance.GetBlock((int)v.X, (int)v.Y, (int)v.Z);
+                ImpactBlock = Block.FromId(impactBlockId);
+                if (impactBlockId != 0)
                 {
-                    BuildPosition = voxels[i];
-                    ImpactPosition = voxels[i-1];
+                    ImpactPosition = voxels[i];
+                    BuildPosition = voxels[i-1];
                     Hit = true;
                     return;
                 }
@@ -42,7 +48,6 @@ namespace WindowsFormsApplication7.Business
             Vector3 currentBlock = new Vector3(AlignToGrid(point.X), AlignToGrid(point.Y), AlignToGrid(point.Z));
 
 
-            float raylengthSquared = 10 * 10;
             while (true)
             {
                 // do we need to stop?

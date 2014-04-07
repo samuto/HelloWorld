@@ -93,25 +93,14 @@ namespace WindowsFormsApplication7.Frontend
                 Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
                 t.Draw(vertices, vertexCount);
             }
-            if (typeof(Player) == entity.GetType() && World.Instance.Player.IsSelectedItemABlock())
-            {
-                /*
-                t.StartDrawingTiledQuads();
-                float scale = 0.1f;
-                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(scale, scale, scale));
-                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(entity.EyePosition + new Vector3(-0.2f, -0.25f, 0.4f)));
-                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0));
-                Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(position));
-                t.Draw(TileTextures.Instance.GetBlockVertexBuffer(World.Instance.Player.SelectedItemStack.Id));
-                 */
-            }
+           
             if (typeof(Player) == entity.GetType() && World.Instance.Player.BreakCompletePercentage > 0)
             {
                 t.StartDrawingTiledQuads2();
                 t.Translate.X = World.Instance.Player.BreakPosition.X + 0.5f;
                 t.Translate.Y = World.Instance.Player.BreakPosition.Y + 0.5f;
                 t.Translate.Z = World.Instance.Player.BreakPosition.Z + 0.5f;
-                float s =1.05f;
+                float s = 1.005f;
                 t.Scale = new Vector3(s, s, s);
                 t.Draw(TileTextures.Instance.GetDestroyBlockVertexBuffer(World.Instance.Player.BreakCompletePercentage));
                 t.ResetTransformation();

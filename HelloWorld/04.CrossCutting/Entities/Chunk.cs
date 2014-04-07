@@ -4,20 +4,38 @@ using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.Business;
 using SlimDX;
+using WindowsFormsApplication7.Business.Geometry;
+using System.Diagnostics;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Chunk
     {
+        public const int timeout = 30 * 1000;
         public const int MaxSizeY = 128;
-        public bool Expired;
         public PositionChunk Position;
         private byte[] blocks = new byte[16 * 16 * 16];
-        public bool RequiresRendering = true;
-        public bool Initialized;
+        public bool IsDirty = true;
+        private bool initialized;
+        public List<EntityStack> StackEntities = new List<EntityStack>();
+        private Stopwatch stopwatch = new Stopwatch();
 
         public Chunk()
         {
+            stopwatch.Start();
+        }
+
+        public void RenewLease()
+        {
+            stopwatch.Restart();
+        }
+
+        public bool Expired
+        {
+            get
+            {
+                return stopwatch.ElapsedMilliseconds > timeout;
+            }
         }
 
         public void SetLocalBlock(int x, int y, int z, int blockId)
@@ -25,15 +43,58 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             blocks[x * 16 * 16 + y * 16 + z] = (byte)blockId;
         }
 
+        public void Invalidate()
+        {
+            // invalidates all pass'es
+            IsDirty = true;
+        }
+
+        public void Update()
+        {
+            if (!initialized)
+            {
+                Initialize();
+            }
+            foreach (EntityStack stack in StackEntities)
+            {
+                stack.Update();
+            }
+        }
+
         public void InvalidateMeAndNeighbors()
         {
-            RequiresRendering = true;
-            World.Instance.GetChunk(new PositionChunk(Position.X-1, Position.Y, Position.Z)).RequiresRendering = true;
-            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y-1, Position.Z)).RequiresRendering = true;
-            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y, Position.Z-1)).RequiresRendering = true;
-            World.Instance.GetChunk(new PositionChunk(Position.X+1, Position.Y, Position.Z)).RequiresRendering = true;
-            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y+1, Position.Z)).RequiresRendering = true;
-            World.Instance.GetChunk(new PositionChunk(Position.X, Position.Y, Position.Z+1)).RequiresRendering = true;
+            Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z + 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 1)).Invalidate();
+
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z + 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 1)).Invalidate();
+
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z - 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 0)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z + 1)).Invalidate();
+            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 1)).Invalidate();
+
+
         }
 
         public byte GetLocalBlock(int x, int y, int z)
@@ -84,30 +145,38 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return false;
         }
 
-        internal void Initialize()
+        private void Initialize()
         {
             World.Instance.Generate(this);
-            Initialized = true;
+            initialized = true;
         }
 
-        internal void RenderingDone()
-        {
-            RequiresRendering = false;
-        }
+       
 
-        internal void OnVertexBufferDisposed()
-        {
-            RequiresRendering = true;
-        }
-
+      
         internal SlimDX.BoundingBox GetBoundingBox()
         {
             PositionBlock minGlobalPos, maxGlobalPos;
             Position.GetGlobalPositionBlock(out minGlobalPos, 0, 0, 0);
             Position.GetGlobalPositionBlock(out maxGlobalPos, 16, 16, 16);
             return new SlimDX.BoundingBox(
-                new Vector3(minGlobalPos.X, minGlobalPos.Y, minGlobalPos.Z), 
+                new Vector3(minGlobalPos.X, minGlobalPos.Y, minGlobalPos.Z),
                 new Vector3(maxGlobalPos.X, maxGlobalPos.Y, maxGlobalPos.Z));
+        }
+
+        internal List<EntityStack> EntitiesInArea(AxisAlignedBoundingBox collectArea)
+        {
+            List<EntityStack> stacksInArea = new List<EntityStack>();
+            foreach (EntityStack stack in StackEntities)
+            {
+                AxisAlignedBoundingBox aabb = stack.AABB;
+                aabb.Translate(stack.Position);
+                if (aabb.OverLaps(collectArea))
+                {
+                    stacksInArea.Add(stack);
+                }
+            }
+            return stacksInArea;
         }
     }
 }

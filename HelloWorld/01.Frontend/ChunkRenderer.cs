@@ -9,14 +9,17 @@ using SlimDX;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business.Profiling;
 using System.Diagnostics;
+using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
 
 namespace WindowsFormsApplication7.Frontend
 {
     class ChunkRenderer
     {
-        public const int timeout = 5*1000;
+        public const int timeout = 5 * 1000;
         public int debug = 0;
-        private VertexBuffer vertexBuffer;
+        // opaque vertex buffer
+        private VertexBuffer pass1VertexBuffer;
+        private VertexBuffer pass2VertexBuffer;
         private Stopwatch stopwatch = new Stopwatch();
         private Chunk chunk;
 
@@ -24,7 +27,8 @@ namespace WindowsFormsApplication7.Frontend
         {
             this.chunk = chunk;
             stopwatch.Start();
-            vertexBuffer = new VertexBuffer();
+            pass1VertexBuffer = new VertexBuffer();
+            pass2VertexBuffer = new VertexBuffer();
         }
 
         internal static bool InsideViewFrustum(Chunk chunk)
@@ -37,23 +41,31 @@ namespace WindowsFormsApplication7.Frontend
             return true;
         }
 
+        internal void RenderPass2()
+        {
+            // draw chunk if drawbuffer has been calculated
+            Tessellator t = Tessellator.Instance;
+            if (pass2VertexBuffer.Vertices != null)
+            {
+                t.StartDrawingTiledQuadsPass2();
+                t.Draw(pass2VertexBuffer.Vertices, pass2VertexBuffer.VertexCount);
+            }
+        }
+
         internal bool Render(bool forceCachedRendering)
         {
             // check if this is inside frustum
             RenewLease();
-            Profiler p = Profiler.Instance;
-
             bool rebuildOccured = false;
-            Tessellator tessellator = Tessellator.Instance;
-            tessellator.StartDrawingTiledQuads();
-            p.StartSection("rebuild");
+            Tessellator t = Tessellator.Instance;
 
-            if ((vertexBuffer.Disposed || chunk.RequiresRendering) && !forceCachedRendering)
+
+            if ((pass1VertexBuffer.Disposed || chunk.IsDirty) && !forceCachedRendering)
             {
-                p.StartSection("init");
-                // safe chunk reference and dispose wrapper
-                 vertexBuffer.Dispose();
-                chunk.OnVertexBufferDisposed();
+                // pass1
+                pass1VertexBuffer.Dispose();
+                pass2VertexBuffer.Dispose();
+                chunk.IsDirty = true;
 
                 // rebuild vertices for cunk
                 BlockRenderer blockRenderer = new BlockRenderer();
@@ -66,7 +78,8 @@ namespace WindowsFormsApplication7.Frontend
                 int maxY = startCorner.Y + 16;
                 int maxZ = startCorner.Z + 16;
                 PositionBlock blockPos = new PositionBlock(0, 0, 0);
-                p.EndStartSection("allblocks");
+                List<PositionBlock> pass2Blocks = new List<PositionBlock>();
+                t.StartDrawingTiledQuads();
                 for (int x = 0; x < 16; x++)
                 {
                     for (int y = 0; y < 16; y++)
@@ -76,53 +89,59 @@ namespace WindowsFormsApplication7.Frontend
                             blockPos.X = x;
                             blockPos.Y = y;
                             blockPos.Z = z;
-                            blockRenderer.RenderBlock(blockPos, chunk);
+                            if (Block.FromId(chunk.SafeGetLocalBlock(x, y, z)).IsOpaque)
+                                blockRenderer.RenderBlock(blockPos, chunk);
+                            else
+                                pass2Blocks.Add(blockPos);
                         }
                     }
                 }
-                p.EndStartSection("wrapper");
+                pass1VertexBuffer = t.GetVertexBuffer();
 
-                // create new wrapper object for cunk with updated vertices
-                vertexBuffer = tessellator.GetVertexBuffer();
-                chunk.RenderingDone();
+                // generate vertex buffer for pass2
+
+                t.StartDrawingTiledQuads();
+                foreach (PositionBlock pass2BlockPos in pass2Blocks)
+                {
+                    blockRenderer.RenderBlock(pass2BlockPos, chunk);
+                }
+                pass2VertexBuffer = t.GetVertexBuffer();
+
+                chunk.IsDirty = false;
                 rebuildOccured = true;
-                p.EndSection();
-
             }
-            p.EndStartSection("draw");
 
             // draw chunk if drawbuffer has been calculated
-            if (vertexBuffer.Vertices != null)
+            if (pass1VertexBuffer.Vertices != null)
             {
-                tessellator.Draw(vertexBuffer.Vertices, vertexBuffer.VertexCount);
-
-                // debug-rendering
-                if (GameSettings.ChunkDebuggingEnabled)
+                t.StartDrawingTiledQuads();
+                t.Draw(pass1VertexBuffer.Vertices, pass1VertexBuffer.VertexCount);
+            }
+            // draw entities in chunk
+            foreach (EntityStack stack in chunk.StackEntities)
+            {
+                if (stack.IsBlock)
                 {
-                    Tessellator t = Tessellator.Instance;
-                    t.StartDrawingLines();
-                    PositionBlock startCorner;
-                    chunk.Position.GetMinCornerBlock(out startCorner);
-                    float x = startCorner.X;
-                    float y = 64;
-                    float z = startCorner.Z;
-                    debug = vertexBuffer.Vertices.Disposed ? 0 : 1;
-                    Vector4 c = new Vector4(1, 1, 1, 1);
-                    t.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 1f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 15f, y + 0f, z + 1f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 15f, y + 0f, z + 1f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 15f, y + 0f, z + 15f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 15f, y + 0f, z + 15f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 15f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 15f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 1f, y + 0f, z + 1f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 7f, y + 0f, z + 7f, 1.0f), c);
-                    t.AddVertexWithColor(new Vector4(x + 7f, 0f, z + 7f, 1.0f), c);
-                    Tessellator.Instance.Draw();
+                    t.StartDrawingTiledQuads();
+                    t.Translate = stack.Position;
+                    t.Scale = new Vector3(0.5f, 0.5f, 0.5f);
+                    t.Rotate = new Vector3(stack.Pitch, stack.Yaw, 0);
+                    t.Draw(TileTextures.Instance.GetBlockVertexBuffer(stack.Id));
+                }
+                else if(stack.IsItem)
+                {
+                    Player p = World.Instance.Player;
+                    t.StartDrawingTiledQuadsPass2();
+                    t.Translate = stack.Position;
+                    t.Scale = new Vector3(0.5f, 0.5f, 0.5f);
+                    t.Rotate = new Vector3(-p.Pitch, p.Yaw+(float)Math.PI, 0);
+                    t.Draw(TileTextures.Instance.GetItemVertexBuffer(stack.Id));
                 }
             }
-            p.EndSection();
+            t.ResetTransformation();
 
+
+            
             return rebuildOccured;
         }
 
@@ -133,18 +152,18 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Dispose()
         {
-            if (!vertexBuffer.Disposed)
+            if (!pass1VertexBuffer.Disposed)
             {
-                vertexBuffer.Dispose();
-                chunk.OnVertexBufferDisposed();
+                pass1VertexBuffer.Dispose();
+                chunk.IsDirty = true;
             }
         }
 
-        public bool Expired 
+        public bool Expired
         {
             get
             {
-                return stopwatch.ElapsedMilliseconds>timeout;
+                return stopwatch.ElapsedMilliseconds > timeout;
             }
         }
     }

@@ -66,5 +66,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             positionBlock.Y = Y * 16 + y;
             positionBlock.Z = Z * 16 + z;
         }
+
+        internal bool SameAs(PositionChunk posChunk)
+        {
+            return posChunk.X == X && posChunk.Y == Y && posChunk.Z == Z;
+        }
     }
 }

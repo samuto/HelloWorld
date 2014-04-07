@@ -28,19 +28,25 @@ namespace WindowsFormsApplication7.Business
 
         internal void Update()
         {
+            Profiler p = Profiler.Instance;
+            p.StartSection("ChunkCache");
             // update landscape
             chunkCache.Update(Player.Position, GameSettings.CachingRadius);
 
             // update entities
+            p.EndStartSection("Entities"); 
             Player.Update();
             FlyingCamera.Update();
             Sun.Update();
             Moon.Update();
 
             // calculate voxel ray
-            Vector3 direction = Player.GetDirection();
+            p.EndStartSection("voxelray");
+            Vector3 direction = Player.Direction;
             Vector3 eye = Vector3.Add(Player.EyePosition, Player.Position);
             PlayerVoxelTrace.Update(eye, direction);
+            p.EndSection();
+
         }
 
         public float TimeOfDay
@@ -101,6 +107,13 @@ namespace WindowsFormsApplication7.Business
                 return true;
             }
             return false;
+        }
+
+        internal void SpawnStack(EntityStack stack)
+        {
+            PositionChunk positionChunk = PositionChunk.CreateFrom(stack.Position);
+            Chunk chunk = GetChunk(positionChunk);
+            chunk.StackEntities.Add(stack);
         }
     }
 }

@@ -14,19 +14,31 @@ namespace WindowsFormsApplication7.Frontend
     class ChunkCacheRenderer
     {
         private Dictionary<object, ChunkRenderer> chunkRenderers = new Dictionary<object, ChunkRenderer>();
+        private List<ChunkRenderer> pass2ChunkRenderers = new List<ChunkRenderer>();
         private ChunkCache cachedChunks;
         private int centerX;
         private int centerY;
         private int centerZ;
         private bool forceCachedRendering;
-        private Profiler p;
         private int viewRadius;
 
         internal void Render()
         {
-            p = Profiler.Instance;
-            p.StartSection("setuploop");
+            RenderPass1AndBuildPass2List();
+            RenderPass2();
+        }
 
+        private void RenderPass2()
+        {
+            foreach (ChunkRenderer pass2ChunkRenderer in pass2ChunkRenderers)
+            {
+                pass2ChunkRenderer.RenderPass2();
+            }
+        }
+
+        private void RenderPass1AndBuildPass2List()
+        {
+            pass2ChunkRenderers.Clear();
             cachedChunks = World.Instance.GetCachedChunks();
             Counters.Instance.SetValue("total cached", cachedChunks.Count);
 
@@ -39,10 +51,8 @@ namespace WindowsFormsApplication7.Frontend
             centerY = MathLibrary.FloorToWorldGrid((maxChunk.Y - minChunk.Y) / 2f + minChunk.Y);
             centerZ = MathLibrary.FloorToWorldGrid((maxChunk.Z - minChunk.Z) / 2f + minChunk.Z);
             viewRadius = (int)(GameSettings.ViewRadius / 16 - 1);
-
             forceCachedRendering = false;
-            
-       
+
             int x, y, z;
             x = centerX;
             y = centerY;
@@ -79,7 +89,6 @@ namespace WindowsFormsApplication7.Frontend
                 }
             }
 
-            p.EndStartSection("disposestuff");
             // dispose and remove expired chunks
             var expiredRenderer = chunkRenderers.Where(pair => pair.Value.Expired).ToList();
             expiredRenderer.ForEach(pair =>
@@ -89,12 +98,11 @@ namespace WindowsFormsApplication7.Frontend
             });
             Counters.Instance.SetValue("expired", chunkRenderers.Values.Where(c => c.Expired).Count());
             Counters.Instance.SetValue("chunkRenderers", chunkRenderers.Count);
-            p.EndSection();
+            
         }
 
         private void Magic(int x, int y, int z)
         {
-            p.EndStartSection("precheck");
             if (y < 0)
                 return;
             if (y >= Chunk.MaxSizeY / 16)
@@ -111,7 +119,6 @@ namespace WindowsFormsApplication7.Frontend
             if (!ChunkRenderer.InsideViewFrustum(chunk)) return;
 
             // get chunkrenderer for this chunk (create new of it does not exist)
-            p.EndStartSection("getchunk");
             object key = chunk.Position.Key;
             ChunkRenderer chunkRenderer;
             if (chunkRenderers.ContainsKey(key))
@@ -122,6 +129,7 @@ namespace WindowsFormsApplication7.Frontend
                 chunkRenderers.Add(key, chunkRenderer);
             }
             forceCachedRendering |= chunkRenderer.Render(forceCachedRendering);
+            pass2ChunkRenderers.Add(chunkRenderer);
         }
     }
 }

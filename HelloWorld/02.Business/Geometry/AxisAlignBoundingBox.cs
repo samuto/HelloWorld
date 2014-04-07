@@ -6,7 +6,7 @@ using SlimDX;
 
 namespace WindowsFormsApplication7.Business.Geometry
 {
-    class AxisAlignedBoundingBox
+    struct AxisAlignedBoundingBox
     {
         public Vector3 Min;
         public Vector3 Max;
@@ -34,12 +34,12 @@ namespace WindowsFormsApplication7.Business.Geometry
 
         internal void AlignToWorldGrid()
         {
-            Min.X = MathLibrary.FloorToWorldGrid(Min.X)-1;
-            Min.Y = MathLibrary.FloorToWorldGrid(Min.Y)-1;
-            Min.Z = MathLibrary.FloorToWorldGrid(Min.Z)-1;
-            Max.X = MathLibrary.FloorToWorldGrid(Max.X)+1;
-            Max.Y = MathLibrary.FloorToWorldGrid(Max.Y)+1;
-            Max.Z = MathLibrary.FloorToWorldGrid(Max.Z)+1;
+            Min.X = MathLibrary.FloorToWorldGrid(Min.X);
+            Min.Y = MathLibrary.FloorToWorldGrid(Min.Y);
+            Min.Z = MathLibrary.FloorToWorldGrid(Min.Z);
+            Max.X = MathLibrary.FloorToWorldGrid(Max.X);
+            Max.Y = MathLibrary.FloorToWorldGrid(Max.Y);
+            Max.Z = MathLibrary.FloorToWorldGrid(Max.Z);
         }
 
         internal bool OverLaps(AxisAlignedBoundingBox alienAABB)

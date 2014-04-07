@@ -30,10 +30,10 @@ namespace WindowsFormsApplication7.Business
             Product.Content.ReplaceWith(recepe.Product);
         }
 
-        public ItemStack CraftRecipe()
+        public EntityStack CraftRecipe()
         {
             TestRecipe();
-            ItemStack createdProduct = Product.Content;
+            EntityStack createdProduct = Product.Content;
             if (createdProduct == null) return null;
             
             // Craft it!
@@ -42,7 +42,7 @@ namespace WindowsFormsApplication7.Business
             {
                 if (Grid[i].Content != null)
                 {
-                    Grid[i].Content.RemoveItems(1);
+                    Grid[i].Content.Remove(1);
                 }
             }
             

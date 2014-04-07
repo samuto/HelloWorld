@@ -15,6 +15,7 @@ using SlimDX;
 using SlimDX.DirectInput;
 using WindowsFormsApplication7.Frontend.Gui;
 using WindowsFormsApplication7.Business.Repositories;
+using WindowsFormsApplication7.CrossCutting;
 
 namespace WindowsFormsApplication7
 {
@@ -40,7 +41,7 @@ namespace WindowsFormsApplication7
         public void Run()
         {
             this.Initialize();
-            form.DesktopLocation = new Point(10, 600);
+            form.DesktopLocation = new Point(10, 10);
 
             MessagePump.Run(form, () =>
             {
@@ -58,12 +59,12 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("Hello World");
-            float scale = 0.75f;
+            float scale = 3f;
             form.ClientSize = new Size((int)(320f * scale), (int)(240f * scale));
 
             GlobalRenderer.Instance.Initialize(form);
-            World.Instance.Player.PrevPosition = World.Instance.Player.Position = new Vector3(-30, 64, 0);
-            World.Instance.FlyingCamera.Position = new Vector3(-30, 70, -25);
+            World.Instance.Player.PrevPosition = World.Instance.Player.Position = new Vector3(0, 66, -20);
+            World.Instance.FlyingCamera.Position = new Vector3(10, 70, -25);
             entityToControl = World.Instance.Player;
             Camera.Instance.AttachTo(entityToControl);
             Input.Instance.Initialize();
@@ -91,12 +92,6 @@ namespace WindowsFormsApplication7
             }
 
             float partialStep = Frame.GetPartialStep();
-            float mousedx = -Input.Instance.InterpolatedMouseDeltaX(partialStep) * GameSettings.MouseSensitivity * 0.001f;
-            float mousedy = Input.Instance.InterpolatedMouseDeltaY(partialStep) * GameSettings.MouseSensitivity * 0.001f;
-            if (Mode == GameMode.InGame)
-            {
-                entityToControl.SetViewAngles(mousedx, mousedy);
-            }
 
             // render game
             p.EndStartSection("render");
@@ -110,6 +105,7 @@ namespace WindowsFormsApplication7
             if (Profiler.Instance.Enabled)
             {
                 GlobalRenderer.Instance.RenderProfiler();
+                GlobalRenderer.Instance.RenderLog();
             }
 
             // render 2d gui
@@ -140,6 +136,7 @@ namespace WindowsFormsApplication7
 
         private void RunTick()
         {
+            Log.Instance.Update();
             // get input
             Input.Instance.Update();
 
@@ -264,6 +261,11 @@ namespace WindowsFormsApplication7
             {
                 return form.ClientSize.Height;
             }
+        }
+
+        internal bool IsEntityControlled(Entity entity)
+        {
+            return entityToControl == entity;
         }
     }
 }

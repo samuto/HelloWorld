@@ -17,16 +17,22 @@ namespace WindowsFormsApplication7.Frontend
 {
     class TileTextures
     {
+        //
+        // Textures -> http://resourcepack.net/lushcraft-resource-pack/
+        //
         public static TileTextures Instance = new TileTextures();
+        private Dictionary<int, List<int>> stageTextures = new Dictionary<int, List<int>>();
         private Dictionary<int, int> topBlockTextures = new Dictionary<int, int>();
+        private Dictionary<int, int> frontBlockTextures = new Dictionary<int, int>();
         private Dictionary<int, int> sideBlockTextures = new Dictionary<int, int>();
         private Dictionary<int, int> bottomBlockTextures = new Dictionary<int, int>();
         private Dictionary<string, int> indexMap = new Dictionary<string, int>();
         private Dictionary<int, VertexBuffer> blockVertexBuffers = new Dictionary<int, VertexBuffer>();
         private Dictionary<int, VertexBuffer> itemVertexBuffers = new Dictionary<int, VertexBuffer>();
         private VertexBuffer[] destroyBlocksBuffers = new VertexBuffer[10];
-        private VertexBuffer selectionBlockBuffers;
+        private VertexBuffer selectionBlockBuffer;
         public ShaderResourceView View;
+        private Tessellator t = Tessellator.Instance;
 
         public void Dispose()
         {
@@ -47,12 +53,13 @@ namespace WindowsFormsApplication7.Frontend
                 vertexBuffer.Dispose();
             }
             destroyBlocksBuffers = null;
-            selectionBlockBuffers.Dispose();
-            selectionBlockBuffers = null;
+            selectionBlockBuffer.Dispose();
+            selectionBlockBuffer = null;
         }
 
         internal void Initialize()
         {
+            t.ResetTransformation();
             LoadAllTileTextures();
 
             // define blocks
@@ -71,6 +78,19 @@ namespace WindowsFormsApplication7.Frontend
             DefineBlock(BlockRepository.FarmlandDry.Id, "farmland_dry", "dirt", "dirt");
             DefineBlock(BlockRepository.FarmlandWet.Id, "farmland_wet", "dirt", "dirt");
             DefineBlock(BlockRepository.Wheat.Id, "wheat_stage_5");
+            DefineBlock(BlockRepository.CraftingTable.Id, "crafting_table_front", "crafting_table_side", "crafting_table_top", "planks_oak");
+            DefineBlock(BlockRepository.FurnaceOff.Id, "furnace_front_off", "furnace_side", "furnace_top", "cobblestone");
+            DefineBlock(BlockRepository.FurnaceOn.Id, "furnace_front_on", "furnace_side", "furnace_top", "cobblestone");
+            
+            // stage textures
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_0");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_1");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_2");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_3");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_4");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_5");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_6");
+            DefineStage(BlockRepository.Wheat.Id,"wheat_stage_7");
 
             // Define destroy blocks...
             DefineDestroyAndSelectionBlocks();
@@ -85,6 +105,15 @@ namespace WindowsFormsApplication7.Frontend
             BuildItemVertexBuffer(ItemRepository.SeedsWheat.Id, "seeds_wheat");
             BuildItemVertexBuffer(ItemRepository.Wheat.Id, "wheat");
             BuildItemVertexBuffer(ItemRepository.Bread.Id, "bread");
+            BuildItemVertexBuffer(ItemRepository.Coal.Id, "coal");
+        }
+
+        private void DefineStage(int blockId, string textureName)
+        {
+            if (!stageTextures.ContainsKey(blockId))
+                stageTextures.Add(blockId, new List<int>());
+            stageTextures[blockId].Add(indexMap[textureName]);
+           
         }
 
         private void DefineDestroyAndSelectionBlocks()
@@ -111,7 +140,7 @@ namespace WindowsFormsApplication7.Frontend
                 BlockColors);
             }
             tileIndex = indexMap["selection_box"];
-            selectionBlockBuffers = GenerateBlockBuffers(
+            selectionBlockBuffer = GenerateBlockBuffers(
             tileIndex,
             tileIndex,
             tileIndex,
@@ -121,9 +150,22 @@ namespace WindowsFormsApplication7.Frontend
             BlockColors);
         }
 
+        private VertexBuffer Generate2dVertexBuffer(string name)
+        {
+            t.StartDrawingTiledQuads();
+            Vector4 c1 = new Vector4(1, 1, 1, 1);
+            t.ArrayIndex = indexMap[name];
+            Vector3 normal = new Vector3(0, 0, 1);
+            float s = 1f;
+            t.AddVertexWithColor(new Vector4(0f, 0f, 0, 1.0f), c1, normal);
+            t.AddVertexWithColor(new Vector4(0f, s, 0, 1.0f), c1, normal);
+            t.AddVertexWithColor(new Vector4(s, s, 0, 1.0f), c1, normal);
+            t.AddVertexWithColor(new Vector4(s, 0f, 0, 1.0f), c1, normal);
+            return t.GetVertexBuffer();
+        }
+
         private void BuildItemVertexBuffer(int itemId, string name)
         {
-            Tessellator t = Tessellator.Instance;
             t.StartDrawingTiledQuads();
             Vector4 c1 = new Vector4(1, 1, 1, 1);
             t.ArrayIndex = indexMap[name];
@@ -143,15 +185,16 @@ namespace WindowsFormsApplication7.Frontend
 
         private void BuildBlockVertexBuffer(int blockId)
         {
-            int tileIndexFront = TileTextures.Instance.SideIndex(blockId);
+            int tileIndexFront = TileTextures.Instance.FrontIndex(blockId);
+            int tileIndexSide = TileTextures.Instance.SideIndex(blockId);
             int tileIndexTop = TileTextures.Instance.TopIndex(blockId);
             int tileIndexBottom = TileTextures.Instance.BottomIndex(blockId);
 
             blockVertexBuffers.Add(blockId, GenerateBlockBuffers(
                 tileIndexFront,
-                tileIndexFront,
-                tileIndexFront,
-                tileIndexFront,
+                tileIndexSide,
+                tileIndexSide,
+                tileIndexSide,
                 tileIndexTop,
                 tileIndexBottom,
                 BlockRepository.Blocks[blockId].BlockColors));
@@ -166,7 +209,6 @@ namespace WindowsFormsApplication7.Frontend
             int tileIndexBottom,
             Vector4[] blockColors)
         {
-            Tessellator t = Tessellator.Instance;
             t.StartDrawingTiledQuads();
             Vector4 c1, c2, c3, c4, c5, c6;
             float vx = -0.5f;
@@ -215,22 +257,29 @@ namespace WindowsFormsApplication7.Frontend
             return t.GetVertexBuffer();
         }
 
-        private void DefineBlock(int blockId, string top, string side, string bottom)
+        private void DefineBlock(int blockId, string front, string side, string top, string bottom)
         {
             topBlockTextures[blockId] = indexMap[top];
             sideBlockTextures[blockId] = indexMap[side];
+            frontBlockTextures[blockId] = indexMap[front];
             bottomBlockTextures[blockId] = indexMap[bottom];
             BuildBlockVertexBuffer(blockId);
 
-            BuildItemVertexBuffer(blockId, side);
+            BuildItemVertexBuffer(blockId, front);
+        }
+
+        private void DefineBlock(int blockId, string top, string side, string bottom)
+        {
+           DefineBlock(blockId, side, side, top, bottom);
         }
 
         private void LoadAllTileTextures()
         {
-            Device device = Tessellator.Instance.Device;
+            Device device = t.Device;
             List<Texture2D> textures = new List<Texture2D>();
             List<string> allFiles = Directory.GetFiles("01.Frontend/Textures/Blocks/", "*.png").ToList();
             allFiles.AddRange(Directory.GetFiles("01.Frontend/Textures/Items/", "*.png"));
+            allFiles.AddRange(Directory.GetFiles("01.Frontend/Textures/Gui/", "*.png"));
 
             ImageLoadInformation info = new ImageLoadInformation()
             {
@@ -276,6 +325,11 @@ namespace WindowsFormsApplication7.Frontend
             return sideBlockTextures[blockId];
         }
 
+        internal int FrontIndex(int blockId)
+        {
+            return frontBlockTextures[blockId];
+        }
+
         internal int BottomIndex(int blockId)
         {
             return bottomBlockTextures[blockId];
@@ -293,7 +347,7 @@ namespace WindowsFormsApplication7.Frontend
 
         internal VertexBuffer GetSelectionBlockVertexBuffer()
         {
-            return selectionBlockBuffers;
+            return selectionBlockBuffer;
         }
 
         internal VertexBuffer GetDestroyBlockVertexBuffer(float breakPercentage)
@@ -304,6 +358,11 @@ namespace WindowsFormsApplication7.Frontend
             else if (index > 9)
                 index = 9;
             return destroyBlocksBuffers[index];
+        }
+
+        internal int GetStage(int blockId, int stage)
+        {
+            return stageTextures[blockId][stage];
         }
     }
 }

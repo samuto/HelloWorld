@@ -19,7 +19,7 @@ namespace WindowsFormsApplication7.Frontend
         public Vector3 EyePosition;
         public Vector3 Direction;
         public bool Enable3d;
-        private Entity attachedEntity;
+        private EntityPlayer attachedEntity;
         private BoundingFrustum frustum;
 
         private Camera()
@@ -27,7 +27,7 @@ namespace WindowsFormsApplication7.Frontend
             World = Matrix.Identity;
         }
 
-        public void AttachTo(Entity entity)
+        public void AttachTo(EntityPlayer entity)
         {
             attachedEntity = entity;
         }

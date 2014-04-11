@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SlimDX;
 
-namespace WindowsFormsApplication7.Frontend.Gui
+namespace WindowsFormsApplication7.Frontend.Gui.Controls
 {
     class GuiButton : GuiControl
     {
@@ -16,12 +16,11 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
             Color = ColorDeactivated;
             CustomRendering = true;
-            this.OnRender += new EventHandler<EventArgs>(GuiButton_OnRender);
+            this.RenderControl += new EventHandler<EventArgs>(GuiButton_RenderForm);
         }
 
-        void GuiButton_OnRender(object sender, EventArgs e)
+        void GuiButton_RenderForm(object sender, EventArgs e)
         {
-            Tessellator t = Tessellator.Instance;
             t.StartDrawingColoredQuads();
             Vector4 black = new Vector4(0, 0, 0, 1f);
             float ofs = FontRenderer.Instance.CharScale;
@@ -37,12 +36,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             t.AddVertexWithColor(new Vector4(Location.X + ofs2, Location.Y + Size.Y - ofs2, 0f, 1f), Color);
             t.AddVertexWithColor(new Vector4(Location.X + Size.X + ofs2, Location.Y + Size.Y - ofs2, 0f, 1f), Color);
             t.AddVertexWithColor(new Vector4(Location.X + Size.X + ofs2, Location.Y - ofs2, 0f, 1f), Color);
-            FontRenderer f = FontRenderer.Instance;
-            t.Draw();
-            t.StartDrawingAlphaTexturedQuads("ascii");
-            Vector2 textSize = f.TextSize(Text);
-            f.RenderTextShadow(Text, Location.X + (Size.X - textSize.X) / 2f + ofs2 + ParentLocation.X, Location.Y + (Size.Y - textSize.Y) / 2f - ofs2 + ParentLocation.Y);
-            t.Draw();
+            
         }
 
         internal override void OnMouseEnter()

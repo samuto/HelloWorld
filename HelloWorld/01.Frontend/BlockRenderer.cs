@@ -19,7 +19,8 @@ namespace WindowsFormsApplication7.Frontend
     class BlockRenderer
     {
         private World world = World.Instance;
-
+        private Tessellator t = Tessellator.Instance;
+            
         public BlockRenderer()
         {
         }
@@ -45,7 +46,6 @@ namespace WindowsFormsApplication7.Frontend
 
         private void RenderHash(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk)
         {
-            Tessellator t = Tessellator.Instance;
             Vector4 c1, c2, c3, c4, c5, c6;
             int blockId = block.Id;
             Vector4[] blockColors = block.BlockColors;
@@ -61,7 +61,13 @@ namespace WindowsFormsApplication7.Frontend
             int x = positionBlock.X;
             int y = positionBlock.Y;
             int z = positionBlock.Z;
-            t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+            if (block.HasStages)
+            {
+                int stage = chunk.MetaDataGetInt("stage", positionBlock);
+                t.ArrayIndex = TileTextures.Instance.GetStage(blockId, stage);
+            }
+            else
+                t.ArrayIndex = TileTextures.Instance.FrontIndex(blockId);
             float margin = 0.2f;
             Vector3 normal = new Vector3(0, 0, 1);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f - margin, 1.0f), c1, normal);
@@ -109,7 +115,6 @@ namespace WindowsFormsApplication7.Frontend
 
         private void RenderCross(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk)
         {
-            Tessellator t = Tessellator.Instance;
             Vector4 c1, c2, c3, c4, c5, c6;
             int blockId = block.Id;
             Vector4[] blockColors = block.BlockColors;
@@ -125,7 +130,7 @@ namespace WindowsFormsApplication7.Frontend
             int x = positionBlock.X;
             int y = positionBlock.Y;
             int z = positionBlock.Z;
-            t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+            t.ArrayIndex = TileTextures.Instance.FrontIndex(blockId);
             Vector3 normal = new Vector3(-0.7f, 0, 0.7f);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0.0f, 1.0f), c1, normal);
             t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0.0f, 1.0f), c1, normal);
@@ -151,7 +156,6 @@ namespace WindowsFormsApplication7.Frontend
 
         private void RenderCube(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk)
         {
-            Tessellator t = Tessellator.Instance;
             Vector4 c1, c2, c3, c4, c5, c6;
             int blockId = block.Id;
             Vector4[] blockColors = block.BlockColors;
@@ -177,7 +181,7 @@ namespace WindowsFormsApplication7.Frontend
             if (renderFront)
             {
                 // front
-                t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+                t.ArrayIndex = TileTextures.Instance.FrontIndex(blockId);
                 bool a1 = IsOpaque(chunk.SafeGetLocalBlock(x, y - 1, z + 1));
                 bool a2 = IsOpaque(chunk.SafeGetLocalBlock(x - 1, y - 1, z + 1));
                 bool a3 = IsOpaque(chunk.SafeGetLocalBlock(x - 1, y, z + 1));

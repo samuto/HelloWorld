@@ -21,6 +21,7 @@ namespace WindowsFormsApplication7.Business.Repositories
         public static Item StoneSword = new Item(5, "Sword");
         public static ItemSeeds SeedsWheat = (ItemSeeds)new ItemSeeds(6, "Wheat Seeds").SetConsumable();
         public static Item Wheat = new Item(7, "Wheat");
-        public static ItemFood Bread = (ItemFood)new ItemFood(8, "Bread");
+        public static ItemFood Bread = (ItemFood)new ItemFood(8, "Bread").SetHungerDecrease(10).SetConsumable();
+        public static Item Coal = (Item)new Item(9, "Coal").SetHeatOfCombustion(50);
     }
 }

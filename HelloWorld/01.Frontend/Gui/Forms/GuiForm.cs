@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business;
+using WindowsFormsApplication7.Frontend.Gui.Controls;
 
-namespace WindowsFormsApplication7.Frontend.Gui
+namespace WindowsFormsApplication7.Frontend.Gui.Forms
 {
     class GuiForm : GuiControl
     {
@@ -14,7 +15,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
             CustomRendering = true;
         }
 
-        internal virtual void Show()
+        internal void Show()
         {
             OnLoad();
             Visible = true;
@@ -24,7 +25,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
         }
 
-        internal void Close()
+        internal virtual void OnClose()
         {
             Visible = false;
         }

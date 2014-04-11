@@ -6,14 +6,14 @@ using SlimDX;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
-    class FlyingCamera : Entity
+    class FlyingCamera : EntityPlayer
     {
         public FlyingCamera()
             : base(new Vector4(0.5f,0.5f,0.5f,1f))
         {
         }
 
-        internal override void Update()
+        internal override void OnUpdate()
         {
             UpdateDirection();
             UpdateViewAngles();

@@ -8,7 +8,7 @@ using WindowsFormsApplication7.Business.Geometry;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
-    class Moon : Entity
+    class Moon : EntityPlayer
     {
         public Moon()
             : base(new Vector4(0.8f, 0.8f, 0.8f, 1f))
@@ -17,7 +17,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             AABB = new AxisAlignedBoundingBox(new Vector3(-size, -2f * size, -size), new Vector3(size, 0, size));
         }
 
-        internal override void Update()
+        internal override void OnUpdate()
         {
             DayWatch watch = DayWatch.Now;
             PrevPosition = Position;

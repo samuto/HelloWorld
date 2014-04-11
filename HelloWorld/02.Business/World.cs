@@ -23,23 +23,22 @@ namespace WindowsFormsApplication7.Business
         private ChunkCache chunkCache = new ChunkCache();
         private ChunkStorage storage = new ChunkStorage();
         private ChunkGenerator generator = new ChunkGenerator();
-
+        private Profiler p = Profiler.Instance;
         public VoxelTrace PlayerVoxelTrace = new VoxelTrace();
 
         internal void Update()
         {
-            Profiler p = Profiler.Instance;
             p.StartSection("ChunkCache");
             // update landscape
             chunkCache.Update(Player.Position, GameSettings.CachingRadius);
 
             // update entities
             p.EndStartSection("Entities"); 
-            Player.Update();
-            FlyingCamera.Update();
-            Sun.Update();
-            Moon.Update();
-
+            Player.OnUpdate();
+            FlyingCamera.OnUpdate();
+            Sun.OnUpdate();
+            Moon.OnUpdate();
+           
             // calculate voxel ray
             p.EndStartSection("voxelray");
             Vector3 direction = Player.Direction;
@@ -79,31 +78,43 @@ namespace WindowsFormsApplication7.Business
             generator.Generate(chunk);
         }
 
-      
-        internal int GetBlock(int x, int y, int z)
+        internal int GetBlock(PositionBlock pos)
         {
-            PositionBlock pos = new PositionBlock(x, y, z);
+            if (pos.Y < 0) return 0;
+            if (pos.Y >= Chunk.MaxSizeY) return 0;
             PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
             Chunk chunk = GetChunk(positionChunk);
             positionChunk.ConvertToLocalPosition(ref pos);
             int blockId = chunk.GetLocalBlock(pos.X, pos.Y, pos.Z);
             return blockId;
         }
-
-        internal void SetBlock(int x, int y, int z, int blockId)
+      
+        internal int GetBlock(int x, int y, int z)
         {
             PositionBlock pos = new PositionBlock(x, y, z);
+            return GetBlock(pos);
+        }
+
+        internal void SetBlock(PositionBlock pos, int blockId)
+        {
             PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
             Chunk chunk = GetChunk(positionChunk);
             positionChunk.ConvertToLocalPosition(ref pos);
             chunk.SetLocalBlock(pos.X, pos.Y, pos.Z, blockId);
         }
 
+        internal void SetBlock(int x, int y, int z, int blockId)
+        {
+            PositionBlock pos = new PositionBlock(x, y, z);
+            SetBlock(pos, blockId);
+            
+        }
+
         internal bool ReplaceBlock(PositionBlock pos, int oldId, int newId)
         {
-            if (GetBlock(pos.X, pos.Y, pos.Z) == oldId)
+            if (GetBlock(pos) == oldId)
             {
-                SetBlock(pos.X, pos.Y, pos.Z, newId);
+                SetBlock(pos, newId);
                 return true;
             }
             return false;
@@ -113,7 +124,20 @@ namespace WindowsFormsApplication7.Business
         {
             PositionChunk positionChunk = PositionChunk.CreateFrom(stack.Position);
             Chunk chunk = GetChunk(positionChunk);
-            chunk.StackEntities.Add(stack);
+            chunk.AddEntity(stack);
         }
+
+
+
+        internal Entity GetBlockEntity(PositionBlock position)
+        {
+            PositionChunk positionChunk = PositionChunk.CreateFrom(position);
+            Chunk chunk = GetChunk(positionChunk);
+            positionChunk.ConvertToLocalPosition(ref position);
+            Entity entity = chunk.GetBlockEntity(position);
+            return entity;
+        }
+
+       
     }
 }

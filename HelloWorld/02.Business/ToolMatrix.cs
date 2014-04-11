@@ -22,6 +22,7 @@ namespace WindowsFormsApplication7.Business
             RegisterEfficiency(ItemRepository.StonePickAxe.Id, BlockRepository.CobbleStone.Id, good);
             RegisterEfficiency(ItemRepository.StoneAxe.Id, BlockRepository.Wood.Id, good);
             RegisterEfficiency(ItemRepository.StoneAxe.Id, BlockRepository.Plank.Id, good);
+            RegisterEfficiency(ItemRepository.StoneAxe.Id, BlockRepository.CraftingTable.Id, good);
         }
 
         private static void RegisterEfficiency(int itemIdInHand, int itemIdToDestroy, float efficiency)

@@ -36,7 +36,7 @@ namespace WindowsFormsApplication7._01.Frontend.Effects
 
         internal override void Apply(SlimDX.Direct3D11.Buffer vertices)
         {
-            Device device = Tessellator.Instance.Device;
+            Device device = t.Device;
             device.ImmediateContext.InputAssembler.InputLayout = layout;
             device.ImmediateContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(vertices, stride, 0));
 

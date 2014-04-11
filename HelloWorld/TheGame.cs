@@ -16,6 +16,7 @@ using SlimDX.DirectInput;
 using WindowsFormsApplication7.Frontend.Gui;
 using WindowsFormsApplication7.Business.Repositories;
 using WindowsFormsApplication7.CrossCutting;
+using WindowsFormsApplication7.Frontend.Gui.Forms;
 
 namespace WindowsFormsApplication7
 {
@@ -26,8 +27,9 @@ namespace WindowsFormsApplication7
             Gui,
             InGame
         }
+
         public static TheGame Instance = new TheGame();
-        public Entity entityToControl;
+        public EntityPlayer entityToControl;
         public int CurrentTick = 0;
         public GameMode Mode = GameMode.InGame;
         public GuiForm ActiveGui = null;
@@ -37,12 +39,13 @@ namespace WindowsFormsApplication7
         private int fpsCounter;
         private bool shutdown = false;
         private Stopwatch sw = new Stopwatch();
-
+        private Profiler p = Profiler.Instance;
+        private bool showProfiler = true;
         public void Run()
         {
             this.Initialize();
             form.DesktopLocation = new Point(10, 10);
-
+           
             MessagePump.Run(form, () =>
             {
                 this.RunGameLoop();
@@ -52,6 +55,7 @@ namespace WindowsFormsApplication7
 
             this.Dispose();
         }
+
 
         private void Initialize()
         {
@@ -74,55 +78,57 @@ namespace WindowsFormsApplication7
         {
             Input.Instance.Dispose();
             Tessellator.Instance.Dispose();
+            FontRenderer.Instance.Dispose();
             GlobalRenderer.Instance.Dispose();
         }
 
         private void RunGameLoop()
         {
             Frame.Next();
-            Profiler p = Profiler.Instance;
-            p.Clear();
-
+            p.StartSection("root");
             // update
             p.StartSection("update");
             while (Frame.HasMoreTicks())
             {
-                RunTick();
+                Update();
                 Frame.Tick();
             }
-
             float partialStep = Frame.GetPartialStep();
 
             // render game
             p.EndStartSection("render");
             GlobalRenderer.Instance.ClearTarget();
             GlobalRenderer.Instance.Render(partialStep);
+           
+            // render 2d gui
+            p.EndStartSection("2dgui");
+            if (ActiveGui != null)
+            {
+                GlobalRenderer.Instance.RenderGui(partialStep);
+            }
             p.EndSection();
 
             p.EndSection(); // end root-section
 
             // render profiler info
-            if (Profiler.Instance.Enabled)
+            if (showProfiler)
             {
                 GlobalRenderer.Instance.RenderProfiler();
-                GlobalRenderer.Instance.RenderLog();
             }
-
-            // render 2d gui
-            if (ActiveGui != null)
-            {
-                GlobalRenderer.Instance.RenderGui(partialStep);
-            }
+            p.Enabled = showProfiler;
 
             // commit the graphics (swap buffer)
             GlobalRenderer.Instance.Commit();
 
             // display debuginfo in widows caption
+            
             while (GetTime() >= this.debugUpdateTime + 1d)
             {
                 form.Text = this.fpsCounter + " fps (" + CurrentTick + ")";
                 this.debugUpdateTime += 1d;
                 this.fpsCounter = 0;
+                GlobalRenderer.Instance.ProfilerSnapshot();
+                p.Clear();
             }
 
             // update frame counter
@@ -134,17 +140,19 @@ namespace WindowsFormsApplication7
             return sw.ElapsedTicks / Stopwatch.Frequency;
         }
 
-        private void RunTick()
+        private void Update()
         {
             Log.Instance.Update();
             // get input
             Input.Instance.Update();
+            // gui scaling
+            GuiScaling.Instance.Update();
 
             // handle input
             KeyboardState prevKeyboardState = Input.Instance.CurrentInput.KeyboardState;
             KeyboardState keyboardState = Input.Instance.LastInput.KeyboardState;
             MouseState mouseState = Input.Instance.CurrentInput.MouseState;
-           
+
             if (prevKeyboardState.IsPressed(Key.Comma))
             {
                 entityToControl = World.Instance.FlyingCamera;
@@ -155,7 +163,11 @@ namespace WindowsFormsApplication7
                 entityToControl = World.Instance.Player;
                 Camera.Instance.AttachTo(entityToControl);
             }
-            
+
+            if (prevKeyboardState.IsPressed(Key.F11))
+            {
+                GlobalRenderer.Instance.ToggleFullScreen();
+            } 
             if (prevKeyboardState.IsPressed(Key.W))
             {
                 entityToControl.MoveForward();
@@ -190,32 +202,33 @@ namespace WindowsFormsApplication7
             }
             else if (prevKeyboardState.IsReleased(Key.V) && keyboardState.IsPressed(Key.V))
             {
-                Profiler.Instance.ToggleReport();
+                p.ToggleReport();
             }
             else if (prevKeyboardState.IsReleased(Key.C) && keyboardState.IsPressed(Key.C))
             {
-                Profiler.Instance.ToggleEnabled();
+                showProfiler = !showProfiler;
             }
             else if (prevKeyboardState.IsReleased(Key.Z) && keyboardState.IsPressed(Key.Z))
             {
-                Profiler.Instance.ToggleMarkedSection();
+                p.ToggleMarkedSection();
             }
             else if (prevKeyboardState.IsReleased(Key.X) && keyboardState.IsPressed(Key.X))
             {
-                Profiler.Instance.SelectedSection = Profiler.Instance.MarkedSection;
+                p.SelectedSection = p.MarkedSection;
             }
             else if (prevKeyboardState.IsReleased(Key.Backspace) && keyboardState.IsPressed(Key.Backspace))
             {
-                int index = Profiler.Instance.SelectedSection.LastIndexOf(".");
+                int index = p.SelectedSection.LastIndexOf(".");
                 if (index >= 0)
-                    Profiler.Instance.SelectedSection = Profiler.Instance.SelectedSection.Substring(0, index);
+                    p.SelectedSection = p.SelectedSection.Substring(0, index);
             }
 
+            p.StartSection("2dgui");
             if (ActiveGui != null)
             {
-                GuiScaling.Instance.Update();
                 ActiveGui.Update();
             }
+            p.EndSection();
 
             // update world
             World.Instance.Update();
@@ -231,9 +244,9 @@ namespace WindowsFormsApplication7
         private void CloseGui()
         {
             // Close gui
-            ActiveGui.Close();
+            ActiveGui.OnClose();
             // Restore parent gui
-            ActiveGui = (GuiForm) ActiveGui.Parent;
+            ActiveGui = (GuiForm)ActiveGui.Parent;
             Mode = ActiveGui == null ? GameMode.InGame : GameMode.Gui;
         }
 
@@ -263,7 +276,7 @@ namespace WindowsFormsApplication7
             }
         }
 
-        internal bool IsEntityControlled(Entity entity)
+        internal bool IsEntityControlled(EntityPlayer entity)
         {
             return entityToControl == entity;
         }

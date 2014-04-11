@@ -9,7 +9,7 @@ namespace WindowsFormsApplication7.Business
 {
     interface ICollisionSystem
     {
-        Vector3 Resolve(CrossCutting.Entities.Entity entity);
+        Vector3 Resolve(CrossCutting.Entities.EntityPlayer entity);
         
     }
 }

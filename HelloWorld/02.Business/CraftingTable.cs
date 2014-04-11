@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business;
-using WindowsFormsApplication7.Business.Repository;
+using WindowsFormsApplication7.Business.Recipes;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -24,7 +24,7 @@ namespace WindowsFormsApplication7.Business
         public void TestRecipe()
         {
             Product.Content.Clear();
-            Recepe recepe = RecepeRepository.FindRecepe(Grid);
+            Recepe recepe = CraftingTableRecipes.Instance.Find(Grid);
             if (recepe == null)
                 return;
             Product.Content.ReplaceWith(recepe.Product);

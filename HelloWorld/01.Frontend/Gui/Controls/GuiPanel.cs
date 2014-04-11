@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SlimDX;
 
-namespace WindowsFormsApplication7.Frontend.Gui
+namespace WindowsFormsApplication7.Frontend.Gui.Controls
 {
     class GuiPanel : GuiControl
     {

@@ -11,17 +11,22 @@ using SlimDX.DirectInput;
 using WindowsFormsApplication7.Frontend.Gui;
 using WindowsFormsApplication7.CrossCutting.Entities.Items;
 using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
+using WindowsFormsApplication7.Frontend.Gui.Forms;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
-    class Player : Entity
+    class Player : EntityPlayer
     {
         public int SelectedSlotId = 0;
         public Inventory Inventory = new Inventory();
-        public float BreakCompletePercentage;
-        public Vector4 prevBreakPosition;
-        public Vector4 BreakPosition;
+        public float DestroyProgress;
+        public Vector4 prevBlockAttackPosition;
+        public Vector4 BlockAttackPosition;
         private int resting = 0;
+        private int throwStackDelay = 0;
+        public float Health = 100;
+        public float Hunger = 100;
+        public bool Dead = false;
 
         public Player()
             : base(new Vector4(1, 0, 0, 1))
@@ -30,26 +35,22 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             EyePosition = new Vector3(0, AABB.Max.Y - 0.1f, 0);
             Speed = 0.15f;
 
-            Inventory.Slots[0].Content.ReplaceWith(BlockRepository.Wood.Id, 64);
-            Inventory.Slots[1].Content.ReplaceWith(BlockRepository.CobbleStone.Id, 64);
+            Inventory.Slots[9].Content.ReplaceWith(BlockRepository.Wood.Id, 64);
+            Inventory.Slots[10].Content.ReplaceWith(BlockRepository.CobbleStone.Id, 64);
+            Inventory.Slots[11].Content.ReplaceWith(ItemRepository.Coal.Id, 64);
+            Inventory.Slots[0].Content.ReplaceWith(BlockRepository.FurnaceOff.Id, 1);
             Inventory.Slots[2].Content.ReplaceWith(ItemRepository.StonePickAxe.Id, 1);
             Inventory.Slots[3].Content.ReplaceWith(ItemRepository.StoneAxe.Id, 1);
             Inventory.Slots[4].Content.ReplaceWith(ItemRepository.StoneShovel.Id, 1);
             Inventory.Slots[5].Content.ReplaceWith(ItemRepository.StoneHoe.Id, 1);
+            Inventory.Slots[6].Content.ReplaceWith(ItemRepository.SeedsWheat.Id, 64);
+            Inventory.Slots[7].Content.ReplaceWith(ItemRepository.Bread.Id, 64);
+            Inventory.Slots[8].Content.ReplaceWith(BlockRepository.Diamond.Id, 1);
 
             collisionSystem = new CollisionComplex(this);
         }
 
-        public bool IsSelectedItemABlock()
-        {
-            return Inventory.Slots[SelectedSlotId].Content.IsBlock;
-        }
-
-        private bool IsSelectedItemAnItem()
-        {
-            return Inventory.Slots[SelectedSlotId].Content.IsItem;
-        }
-
+       
         public EntityStack SelectedStack
         {
             get
@@ -58,12 +59,21 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        internal override void Update()
+        internal override void OnUpdate()
         {
+            // Handle hunger/health
+            DecreaseHunger(-0.1f);
+            if (Health == 0)
+                Dead = true;
+            if (Hunger == 100)
+                GiveHealth(-0.1f);
+            if(Hunger < 10)
+                GiveHealth(0.2f);
+
             HandleInput();
             CalculateVelocity();
-            base.Update();
-            CollectNearbyItems();
+            base.OnUpdate();
+            CollectNearbyEntities();
         }
 
         protected void CalculateVelocity()
@@ -95,12 +105,19 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         }
 
-        private void CollectNearbyItems()
+        private void CollectNearbyEntities()
         {
+            if (throwStackDelay > 0)
+            {
+                throwStackDelay--;
+                return;
+            }
+
             AxisAlignedBoundingBox collectArea = AABB;
             collectArea.Translate(Position);
-            collectArea.Min -= new Vector3(1, 1, 1);
-            collectArea.Max += new Vector3(1, 1, 1);
+            float radius = 0.5f;
+            collectArea.Min -= new Vector3(radius, radius, radius);
+            collectArea.Max += new Vector3(radius, radius, radius);
             PositionChunk minChunk = PositionChunk.CreateFrom(collectArea.Min);
             PositionChunk maxChunk = PositionChunk.CreateFrom(collectArea.Max);
             PositionChunk chunkPos;
@@ -110,9 +127,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 {
                     for (int z = minChunk.Z; z <= maxChunk.Z; z++)
                     {
-                        chunkPos.X = x;
-                        chunkPos.Y = y;
-                        chunkPos.Z = z;
+                        chunkPos = new PositionChunk(x, y, z);
                         Chunk chunk = World.Instance.GetChunk(chunkPos);
                         foreach (EntityStack stack in chunk.EntitiesInArea(collectArea))
                         {
@@ -121,7 +136,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                             // if stack is empty remove it
                             if (stack.IsEmpty)
                             {
-                                chunk.StackEntities.Remove(stack);
+                                chunk.RemoveEntity(stack);
                             }
                         }
                     }
@@ -133,61 +148,31 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         private void HandleInput()
         {
             // handle keyboard
-            Player player = World.Instance.Player;
-            KeyboardState prevKeyboardState = Input.Instance.CurrentInput.KeyboardState;
-            KeyboardState keyboardState = Input.Instance.LastInput.KeyboardState;
             bool inGuiMode = TheGame.Instance.Mode == TheGame.GameMode.Gui;
-            if (prevKeyboardState.IsPressed(Key.E) && !inGuiMode)
-            {
-                TheGame.Instance.OpenGui(new GuiCraftingForm());
-            }
-            else if (prevKeyboardState.IsPressed(Key.D1))
-            {
-                player.SelectedSlotId = 0;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D2))
-            {
-                player.SelectedSlotId = 1;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D3))
-            {
-                player.SelectedSlotId = 2;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D4))
-            {
-                player.SelectedSlotId = 3;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D5))
-            {
-                player.SelectedSlotId = 4;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D6))
-            {
-                player.SelectedSlotId = 5;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D7))
-            {
-                player.SelectedSlotId = 6;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D8))
-            {
-                player.SelectedSlotId = 7;
-            }
-            else if (prevKeyboardState.IsPressed(Key.D9))
-            {
-                player.SelectedSlotId = 8;
-            }
+            HandleKeyboard();
             if (inGuiMode)
                 return;
-            if (!World.Instance.PlayerVoxelTrace.Hit)
+            if (DoRest())
                 return;
-            if (resting > 0)
-            {
-                resting--;
-                return;
-            }
-            resting = 0;
+            HandleMouse();
+        }
 
+        private bool DoRest()
+        {
+            if (resting == 0)
+                return false;
+            resting--;
+            return true;
+        }
+
+        private void NeedsRest()
+        {
+            int updatesToRest = 6;
+            resting = updatesToRest;
+        }
+
+        private void HandleMouse()
+        {
             // handle mouse
             MouseState mouseState = Input.Instance.CurrentInput.MouseState;
             MouseState prevState = Input.Instance.LastInput.MouseState;
@@ -196,100 +181,248 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             bool prevMouseLeft = prevState.IsPressed(0);
             bool mouseHold = mouseLeft && prevMouseLeft;
 
-            // are we punching blocks?
-            if (mouseHold && mouseLeft)
-            {
-                BreakPosition = World.Instance.PlayerVoxelTrace.ImpactPosition;
-                bool sameBlock = prevBreakPosition == BreakPosition;
-                prevBreakPosition = BreakPosition;
-                if (sameBlock)
-                {
-                    int id = player.SelectedStack.Id;
-                    int blockToDestroy = World.Instance.GetBlock((int)BreakPosition.X, (int)BreakPosition.Y, (int)BreakPosition.Z);
-                    float efficiency = ToolMatrix.GetEfficiency(id, blockToDestroy);
-                    Block block = Block.FromId(blockToDestroy);
-                    BreakCompletePercentage += (100f / (float)block.Density) * efficiency;
-                    if (player.SelectedStack.IsItem)
-                    {
-                        Item itemInHand = Item.FromId(id);
-                        itemInHand.OnPunchedWith();
-                    }
-                }
-                else
-                    BreakCompletePercentage = 0f;
-                if (BreakCompletePercentage >= 100f)
-                {
-                    BreakBlock(BreakPosition);
-                    BreakCompletePercentage = 0;
-                    resting = 0;
-                }
-            }
+            // destroy / attack
+            if (mouseLeft)
+                HandleMouseLeft(mouseHold);
             else
-            {
-                BreakCompletePercentage = 0f;
-            }
+                DestroyProgress = 0f;
 
-            // are we setting blocks?
-            if (mouseRight && player.IsSelectedItemABlock())
+            // use block / use item
+            if (mouseRight)
+                HandleMouseRight();
+
+            
+        }
+
+        private void HandleMouseRight()
+        {
+            // activate block?
+            PositionBlock positionBlock = PositionBlock.FromVector(World.Instance.PlayerVoxelTrace.ImpactPosition);
+            Block impactBlock = Block.FromId(World.Instance.GetBlock(positionBlock));
+            if (impactBlock.OnActivate(positionBlock))
+                return;
+
+            // are we using a block?
+            if (SelectedStack.AsBlock != null)
             {
-                Vector4 pos = World.Instance.PlayerVoxelTrace.BuildPosition;
-                PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-                World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, player.SelectedStack.Id);
-                PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
-                Chunk chunk = World.Instance.GetChunk(posChunk);
-                chunk.InvalidateMeAndNeighbors();
-                player.SelectedStack.Remove(1);
-                resting = 6;
+                UseBlockInHand();
             }
-            // are we using a tool?
-            else if (mouseRight && player.IsSelectedItemAnItem())
+            // are we using an item?
+            else if (SelectedStack.AsItem != null)
             {
-                Vector4 pos = World.Instance.PlayerVoxelTrace.ImpactPosition;
-                PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-                Item item = Item.FromId(SelectedStack.Id);
-                if (item.UseOnBlock(posBlock))
-                {
-                    PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
-                    Chunk chunk = World.Instance.GetChunk(posChunk);
-                    chunk.InvalidateMeAndNeighbors();
-                    if (item.Consumable)
-                    {
-                        player.SelectedStack.Remove(1);
-                    }
-                }
-                
-                resting = 6;
+                UseItemInHand();
+                NeedsRest();
             }
         }
 
-       
-
-       
-
-        private void BreakBlock(Vector4 pos)
+        private void UseBlockInHand()
         {
-            PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
-            Block block = Block.FromId(World.Instance.GetBlock(posBlock.X, posBlock.Y, posBlock.Z));
-            int[] droppedIds = block.DroppedIds();
-            if (droppedIds.Length > 0)
+            if (World.Instance.PlayerVoxelTrace.Hit)
             {
-                foreach (int id in droppedIds)
+                UseBlockOnBlock();
+            }
+            else
+            {
+                UseBlockOnMe();
+            }
+        }
+
+        private void UseItemInHand()
+        {
+            if (World.Instance.PlayerVoxelTrace.Hit)
+            {
+                UseItemOnBlock();
+            }
+            else
+            {
+                UseItemOnMe();
+            }
+        }
+
+        private void UseItemOnMe()
+        {
+            Item item = Item.FromId(SelectedStack.Id);
+            if (item.OnUseOnPlayer())
+            {
+                if (item.Consumable)
                 {
-                    EntityStack stackToSpawn = new EntityStack(id, 1);
-                    stackToSpawn.Position = new Vector3(pos.X + 0.5f, pos.Y + 0.5f, pos.Z + 0.5f);
-                    stackToSpawn.Yaw = (float)(MathLibrary.GlobalRandom.NextDouble() * Math.PI);
-                    stackToSpawn.Pitch = (float)(MathLibrary.GlobalRandom.NextDouble() * Math.PI);
-                    stackToSpawn.Velocity = new Vector3(
-                        (float)0.05f * (float)(MathLibrary.GlobalRandom.NextDouble() * 2.0 - 1.0),
-                        (float)0.25f,
-                        (float)0.05f * (float)(MathLibrary.GlobalRandom.NextDouble() * 2.0 - 1.0));
-                    World.Instance.SpawnStack(stackToSpawn);
+                    SelectedStack.Remove(1);
                 }
             }
-            World.Instance.SetBlock(posBlock.X, posBlock.Y, posBlock.Z, 0);
+        }
+
+        private void UseBlockOnMe()
+        {
+        }
+
+        private void UseItemOnBlock()
+        {
+            // used on a block!
+            Vector4 pos = World.Instance.PlayerVoxelTrace.ImpactPosition;
+            PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
+            Item item = Item.FromId(SelectedStack.Id);
+            if (item.OnUseOnBlock(posBlock))
+            {
+                // here if world is changed
+                PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
+                Chunk chunk = World.Instance.GetChunk(posChunk);
+                chunk.InvalidateMeAndNeighbors();
+                if (item.Consumable)
+                {
+                    SelectedStack.Remove(1);
+                }
+            }
+        }
+
+        private void UseBlockOnBlock()
+        {
+            Vector4 pos = World.Instance.PlayerVoxelTrace.BuildPosition;
+            PositionBlock posBlock = new PositionBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
+            World.Instance.SetBlock(posBlock, SelectedStack.Id);
             PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
             Chunk chunk = World.Instance.GetChunk(posChunk);
             chunk.InvalidateMeAndNeighbors();
+            SelectedStack.Remove(1);
+            NeedsRest();
+        }
+
+        private void HandleMouseLeft(bool mouseHold)
+        {
+            // if no block is selected then we cannot attack..
+            if (!World.Instance.PlayerVoxelTrace.Hit)
+                return;
+            // if this is the first click then reset destroy counter.. and see if player holds down the mouse...
+            if (!mouseHold)
+            {
+                DestroyProgress = 0f;
+                return;
+            }
+            // are we destroying blocks?
+            BlockAttackPosition = World.Instance.PlayerVoxelTrace.ImpactPosition;
+            bool destroyInProgress = prevBlockAttackPosition == BlockAttackPosition;
+            prevBlockAttackPosition = BlockAttackPosition;
+            if(!destroyInProgress)
+            {
+                DestroyProgress = 0f;
+                return;
+            }
+            
+            // we are punching the block!!
+            UpdateBlockDestroyProgress();
+         
+            // have we destroyed the block?
+            if (DestroyProgress >= 100f)
+            {
+                DestroyBlock(BlockAttackPosition);
+                DestroyProgress = 0;
+                NeedsRest();
+            }
+        }
+
+        private void UpdateBlockDestroyProgress()
+        {
+            Block blockToDestroy = Block.FromId(World.Instance.GetBlock(PositionBlock.FromVector(BlockAttackPosition)));
+            float efficiency = ToolMatrix.GetEfficiency(SelectedStack.Id, blockToDestroy.Id);
+            DestroyProgress += (100f / (float)blockToDestroy.Density) * efficiency;
+            if (SelectedStack.AsItem != null)
+            {
+                Item itemInHand = Item.FromId(SelectedStack.Id);
+                itemInHand.OnAfterAttack();
+            }
+        }
+
+        private void HandleKeyboard()
+        {
+            KeyboardState prevKeyboardState = Input.Instance.CurrentInput.KeyboardState;
+            KeyboardState keyboardState = Input.Instance.LastInput.KeyboardState;
+            bool inGuiMode = TheGame.Instance.Mode == TheGame.GameMode.Gui;
+            Player player = World.Instance.Player;
+            if (prevKeyboardState.IsPressed(Key.E) && !inGuiMode)
+            {
+                //open player inventory gui...
+                //TheGame.Instance.OpenGui(new GuiTestForm());
+                TheGame.Instance.OpenGui(new GuiCraftingForm());
+            }
+            else if (prevKeyboardState.IsPressed(Key.D1))
+            {
+                SelectedSlotId = 0;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D2))
+            {
+                SelectedSlotId = 1;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D3))
+            {
+                SelectedSlotId = 2;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D4))
+            {
+                SelectedSlotId = 3;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D5))
+            {
+                SelectedSlotId = 4;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D6))
+            {
+                SelectedSlotId = 5;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D7))
+            {
+                SelectedSlotId = 6;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D8))
+            {
+                SelectedSlotId = 7;
+            }
+            else if (prevKeyboardState.IsPressed(Key.D9))
+            {
+                SelectedSlotId = 8;
+            }
+        }
+
+        private void DestroyBlock(Vector4 pos)
+        {
+            PositionBlock posBlock = PositionBlock.FromVector(pos);
+            Block block = Block.FromId(World.Instance.GetBlock(posBlock));
+            block.OnDestroy(posBlock);
+            World.Instance.SetBlock(posBlock, 0);
+            PositionChunk posChunk = PositionChunk.CreateFrom(posBlock);
+            Chunk chunk = World.Instance.GetChunk(posChunk);
+            chunk.InvalidateMeAndNeighbors();
+        }
+
+        internal void ThrowStack(EntityStack stack)
+        {
+            // drop items in crafting table and in hand...
+            stack.Position = Position + EyePosition;
+            stack.Position.Y -= (float)(MathLibrary.GlobalRandom.NextDouble() * 0.5f);
+            stack.Velocity = Direction * 0.1f;
+            stack.Yaw = (float)(MathLibrary.GlobalRandom.NextDouble() * Math.PI);
+            stack.Pitch = (float)(MathLibrary.GlobalRandom.NextDouble() * Math.PI);
+            stack.Velocity.X += (float)0.05f * (float)(MathLibrary.GlobalRandom.NextDouble() * 2.0 - 1.0);
+            stack.Velocity.Z += (float)0.05f * (float)(MathLibrary.GlobalRandom.NextDouble() * 2.0 - 1.0);
+            stack.Velocity.Y = 0.2f + (float)0.05f * (float)(MathLibrary.GlobalRandom.NextDouble() * 2.0 - 1.0);
+            World.Instance.SpawnStack(stack);
+            throwStackDelay = 20;
+        }
+
+        internal void GiveHealth(float percentPoints)
+        {
+            Health += percentPoints;
+            if (Health > 100f) 
+                Health = 100f;
+            if (Health < 0)
+                Health = 0f;
+        }
+
+        internal void DecreaseHunger(float percentPoints)
+        {
+            Hunger -= percentPoints;
+            if (Hunger > 100f)
+                Hunger = 100f;
+            if (Hunger < 0f)
+                Hunger = 0;
         }
     }
 }

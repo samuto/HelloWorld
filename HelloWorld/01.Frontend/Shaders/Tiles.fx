@@ -163,9 +163,20 @@ technique10 tech3
 {
     pass P0
     {
-        SetVertexShader( CompileShader( vs_4_0, VS() ) );
+        SetVertexShader( CompileShader( vs_4_0, VS_SIMPLE() ) );
         SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, PS() ) );
 		SetBlendState( Blending1, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+    }
+}
+
+technique10 tech4
+{
+    pass P0
+    {
+        SetVertexShader( CompileShader( vs_4_0, VS_SIMPLE() ) );
+        SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, PS() ) );
+		SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
     }
 }

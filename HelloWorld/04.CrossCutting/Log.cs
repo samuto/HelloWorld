@@ -44,6 +44,11 @@ namespace WindowsFormsApplication7.CrossCutting
             }
             return lastLines;
         }
+
+        internal void Debug(string text, SlimDX.Vector3 vector)
+        {
+            Debug(string.Format("{0} = ({1},{2},{3})", text, vector.X.ToString("###"), vector.Y.ToString("###"), vector.Z.ToString("###")));
+        }
     }
 
 }

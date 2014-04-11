@@ -9,13 +9,12 @@ namespace WindowsFormsApplication7.Business.Profiling
     {
         public Dictionary<string, int> AllCounters = new Dictionary<string, int>();
         public static Counters Instance = new Counters();
-
+        private Profiler p = Profiler.Instance;
         public void Reset()
         {
             foreach (var key in AllCounters.Keys.ToList())
             {
                 AllCounters[key] = 0;
-
             }
         }
 

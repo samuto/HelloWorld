@@ -5,23 +5,67 @@ using System.Text;
 using SlimDX;
 using WindowsFormsApplication7.Business;
 
-namespace WindowsFormsApplication7.Frontend.Gui
+namespace WindowsFormsApplication7.Frontend.Gui.Controls
 {
     class GuiControl
     {
         public object Tag;
-        public Vector2 Location;
+        private Vector2 location;
         public Vector2 Size;
-        public string Text = "<text>";
+        public string text = "<text>";
         public bool MouseIsOver = false;
         public Vector4 Color = new Vector4(0f, 0f, 1f, 1f);
         public bool Visible = true;
         public bool CustomRendering;
-        public Vector2 ParentLocation = new Vector2();
         public GuiControl Parent = null;
-        public event EventHandler<EventArgs> OnRender;
+        public event EventHandler<EventArgs> RenderControl;
         protected List<GuiControl> controls = new List<GuiControl>();
         public bool SkipUpdate = true;
+        protected Tessellator t = Tessellator.Instance;
+
+        public Vector2 GlobalLocation
+        {
+            get
+            {
+                if (Parent == null)
+                    return Location;
+                return Location + Parent.GlobalLocation;
+            }
+        }
+
+        public Vector2 Location
+        {
+            get
+            {
+                return location;
+            }
+            set
+            {
+                location = value;
+                OnLocationChanged();
+            }
+        }
+
+        protected virtual void OnLocationChanged()
+        {
+        }
+
+        public string Text
+        {
+            get
+            {
+                return text;
+            }
+            set
+            {
+                text = value;
+                OnTextChanged(text);
+            }
+        }
+
+        protected virtual void OnTextChanged(string text)
+        {
+        }
 
         public GuiControl[] Controls
         {
@@ -38,43 +82,39 @@ namespace WindowsFormsApplication7.Frontend.Gui
         internal void AddControl(GuiControl control)
         {
             controls.Add(control);
-            control.ParentLocation = this.Location;
             control.Parent = this;
+            control.OnLocationChanged();
         }
 
         internal void RemoveControl(GuiControl control)
         {
             controls.Remove(control);
-            control.ParentLocation = new Vector2();
             control.Parent = null;
+            control.OnLocationChanged();
         }
 
-
-        internal virtual void Render(float partialStep)
+        internal virtual void OnRender(float partialStep)
         {
+        }
 
+        internal void Render(float partialStep)
+        {
             if (!Visible)
                 return;
 
             if (!CustomRendering)
             {
-                Tessellator t = Tessellator.Instance;
                 t.StartDrawingColoredQuads();
-                Vector4 black = new Vector4(0, 0, 0, 1f);
-                t.AddVertexWithColorAndOffset(new Vector4(Location.X, Location.Y, 0f, 1f), Color, ParentLocation);
-                t.AddVertexWithColorAndOffset(new Vector4(Location.X, Location.Y + Size.Y, 0f, 1f), Color, ParentLocation);
-                t.AddVertexWithColorAndOffset(new Vector4(Location.X + Size.X, Location.Y + Size.Y, 0f, 1f), Color, ParentLocation);
-                t.AddVertexWithColorAndOffset(new Vector4(Location.X + Size.X, Location.Y, 0f, 1f), Color, ParentLocation);
-                t.Draw();
-
-                FontRenderer f = FontRenderer.Instance;
-                t.StartDrawingAlphaTexturedQuads("ascii");
-                Vector2 textSize = f.TextSize(Text);
-                f.RenderText(Text, Location.X + (Size.X - textSize.X) / 2f + ParentLocation.X, Location.Y + (Size.Y - textSize.Y) / 2f + ParentLocation.Y);
+                t.AddVertexWithColor(new Vector4(GlobalLocation.X, GlobalLocation.Y, 0f, 1f), Color);
+                t.AddVertexWithColor(new Vector4(GlobalLocation.X, GlobalLocation.Y + Size.Y, 0f, 1f), Color);
+                t.AddVertexWithColor(new Vector4(GlobalLocation.X + Size.X, GlobalLocation.Y + Size.Y, 0f, 1f), Color);
+                t.AddVertexWithColor(new Vector4(GlobalLocation.X + Size.X, GlobalLocation.Y, 0f, 1f), Color);
                 t.Draw();
             }
-            if(OnRender != null)
-                OnRender(this, new EventArgs());
+            else
+                OnRender(partialStep);
+            if(RenderControl != null)
+                RenderControl(this, new EventArgs());
             
             foreach (GuiControl control in controls)
             {
@@ -87,7 +127,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
             if(Parent == null)
                 return;
-            this.Location = Parent.Size / 2 - this.Size / 2;
+            this.Location = (Parent.Size - this.Size) / 2f;
         }
 
 
@@ -104,42 +144,43 @@ namespace WindowsFormsApplication7.Frontend.Gui
             bool mouseRightPrev = Input.Instance.LastInput.MouseState.IsPressed(1);
             bool mouseMoved = Input.Instance.CurrentInput.MouseLocation != Input.Instance.LastInput.MouseLocation;
 
-            GuiControl control = this;
-            bool mouseOverPrev = control.MouseIsOver;
-            bool mouseOver = MouseInRect(GuiScaling.Instance.CalcMouseLocation(Input.Instance.CurrentInput.MouseLocation), control.Location+ParentLocation, control.Size);
-            control.MouseIsOver = mouseOver;
+
+            bool mouseOverPrev = MouseIsOver;
+            Vector2 pos = new Vector2(GlobalLocation.X, GlobalLocation.Y);
+            bool mouseOver = MouseInRect(GuiScaling.Instance.CalcMouseLocation(Input.Instance.CurrentInput.MouseLocation), pos, Size);
+            MouseIsOver = mouseOver;
 
             // Fire events
             if (mouseMoved)
             {
-                control.OnMouseMoved();
+                OnMouseMoved();
             }
             if (mouseOver)
             {
                 if (!mouseOverPrev)
                 {
-                    control.OnMouseEnter();
+                    OnMouseEnter();
                     if (mouseLeft || mouseRight)
                     {
-                        control.OnMouseDown();
+                        OnMouseDown();
                     }
                 }
                 if (mouseLeft && !mouseLeftPrev || mouseRight && !mouseRightPrev)
                 {
-                    control.OnMouseDown();
+                    OnMouseDown();
                 }
                 if (!mouseLeft && mouseLeftPrev || !mouseRight && mouseRightPrev)
                 {
-                    control.OnMouseUp();
+                    OnMouseUp();
                 }
             }
             else
             {
                 if (mouseOverPrev)
                 {
-                    control.OnMouseLeave();
+                    OnMouseLeave();
                     if (mouseLeft)
-                        control.OnMouseUp();
+                        OnMouseUp();
                 }
             }
            
@@ -185,7 +226,13 @@ namespace WindowsFormsApplication7.Frontend.Gui
         {
         }
 
-       
+        public virtual void Dispose()
+        {
+            foreach (GuiControl child in controls)
+            {
+                child.Dispose();
+            }
+        }
 
     }
 }

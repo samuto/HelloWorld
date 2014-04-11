@@ -24,5 +24,14 @@ namespace WindowsFormsApplication7.Frontend
             Vertices = null;
             Disposed = true;
         }
+
+        internal static void Dispose(ref VertexBuffer buffer)
+        {
+            if (buffer != null)
+            {
+                buffer.Dispose();
+                buffer = null;
+            }
+        }
     }
 }

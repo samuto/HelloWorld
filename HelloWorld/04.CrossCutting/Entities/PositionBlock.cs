@@ -17,5 +17,15 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             this.Y = y;
             this.Z = z;
         }
+
+        internal static PositionBlock FromVector(SlimDX.Vector4 vector4)
+        {
+            return new PositionBlock((int)vector4.X, (int)vector4.Y, (int)vector4.Z);
+        }
+
+        internal bool SameAs(PositionBlock otherPos)
+        {
+            return X == otherPos.X && Z == otherPos.Z && Y == otherPos.Y;
+        }
     }
 }

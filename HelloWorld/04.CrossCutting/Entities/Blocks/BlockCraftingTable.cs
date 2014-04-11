@@ -7,21 +7,19 @@ using WindowsFormsApplication7.Business;
 using SlimDX;
 using WindowsFormsApplication7.Business.Repositories;
 using WindowsFormsApplication7.Business.Geometry;
+using WindowsFormsApplication7.Frontend.Gui;
+using WindowsFormsApplication7.Frontend.Gui.Forms;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
 {
-    class BlockGrass : Block
+    class BlockCraftingTable : Block
     {
-        public BlockGrass(int blockId)
-            : base(blockId)
-        {
-        }
+        public BlockCraftingTable(int blockId) : base(blockId) { }
 
-        internal override int[] DroppedIds()
+        internal override bool OnActivate(PositionBlock position)
         {
-            if(MathLibrary.GlobalRandom.NextDouble() > 0.1)
-                return new int[0];
-            return new int[1] { ItemRepository.SeedsWheat.Id };
+            TheGame.Instance.OpenGui(new GuiCraftingForm());
+            return true;
         }
     }
 }

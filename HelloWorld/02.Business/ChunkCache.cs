@@ -13,6 +13,7 @@ namespace WindowsFormsApplication7.Business
         private Dictionary<object, Chunk> cachedChunks = new Dictionary<object, Chunk>();
         public PositionChunk LastMinChunk = new PositionChunk();
         public PositionChunk LastMaxChunk = new PositionChunk();
+        private Profiler p = Profiler.Instance;
 
         public ChunkCache()
         {
@@ -21,14 +22,14 @@ namespace WindowsFormsApplication7.Business
 
         internal void Update(Vector3 position, float blockRadius)
         {
-            Profiler p = Profiler.Instance;
             p.StartSection("setup");
-            PositionChunk minChunk = PositionChunk.CreateFrom(Vector3.Add(position, new Vector3(-blockRadius, -blockRadius, -blockRadius)));
-            PositionChunk maxChunk = PositionChunk.CreateFrom(Vector3.Add(position, new Vector3(blockRadius, blockRadius, blockRadius)));
 
-            // limit y...
-            if (minChunk.Y < 0) minChunk.Y = 0;
-            if (maxChunk.Y >= Chunk.MaxSizeY / 16) maxChunk.Y = Chunk.MaxSizeY / 16 - 1;
+            Vector3 minPos = Vector3.Add(position, new Vector3(-blockRadius, -blockRadius, -blockRadius));
+            Vector3 maxPos = Vector3.Add(position, new Vector3(blockRadius, blockRadius, blockRadius));
+            if (minPos.Y < 0) minPos.Y = 0;
+            if (maxPos.Y > (Chunk.MaxSizeY - 1)) maxPos.Y = Chunk.MaxSizeY - 1;
+            PositionChunk minChunk = PositionChunk.CreateFrom(minPos);
+            PositionChunk maxChunk = PositionChunk.CreateFrom(maxPos);
 
             // skip updating cache if nothing has changed
             /*
@@ -47,13 +48,20 @@ namespace WindowsFormsApplication7.Business
                 {
                     for (int z = minChunk.Z; z <= maxChunk.Z; z++)
                     {
+                        p.StartSection("maintain");
                         Chunk chunk = World.Instance.GetChunk(new PositionChunk(x, y, z));
                         chunk.RenewLease();
+                        p.EndStartSection("updatecahce");
                         if (!cachedChunks.ContainsKey(chunk.Position.Key))
                         {
                             cachedChunks.Add(chunk.Position.Key, chunk);
                         }
+                        p.EndStartSection("updating");
+                       
                         chunk.Update();
+
+
+                        p.EndStartSection("relocating");
                         // relocate entities
                         foreach (EntityStack stack in chunk.StackEntities.ToArray())
                         {
@@ -61,14 +69,15 @@ namespace WindowsFormsApplication7.Business
                             if (!chunk.Position.SameAs(destChunk))
                             {
                                 // relocate
-                                chunk.StackEntities.Remove(stack);
+                                chunk.RemoveEntity(stack);
                                 if (cachedChunks.ContainsKey(destChunk.Key))
                                 {
-                                    cachedChunks[destChunk.Key].StackEntities.Add(stack);
+                                    cachedChunks[destChunk.Key].AddEntity(stack);
                                 }
                             }
                             
                         }
+                        p.EndSection();
                     }
                 }
             }

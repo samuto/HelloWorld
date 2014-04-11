@@ -12,14 +12,14 @@ namespace WindowsFormsApplication7.Business
 {
     class CollisionSimple : ICollisionSystem
     {
-        private Entity entity;
+        private EntityPlayer entity;
 
-        public CollisionSimple(Entity entity)
+        public CollisionSimple(EntityPlayer entity)
         {
             this.entity = entity;
         }
 
-        public Vector3 Resolve(CrossCutting.Entities.Entity entity)
+        public Vector3 Resolve(CrossCutting.Entities.EntityPlayer entity)
         {
             World theWorld = World.Instance;
             Vector3 pos = entity.Position;

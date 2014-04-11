@@ -31,6 +31,9 @@ namespace WindowsFormsApplication7.Frontend
         private Texture2D depthBuffer;
         private Device device;
         private SwapChain swapChain;
+        private HeadUpDisplay headUpDisplay;
+        private Tessellator t = Tessellator.Instance;
+        private Profiler p = Profiler.Instance;
 
         internal void ClearTarget()
         {
@@ -46,10 +49,11 @@ namespace WindowsFormsApplication7.Frontend
             Setup3dCamera(partialStep);
 
             // 3D: render chunks
+            p.StartSection("chunkcache");
             chunkCacheRenderer.Render();
 
             // 3D: render entities
-
+            p.EndStartSection("entities");
             entityRenderers.GetRenderer(World.Instance.Player).Render(partialStep);
             entityRenderers.GetRenderer(World.Instance.FlyingCamera).Render(partialStep);
             entityRenderers.GetRenderer(World.Instance.Sun).Render(partialStep);
@@ -57,13 +61,24 @@ namespace WindowsFormsApplication7.Frontend
             RenderPlayerRayImpact(partialStep);
 
             // Render 2d stuff
+            p.EndStartSection("2d");
             Setup2dCamera();
             RenderCrossHair();
+            RenderHeadUpDisplay();
+            p.EndSection();
+        }
+
+        private void RenderHeadUpDisplay()
+        {
+            if (TheGame.Instance.Mode == TheGame.GameMode.InGame)
+            {
+                headUpDisplay.Render();
+            }
         }
 
         private void RenderCrossHair()
         {
-            Tessellator t = Tessellator.Instance;
+            t.ResetTransformation();
             t.StartDrawingLines();
             Vector4 c = new Vector4(1, 1, 1, 1);
             Vector4 center = new Vector4(TheGame.Instance.Width / 2, TheGame.Instance.Height / 2, 0, 1);
@@ -79,8 +94,7 @@ namespace WindowsFormsApplication7.Frontend
         {
             if (!World.Instance.PlayerVoxelTrace.Hit)
                 return;
-
-            Tessellator t = Tessellator.Instance;
+            t.ResetTransformation();
             t.StartDrawingTiledQuadsWTF();
             Vector4 buildPos = World.Instance.PlayerVoxelTrace.ImpactPosition;
             t.Translate.X = buildPos.X + 0.5f;
@@ -89,7 +103,6 @@ namespace WindowsFormsApplication7.Frontend
             float s = 1.01f;
             t.Scale = new Vector3(s, s, s);
             t.Draw(TileTextures.Instance.GetSelectionBlockVertexBuffer());
-            t.ResetTransformation();
             return;
         }
 
@@ -131,6 +144,13 @@ namespace WindowsFormsApplication7.Frontend
             Camera.Instance.Update(partialStep);
         }
 
+        internal void ToggleFullScreen()
+        {
+            bool isFull = swapChain.Description.IsWindowed;
+            swapChain.SetFullScreenState(isFull, null);
+        }
+
+        
         internal void Initialize(SlimDX.Windows.RenderForm form)
         {
             // setup directx
@@ -200,24 +220,43 @@ namespace WindowsFormsApplication7.Frontend
             device.ImmediateContext.OutputMerger.SetTargets(depthView, renderView);
             device.ImmediateContext.Rasterizer.SetViewports(new Viewport(0, 0, form.ClientSize.Width, form.ClientSize.Height, 0.0f, 0.01f));
 
-            Tessellator.Instance.Initialize(1024 * 1024 * 10, device);
+            t.Initialize(1024 * 1024 * 10, device);
             TileTextures.Instance.Initialize();
+            headUpDisplay = new HeadUpDisplay();
         }
 
         internal void Dispose()
         {
+            profileVertexBuffer.Dispose();
             depthView.Dispose();
             renderView.Dispose();
             depthBuffer.Dispose();
             backBuffer.Dispose();
             device.Dispose();
+            swapChain.SetFullScreenState(false, null);
             swapChain.Dispose();
         }
 
+
         internal void RenderProfiler()
         {
+            if (profileVertexBuffer == null)
+                return;
+            t.ResetTransformation();
+            t.StartDrawingAlphaTexturedQuads("ascii");
+            t.Draw(profileVertexBuffer);
+        }
+
+        private VertexBuffer profileVertexBuffer;
+        internal void ProfilerSnapshot()
+        {
+            if (profileVertexBuffer != null)
+                profileVertexBuffer.Dispose();
+
+            t.ResetTransformation();
             FontRenderer f = FontRenderer.Instance;
-            Profiler p = Profiler.Instance;
+            f.BeginBatch();
+            f.CharScale = 1;
             string report = p.Report();
             float y = TheGame.Instance.Height - FontRenderer.Instance.LineHeight;
             using (StringReader sr = new StringReader(report))
@@ -229,25 +268,9 @@ namespace WindowsFormsApplication7.Frontend
                     y -= f.LineHeight;
                 }
             }
-        }
-
-        internal void RenderGui(float partialStep)
-        {
-            Tessellator t = Tessellator.Instance;
-            t.Scale = GuiScaling.Instance.Scale3;
-            t.Translate = GuiScaling.Instance.Translate3;
-            TheGame.Instance.ActiveGui.Render(partialStep);
-            t.ResetTransformation();
-
-            FontRenderer.Instance.CharScale = GuiScaling.Instance.Scale;
-            TheGame.Instance.Cursor.Render(partialStep);
-            FontRenderer.Instance.CharScale = 1f;
-        }
-
-        internal void RenderLog()
-        {
-            FontRenderer f = FontRenderer.Instance;
-            float y = 0;
+            
+            // log...
+            y = TheGame.Instance.Height - f.LineHeight * 10f;
 
             if (World.Instance.PlayerVoxelTrace.Hit)
             {
@@ -257,30 +280,47 @@ namespace WindowsFormsApplication7.Frontend
                         World.Instance.PlayerVoxelTrace.ImpactPosition.Z.ToString().PadRight(5),
                         World.Instance.PlayerVoxelTrace.ImpactBlock.Id);
                 f.RenderTextShadow(line, 0, y);
-                y += f.LineHeight;
+                y -= f.LineHeight;
             }
             else
             {
                 f.RenderTextShadow("no impact", 0, y);
-                y += f.LineHeight;
+                y -= f.LineHeight;
             }
             f.RenderTextShadow(string.Format("direction: x={0}z={2}y={1}",
                         World.Instance.Player.Direction.X.ToString("#.##").PadRight(5),
                         World.Instance.Player.Direction.Y.ToString("#.##").PadRight(5),
                         World.Instance.Player.Direction.Z.ToString("#.##").PadRight(5)), 0, y);
-            y += f.LineHeight;
+            y -= f.LineHeight;
             f.RenderTextShadow(string.Format("position: x={0}z={2}y={1}",
                        World.Instance.Player.Position.X.ToString("#.##").PadRight(5),
                        World.Instance.Player.Position.Y.ToString("#.##").PadRight(5),
                        World.Instance.Player.Position.Z.ToString("#.##").PadRight(5)), 0, y);
-            y += f.LineHeight;
-            y += f.LineHeight;
+            y -= f.LineHeight;
+            y -= f.LineHeight;
             string[] lastLines = Log.Instance.Last(30);
             foreach (string line in lastLines)
             {
                 f.RenderTextShadow(line, 0, y);
-                y += f.LineHeight;
+                y -= f.LineHeight;
             }
+            f.StopBatch();
+            profileVertexBuffer = t.GetVertexBuffer();
         }
+
+        internal void RenderGui(float partialStep)
+        {
+            t.Scale = GuiScaling.Instance.Scale3;
+            t.Translate = GuiScaling.Instance.Translate3;
+            TheGame.Instance.ActiveGui.Render(partialStep);
+
+            FontRenderer.Instance.CharScale = GuiScaling.Instance.Scale;
+            TheGame.Instance.Cursor.Render(partialStep);
+            FontRenderer.Instance.CharScale = 1f;
+        }
+
+       
+
+       
     }
 }

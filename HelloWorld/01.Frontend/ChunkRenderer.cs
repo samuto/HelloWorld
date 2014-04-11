@@ -22,6 +22,7 @@ namespace WindowsFormsApplication7.Frontend
         private VertexBuffer pass2VertexBuffer;
         private Stopwatch stopwatch = new Stopwatch();
         private Chunk chunk;
+        private Tessellator t = Tessellator.Instance;
 
         public ChunkRenderer(Chunk chunk)
         {
@@ -44,7 +45,6 @@ namespace WindowsFormsApplication7.Frontend
         internal void RenderPass2()
         {
             // draw chunk if drawbuffer has been calculated
-            Tessellator t = Tessellator.Instance;
             if (pass2VertexBuffer.Vertices != null)
             {
                 t.StartDrawingTiledQuadsPass2();
@@ -57,8 +57,7 @@ namespace WindowsFormsApplication7.Frontend
             // check if this is inside frustum
             RenewLease();
             bool rebuildOccured = false;
-            Tessellator t = Tessellator.Instance;
-
+            
 
             if ((pass1VertexBuffer.Disposed || chunk.IsDirty) && !forceCachedRendering)
             {
@@ -99,8 +98,6 @@ namespace WindowsFormsApplication7.Frontend
                 pass1VertexBuffer = t.GetVertexBuffer();
 
                 // generate vertex buffer for pass2
-
-                t.StartDrawingTiledQuads();
                 foreach (PositionBlock pass2BlockPos in pass2Blocks)
                 {
                     blockRenderer.RenderBlock(pass2BlockPos, chunk);
@@ -112,6 +109,7 @@ namespace WindowsFormsApplication7.Frontend
             }
 
             // draw chunk if drawbuffer has been calculated
+            t.ResetTransformation();
             if (pass1VertexBuffer.Vertices != null)
             {
                 t.StartDrawingTiledQuads();
@@ -120,28 +118,33 @@ namespace WindowsFormsApplication7.Frontend
             // draw entities in chunk
             foreach (EntityStack stack in chunk.StackEntities)
             {
-                if (stack.IsBlock)
+                int entitiesToDraw = stack.Count > 2 ? 2 : stack.Count;
+                if (stack.AsBlock != null)
                 {
-                    t.StartDrawingTiledQuads();
                     t.Translate = stack.Position;
                     t.Scale = new Vector3(0.5f, 0.5f, 0.5f);
                     t.Rotate = new Vector3(stack.Pitch, stack.Yaw, 0);
-                    t.Draw(TileTextures.Instance.GetBlockVertexBuffer(stack.Id));
+                    for (int i = 0; i<entitiesToDraw; i++)
+                    {
+                        t.StartDrawingTiledQuads();
+                        t.Draw(TileTextures.Instance.GetBlockVertexBuffer(stack.Id));
+                        t.Translate += new Vector3(0.05f, 0.05f, 0.05f);
+                    }
                 }
-                else if(stack.IsItem)
+                else if (stack.AsItem != null)
                 {
-                    Player p = World.Instance.Player;
-                    t.StartDrawingTiledQuadsPass2();
                     t.Translate = stack.Position;
                     t.Scale = new Vector3(0.5f, 0.5f, 0.5f);
-                    t.Rotate = new Vector3(-p.Pitch, p.Yaw+(float)Math.PI, 0);
-                    t.Draw(TileTextures.Instance.GetItemVertexBuffer(stack.Id));
+                    for (int i = 0; i < entitiesToDraw; i++)
+                    {
+                        Player p = World.Instance.Player;
+                        t.Rotate = new Vector3(-p.Pitch, p.Yaw + (float)Math.PI, 0);
+                        t.StartDrawingTiledQuadsPass2();
+                        t.Draw(TileTextures.Instance.GetItemVertexBuffer(stack.Id));
+                        t.Translate += new Vector3(0.2f, 0.2f, 0.2f);
+                    }
                 }
-            }
-            t.ResetTransformation();
-
-
-            
+            }            
             return rebuildOccured;
         }
 

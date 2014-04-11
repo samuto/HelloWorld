@@ -11,10 +11,12 @@ using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
-    class EntityStack : Entity
+    class EntityStack : EntityPlayer
     {
         private int count;
-        public int Id;
+        public new int Id;
+        private float dYaw = (float)(MathLibrary.GlobalRandom.NextDouble() - 0.5);
+        private float dPitch = (float)(MathLibrary.GlobalRandom.NextDouble() - 0.5);
 
         public int Count
         {
@@ -30,6 +32,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             this.count = count;
             AABB = new AxisAlignedBoundingBox(new Vector3(-0.25f, -0.25f, -0.25f), new Vector3(0.25f, 0.25f, 0.25f));
             collisionSystem = new CollisionSimple(this);
+            EntityType = EntityTypeEnum.EntityStackFullUpdate;
         }
 
         internal bool Compatible(EntityStack otherStack)
@@ -37,32 +40,22 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return otherStack.Id == Id || this.Id == 0 || otherStack.Id == 0;
         }
 
-        internal bool IsBlock
-        {
-            get
-            {
-                return Id > 0 && Id < ItemRepository.ItemIdOffset;
-            }
-        }
-
-
        
-
-        internal bool IsItem
-        {
-            get
-            {
-                return Id >= ItemRepository.ItemIdOffset;
-            }
-        }
-
         internal Block AsBlock
         {
             get
             {
-                if (!IsBlock) 
+                if (!Entity.IsBlock(Id)) 
                     return null;
                 return BlockRepository.Blocks[Id];
+            }
+        }
+
+        internal Entity AsEntity
+        {
+            get
+            {
+                return Entity.FromId(Id);
             }
         }
 
@@ -70,7 +63,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             get
             {
-                if (!IsItem)
+                if (!Entity.IsItem(Id))
                     return null;
                 return ItemRepository.Items[Id];
             }
@@ -157,5 +150,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             swapStack.Id = tempId;
         }
 
+       internal override void OnUpdate()
+        {
+            PrevYaw = Yaw;
+            Yaw += dYaw*0.02f;
+            PrevPitch = Pitch;
+            Pitch += dPitch * 0.02f;
+            if (Yaw > Math.PI * 2.0)
+                Yaw -= (float)Math.PI * 2f;
+            if (Pitch > Math.PI * 2.0)
+                Pitch -= (float)Math.PI * 2f;
+            base.OnUpdate();
+        }
     }
 }

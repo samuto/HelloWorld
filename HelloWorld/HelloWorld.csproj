@@ -53,18 +53,28 @@
     <Compile Include="01.Frontend\Effects\FXBase.cs" />
     <Compile Include="01.Frontend\Effects\FXSimple.cs" />
     <Compile Include="01.Frontend\FontRenderer.cs" />
+    <Compile Include="01.Frontend\Gui\Controls\GuiLabel.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiTestForm.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiInventoryForm.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiFurnaceForm.cs" />
     <Compile Include="01.Frontend\Gui\GuiScaling.cs" />
-    <Compile Include="01.Frontend\Gui\GuiMovableControl.cs" />
-    <Compile Include="01.Frontend\Gui\GuiPanel.cs" />
-    <Compile Include="01.Frontend\Gui\GuiButton.cs" />
-    <Compile Include="01.Frontend\Gui\GuiForm.cs" />
-    <Compile Include="01.Frontend\Gui\GuiControl.cs" />
+    <Compile Include="01.Frontend\Gui\Controls\GuiStackControl.cs" />
+    <Compile Include="01.Frontend\Gui\Controls\GuiPanel.cs" />
+    <Compile Include="01.Frontend\Gui\Controls\GuiButton.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiForm.cs" />
+    <Compile Include="01.Frontend\Gui\Controls\GuiControl.cs" />
     <Compile Include="01.Frontend\Gui\GuiCursor.cs" />
+    <Compile Include="01.Frontend\Label.cs" />
+    <Compile Include="01.Frontend\HeadUpDisplay.cs" />
     <Compile Include="01.Frontend\Interpolate.cs" />
     <Compile Include="01.Frontend\TileTextures.cs" />
     <Compile Include="01.Frontend\VertexBuffer.cs" />
     <Compile Include="02.Business\CollisionComplex.cs" />
     <Compile Include="02.Business\CollisionSimple.cs" />
+    <Compile Include="02.Business\Recipes\RecipesBase.cs" />
+    <Compile Include="02.Business\Recipes\FurnaceRecipes.cs" />
+    <Compile Include="04.CrossCutting\Entities\Wheat.cs" />
+    <Compile Include="04.CrossCutting\Entities\Furnace.cs" />
     <Compile Include="02.Business\Geometry\AxisAlignBoundingBox.cs" />
     <Compile Include="02.Business\Geometry\BoundingFrustum.cs" />
     <Compile Include="02.Business\ICollisionSystem.cs" />
@@ -75,11 +85,13 @@
     <Compile Include="02.Business\Profiling\Profiler.cs" />
     <Compile Include="02.Business\Frame.cs" />
     <Compile Include="02.Business\Input.cs" />
-    <Compile Include="02.Business\Repositories\RecepeRepository.cs" />
+    <Compile Include="02.Business\Recipes\CraftingTableRecipes.cs" />
     <Compile Include="02.Business\ToolMatrix.cs" />
     <Compile Include="02.Business\VoxelTrace.cs" />
-    <Compile Include="04.CrossCutting\Entities\Blocks\BlockGrass.cs" />
     <Compile Include="04.CrossCutting\Entities\Blocks\BlockWheat.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockCraftingTable.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockFurnace.cs" />
+    <Compile Include="04.CrossCutting\Entities\Entity.cs" />
     <Compile Include="04.CrossCutting\Entities\Items\ItemFood.cs" />
     <Compile Include="04.CrossCutting\Entities\Items\ItemSeeds.cs" />
     <Compile Include="04.CrossCutting\Entities\Items\ItemHoe.cs" />
@@ -102,7 +114,7 @@
     <Compile Include="04.CrossCutting\Entities\PositionBlock.cs" />
     <Compile Include="04.CrossCutting\Entities\FlyingCamera.cs" />
     <Compile Include="04.CrossCutting\Entities\Player.cs" />
-    <Compile Include="04.CrossCutting\Entities\Entity.cs" />
+    <Compile Include="04.CrossCutting\Entities\EntityPlayer.cs" />
     <Compile Include="01.Frontend\ChunkCacheRenderer.cs" />
     <Compile Include="01.Frontend\ChunkRenderer.cs" />
     <Compile Include="01.Frontend\EntityRenderer.cs" />
@@ -110,7 +122,7 @@
     <Compile Include="01.Frontend\Camera.cs" />
     <Compile Include="04.CrossCutting\Entities\Chunk.cs" />
     <Compile Include="01.Frontend\Resources.cs" />
-    <Compile Include="01.Frontend\Gui\GuiCraftingForm.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiCraftingForm.cs" />
     <Compile Include="04.CrossCutting\Log.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -157,10 +169,31 @@
     <Content Include="01.Frontend\Textures\Blocks\cobblestone.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="01.Frontend\Textures\Blocks\crafting_table_front.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\crafting_table_side.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\crafting_table_top.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="01.Frontend\Textures\Blocks\farmland_dry.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\farmland_wet.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\furnace_front_off.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\furnace_front_on.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\furnace_side.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\furnace_top.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\selection_box.png">
@@ -253,7 +286,13 @@
     <Content Include="01.Frontend\Textures\Blocks\wheat_stage_7.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="01.Frontend\Textures\Items\empty.png">
+    <Content Include="01.Frontend\Textures\Gui\Frame.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\icons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Items\coal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Items\seeds_wheat.png">
@@ -278,9 +317,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Items\wheat.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="01.Frontend\Textures\terrain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\ascii.png">

@@ -5,8 +5,10 @@ using System.Text;
 using WindowsFormsApplication7.Business;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using SlimDX;
+using WindowsFormsApplication7.Business.Geometry;
+using WindowsFormsApplication7.Frontend.Gui.Controls;
 
-namespace WindowsFormsApplication7.Frontend.Gui
+namespace WindowsFormsApplication7.Frontend.Gui.Forms
 {
     class GuiCraftingForm : GuiForm
     {
@@ -17,7 +19,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
         private GuiPanel guiCraftingProduct;
         private List<GuiPanel> craftingSlots = new List<GuiPanel>();
 
-        private GuiMovableControl guiStackInHand;
+        private GuiStackControl guiStackInHand;
         private EntityStack stackInHand = EntityStack.CreateEmptyStack();
 
         public GuiCraftingForm()
@@ -28,14 +30,31 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         }
 
+        internal override void OnClose()
+        {
+            base.OnClose();
+            Player player = World.Instance.Player;
+            player.ThrowStack(stackInHand);
+           
+
+            foreach (Slot slot in craftingTable.Grid)
+            {
+                if (slot.IsEmpty)
+                    continue;
+                player.ThrowStack(slot.Content);
+           
+
+            }
+        }
+
         private void Initialize()
         {
             // Create gui stack in hand and bind it to local variable
-            guiStackInHand = new GuiMovableControl();
+            guiStackInHand = new GuiStackControl();
             guiStackInHand.Size = new SlimDX.Vector2(itemSize, itemSize);
             guiStackInHand.Tag = stackInHand;
             guiStackInHand.AttachToCursor();
-            guiStackInHand.OnRender += new EventHandler<EventArgs>(guiStack_OnRender);
+            guiStackInHand.RenderControl += new EventHandler<EventArgs>(guiStack_RenderControl);
             BindControl(guiStackInHand);
 
             // setup crafting table
@@ -84,50 +103,42 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
         private void CreateAndBindGuiStack(EntityStack stack, GuiPanel parent)
         {
-            GuiMovableControl guiStack = new GuiMovableControl();
+            GuiStackControl guiStack = new GuiStackControl();
             guiStack.Size = new SlimDX.Vector2(itemSize, itemSize);
             guiStack.Tag = stack;
             parent.AddControl(guiStack);
             guiStack.CenterInParent();
-            guiStack.OnRender += new EventHandler<EventArgs>(guiStack_OnRender);
+            guiStack.RenderControl += new EventHandler<EventArgs>(guiStack_RenderControl);
             BindControl(guiStack);
         }
 
 
         private void BindControl(GuiPanel guiCraftingProduct)
         {
-            BindControl((GuiMovableControl)guiCraftingProduct.Controls[0]);
+            BindControl((GuiStackControl)guiCraftingProduct.Controls[0]);
         }
 
-        private void BindControl(GuiMovableControl control)
+        private void BindControl(GuiStackControl control)
         {
             EntityStack stack = (EntityStack)control.Tag;
-            control.Text = stack.Id + "#" + stack.Count.ToString();
+            control.Text = stack.Count.ToString();
             control.Visible = stack.Count > 0;
         }
 
-        void guiStack_OnRender(object sender, EventArgs e)
+        void guiStack_RenderControl(object sender, EventArgs e)
         {
-            GuiMovableControl control = (GuiMovableControl)sender;
+            GuiStackControl control = (GuiStackControl)sender;
             Vector3 pos = new Vector3(
-                control.Location.X+control.ParentLocation.X, 
-                control.Location.Y+control.ParentLocation.Y, 
+                control.GlobalLocation.X,
+                control.GlobalLocation.Y,
                 0);
-            Tessellator t = Tessellator.Instance;
             t.StartDrawingTiledQuadsWTF();
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(new Vector3(itemSize, itemSize, itemSize)));
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(pos));
             EntityStack stack = (EntityStack)control.Tag;
             t.Draw(TileTextures.Instance.GetItemVertexBuffer(stack.Id));
             
-            FontRenderer f = FontRenderer.Instance;
-            t.StartDrawingAlphaTexturedQuads("ascii");
-            string text = stack.Count.ToString();
-            Vector2 textSize = f.TextSize(text);
-            f.RenderText(text, 
-                control.Location.X + control.ParentLocation.X,
-                control.Location.Y + control.ParentLocation.Y);
-            t.Draw();
+           
         }
 
 
@@ -173,7 +184,7 @@ namespace WindowsFormsApplication7.Frontend.Gui
 
             // setup variables
             GuiPanel guiSelectedSlot = (GuiPanel)sender;
-            GuiMovableControl guiSelectedStack = (GuiMovableControl)guiSelectedSlot.Controls[0];
+            GuiStackControl guiSelectedStack = (GuiStackControl)guiSelectedSlot.Controls[0];
             Slot selectedSlot = (Slot)guiSelectedSlot.Tag;
 
             // return if there is nothing to pick up

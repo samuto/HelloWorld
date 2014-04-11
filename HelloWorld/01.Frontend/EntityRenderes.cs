@@ -12,10 +12,10 @@ namespace WindowsFormsApplication7.Frontend
 {
     class EntityRenderers
     {
-        Dictionary<Entity, EntityRenderer> renderers = new Dictionary<Entity, EntityRenderer>();
+        Dictionary<EntityPlayer, EntityRenderer> renderers = new Dictionary<EntityPlayer, EntityRenderer>();
 
 
-        internal EntityRenderer GetRenderer(Entity entity)
+        internal EntityRenderer GetRenderer(EntityPlayer entity)
         {
             if (renderers.ContainsKey(entity))
                 return renderers[entity];

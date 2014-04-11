@@ -10,6 +10,7 @@ using SlimDX.D3DCompiler;
 using Device = SlimDX.Direct3D11.Device;
 using WindowsFormsApplication7.Business;
 using WindowsFormsApplication7._01.Frontend.Effects;
+using WindowsFormsApplication7.Business.Profiling;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -122,7 +123,7 @@ namespace WindowsFormsApplication7.Frontend
         {
             if (VertexCount == 0)
                 return;
-
+            Counters.Instance.Increment("#drawcalls");
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Scaling(Scale));
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(Rotate.Y, Rotate.X, Rotate.Z));
             Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(Translate));
@@ -200,6 +201,12 @@ namespace WindowsFormsApplication7.Frontend
         {
             SetTextureQuad(new Vector2(0, 0), 1f, 1f);
             StartDrawing(null, FXTiles.Instance, 1, PrimitiveTopology.TriangleList);
+        }
+
+        public void StartDrawingTiledQuadsSimpleNoBlend()
+        {
+            SetTextureQuad(new Vector2(0, 0), 1f, 1f);
+            StartDrawing(null, FXTiles.Instance, 4, PrimitiveTopology.TriangleList);
         }
 
         public void StartDrawingTiledQuadsPass2()

@@ -15,7 +15,7 @@ namespace WindowsFormsApplication7.Frontend
         /// <param name="entity"></param>
         /// <param name="partialStep">1.0 if this is previous tick position, 0.0 if this is current tick position</param>
         /// <returns></returns>
-        internal static SlimDX.Vector3 Position(Entity entity, float partialStep)
+        internal static SlimDX.Vector3 Position(EntityPlayer entity, float partialStep)
         {
             float p1 = partialStep;
             float p2 = (1-partialStep);
@@ -26,7 +26,7 @@ namespace WindowsFormsApplication7.Frontend
                 );
         }
 
-        internal static Vector3 EyePosition(Entity attachedEntity, float partialStep)
+        internal static Vector3 EyePosition(EntityPlayer attachedEntity, float partialStep)
         {
             return Vector3.Add(attachedEntity.EyePosition, Interpolate.Position(attachedEntity, partialStep));
         }

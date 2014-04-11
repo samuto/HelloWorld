@@ -6,6 +6,7 @@ using WindowsFormsApplication7.Business;
 using SlimDX;
 using WindowsFormsApplication7.Business.Geometry;
 using System.Diagnostics;
+using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities
 {
@@ -15,14 +16,17 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         public const int MaxSizeY = 128;
         public PositionChunk Position;
         private byte[] blocks = new byte[16 * 16 * 16];
+        private Dictionary<int, Dictionary<string, object>> chunkMetaData = new Dictionary<int, Dictionary<string, object>>();
         public bool IsDirty = true;
         private bool initialized;
-        public List<EntityStack> StackEntities = new List<EntityStack>();
+        private List<EntityStack> stackEntities = new List<EntityStack>();
+        private List<Entity> blockEntityFullUpdate = new List<Entity>();
         private Stopwatch stopwatch = new Stopwatch();
 
         public Chunk()
         {
             stopwatch.Start();
+          
         }
 
         public void RenewLease()
@@ -38,8 +42,23 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        public void SetLocalBlock(int x, int y, int z, int blockId)
+        public void SetLocalBlock(int x, int y, int z, int blockId, bool registerBlock=true)
         {
+            Block block = Block.FromId(blockId);
+            if (registerBlock)
+            {
+                Entity entity = block.CreateEntity();
+                if (entity != null)
+                {
+                    entity.Parent = this;
+                    entity.AddToParent();
+                    entity.PositionBlock = new PositionBlock(x, y, z);
+                }
+            }
+            if (blockId == 0)
+            {
+                RemoveMetaData(new PositionBlock(x, y, z));
+            }
             blocks[x * 16 * 16 + y * 16 + z] = (byte)blockId;
         }
 
@@ -55,9 +74,27 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             {
                 Initialize();
             }
-            foreach (EntityStack stack in StackEntities)
+            foreach (EntityStack stack in stackEntities)
             {
-                stack.Update();
+                stack.OnUpdate();
+            }
+            foreach (Entity blockEntity in blockEntityFullUpdate)
+            {
+                blockEntity.OnUpdate();
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                int x = MathLibrary.GlobalRandom.Next(0, 16);
+                int y = MathLibrary.GlobalRandom.Next(0, 16);
+                int z = MathLibrary.GlobalRandom.Next(0, 16);
+                Block block = Block.FromId(GetLocalBlock(x, y, z));
+                Entity entity = block.CreateEntity();
+                if (entity != null)
+                {
+                    entity.Parent = this;
+                    entity.PositionBlock = new PositionBlock(x, y, z);
+                    entity.OnUpdate();
+                }
             }
         }
 
@@ -110,7 +147,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             {
                 PositionBlock globalPosition;
                 Position.GetGlobalPositionBlock(out globalPosition, x, y, z);
-                World.Instance.SetBlock(globalPosition.X, globalPosition.Y, globalPosition.Z, blockId);
+                World.Instance.SetBlock(globalPosition, blockId);
                 return;
             }
             SetLocalBlock(x, y, z, blockId);
@@ -124,7 +161,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             {
                 PositionBlock globalPosition;
                 Position.GetGlobalPositionBlock(out globalPosition, x, y, z);
-                return World.Instance.GetBlock(globalPosition.X, globalPosition.Y, globalPosition.Z);
+                return World.Instance.GetBlock(globalPosition);
             }
             return GetLocalBlock(x, y, z);
         }
@@ -151,9 +188,9 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             initialized = true;
         }
 
-       
 
-      
+
+
         internal SlimDX.BoundingBox GetBoundingBox()
         {
             PositionBlock minGlobalPos, maxGlobalPos;
@@ -167,7 +204,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal List<EntityStack> EntitiesInArea(AxisAlignedBoundingBox collectArea)
         {
             List<EntityStack> stacksInArea = new List<EntityStack>();
-            foreach (EntityStack stack in StackEntities)
+            foreach (EntityStack stack in stackEntities)
             {
                 AxisAlignedBoundingBox aabb = stack.AABB;
                 aabb.Translate(stack.Position);
@@ -177,6 +214,67 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 }
             }
             return stacksInArea;
+        }
+
+        internal Entity GetBlockEntity(PositionBlock localPos)
+        {
+            return blockEntityFullUpdate.Where(e => e.PositionBlock.SameAs(localPos)).FirstOrDefault();
+        }
+
+        public IEnumerable<EntityStack> StackEntities { get { return (IEnumerable<EntityStack>)stackEntities; } }
+
+        internal Dictionary<string, object> GetBlockMetaData(PositionBlock positionBlock)
+        {
+            int key = positionBlock.X * 16 * 16 + positionBlock.Y * 16 + positionBlock.Z;
+            if(chunkMetaData.ContainsKey(key))
+                return chunkMetaData[key];
+            Dictionary<string, object> blockMetaData = new Dictionary<string,object>();
+            chunkMetaData.Add(key, blockMetaData);
+            return blockMetaData;
+        }
+
+        internal int MetaDataGetInt(string key, PositionBlock positionBlock)
+        {
+            var blockMetaData = GetBlockMetaData(positionBlock);
+            if (blockMetaData.ContainsKey(key))
+                return (int)(blockMetaData[key]);
+            blockMetaData[key] = 0;
+            return 0;
+        }
+
+        internal void AddEntity(Entity entity)
+        {
+            switch (entity.EntityType)
+            {
+                case Entity.EntityTypeEnum.BlockFullUpdate:
+                    blockEntityFullUpdate.Add(entity);
+                    break;
+               
+                case Entity.EntityTypeEnum.EntityStackFullUpdate:
+                    stackEntities.Add((EntityStack)entity);
+                    break;
+            }
+        }
+
+        internal void RemoveEntity(Entity entity)
+        {
+            switch (entity.EntityType)
+            {
+                case Entity.EntityTypeEnum.BlockFullUpdate:
+                    blockEntityFullUpdate.Remove(entity);
+                    break;
+                case Entity.EntityTypeEnum.EntityStackFullUpdate:
+                    stackEntities.Remove((EntityStack)entity);
+                    break;
+            }
+
+        }
+
+        internal void RemoveMetaData(PositionBlock localPos)
+        {
+            int key = localPos.X * 16 * 16 + localPos.Y * 16 + localPos.Z;
+            if (chunkMetaData.ContainsKey(key))
+                chunkMetaData.Remove(key);
         }
     }
 }

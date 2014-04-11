@@ -12,44 +12,43 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        string path = @"..\..\..\HelloWorld\01.Frontend\Textures\";
+        string path = @".";
         
         public Form1()
         {
             InitializeComponent();
-            pictureBox1.Load(Path.Combine(path, "terrain.png"));
+          
+        }
+
+        
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string sourcePath = @"C:\Users\ba2676\Desktop\LushCraft\assets\minecraft\textures";
+            string destPath = @"C:\Users\ba2676\Desktop\GitHub\HelloWorld\Test\bin\Debug\..\..\..\HelloWorld\01.Frontend\Textures";
+            CopyDir("Blocks", sourcePath, destPath);
+            CopyDir("Items", sourcePath, destPath);
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void CopyDir(string subdir, string sourcePath, string destPath)
         {
-            using (Image img = Image.FromFile(Path.Combine(path, "terrain.png")))
+            foreach (string file in Directory.GetFiles(Path.Combine(destPath, subdir)))
             {
-                Size outsize = new System.Drawing.Size(64, 64);
-                Unstitch(img, 0, 0, outsize, "grass_top");
-                Unstitch(img, 2, 0, outsize, "dirt");
-                Unstitch(img, 3, 0, outsize, "grass_side");
-                Unstitch(img, 2, 1, outsize, "sand");
-                Unstitch(img, 1, 0, outsize, "stone");
-                Unstitch(img, 5, 1, outsize, "log_oak_top");
-                Unstitch(img, 4, 1, outsize, "log_oak");
-                Unstitch(img, 5, 3, outsize, "leaves_oak_opaque");
-                Unstitch(img, 7, 0, outsize, "brick");
-                Unstitch(img, 1, 1, outsize, "bedrock");
-                Unstitch(img, 2, 3, outsize, "diamond_ore");
+                string sourceFile = Path.Combine(Path.Combine(sourcePath, subdir), Path.GetFileName(file));
+                string destfile = Path.Combine(Path.Combine(destPath, subdir), Path.GetFileName(file));
+                try
+                {
+                    File.Copy(sourceFile, destfile, true);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    
+                }
             }
 
+            
 
-        }
-
-        private void Unstitch(Image img, int x, int y, Size outsize, string name)
-        {
-            int tileWidth = img.Size.Width / 16;
-            int tileHeight = img.Size.Height / 16;
-            Bitmap bmp = new Bitmap(outsize.Width, outsize.Height, img.PixelFormat);
-            Graphics g = Graphics.FromImage(bmp);
-            g.DrawImage(img, new Rectangle(0, 0, outsize.Width, outsize.Height), new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight), GraphicsUnit.Pixel);
-            bmp.Save(Path.Combine(path, "blocks\\"+name+".png"));
         }
     }
 }

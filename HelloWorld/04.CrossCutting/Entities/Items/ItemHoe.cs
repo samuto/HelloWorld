@@ -15,9 +15,9 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Items
         {
         }
 
-        public override bool UseOnBlock(PositionBlock pos)
+        public override bool OnUseOnBlock(PositionBlock pos)
         {
-            World.Instance.SetBlock(pos.X, pos.Y, pos.Z, BlockRepository.FarmlandDry.Id);
+            World.Instance.SetBlock(pos, BlockRepository.FarmlandDry.Id);
             return true;
         }
     }

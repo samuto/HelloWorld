@@ -13,15 +13,15 @@ namespace WindowsFormsApplication7.Business
 {
     class CollisionComplex : ICollisionSystem
     {
-        private Entity entity;
+        private EntityPlayer entity;
         private Log logger = Log.Instance;
         
-        public CollisionComplex(Entity entity)
+        public CollisionComplex(EntityPlayer entity)
         {
             this.entity = entity;
         }
 
-        public Vector3 Resolve(CrossCutting.Entities.Entity entity)
+        public Vector3 Resolve(CrossCutting.Entities.EntityPlayer entity)
         {
             List<AxisAlignedBoundingBox> collidingObjects;
             Vector3 response = entity.Position;
@@ -113,7 +113,7 @@ namespace WindowsFormsApplication7.Business
                         Block alien = BlockRepository.Blocks[blockId];
                         if (!alien.IsOpaque)
                             continue;
-                        AxisAlignedBoundingBox collidingObject = alien.GetBoundingBox();
+                        AxisAlignedBoundingBox collidingObject = alien.BoundingBox;
                         collidingObject.Translate(new Vector3(x, y, z));
                         if (thisAABB.OverLaps(collidingObject))
                         {

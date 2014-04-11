@@ -13,11 +13,12 @@ namespace WindowsFormsApplication7.Frontend
 {
     class EntityRenderer
     {
-        Entity entity;
-        SlimDX.Direct3D11.Buffer vertices;
-        int vertexCount;
+        private EntityPlayer entity;
+        private VertexBuffer buffer;
+        private int vertexCount;
+        private Tessellator t = Tessellator.Instance;
 
-        public EntityRenderer(Entity entity)
+        public EntityRenderer(EntityPlayer entity)
         {
             this.entity = entity;
             Build();
@@ -25,8 +26,7 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Build()
         {
-            Tessellator t = Tessellator.Instance;
-
+            
             t.StartDrawingColoredQuads();
             Vector4 c = entity.Color;
             Vector3 min = entity.AABB.Min;
@@ -78,38 +78,35 @@ namespace WindowsFormsApplication7.Frontend
             t.AddVertexWithColor(v[2], c);
             t.AddVertexWithColor(v[1], c);
 
-            vertices = t.GetDrawBuffer();
-            vertexCount = t.VertexCount;
+            buffer = t.GetVertexBuffer();
         }
 
         internal void Render(float partialStep)
         {
-            Tessellator t = Tessellator.Instance;
+            t.ResetTransformation();
             Vector3 position = Interpolate.Position(entity, partialStep);
-
             if (entity != TheGame.Instance.entityToControl)
             {
                 t.StartDrawingColoredQuads();
                 Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
-                t.Draw(vertices, vertexCount);
+                t.Draw(buffer);
             }
            
-            if (typeof(Player) == entity.GetType() && World.Instance.Player.BreakCompletePercentage > 0)
+            if (typeof(Player) == entity.GetType() && World.Instance.Player.DestroyProgress > 0)
             {
                 t.StartDrawingTiledQuads2();
-                t.Translate.X = World.Instance.Player.BreakPosition.X + 0.5f;
-                t.Translate.Y = World.Instance.Player.BreakPosition.Y + 0.5f;
-                t.Translate.Z = World.Instance.Player.BreakPosition.Z + 0.5f;
+                t.Translate.X = World.Instance.Player.BlockAttackPosition.X + 0.5f;
+                t.Translate.Y = World.Instance.Player.BlockAttackPosition.Y + 0.5f;
+                t.Translate.Z = World.Instance.Player.BlockAttackPosition.Z + 0.5f;
                 float s = 1.005f;
                 t.Scale = new Vector3(s, s, s);
-                t.Draw(TileTextures.Instance.GetDestroyBlockVertexBuffer(World.Instance.Player.BreakCompletePercentage));
-                t.ResetTransformation();
+                t.Draw(TileTextures.Instance.GetDestroyBlockVertexBuffer(World.Instance.Player.DestroyProgress));
             }
         }
 
         public void Dispose()
         {
-            vertices.Dispose();
+            VertexBuffer.Dispose(ref buffer);
         }
     }
 }

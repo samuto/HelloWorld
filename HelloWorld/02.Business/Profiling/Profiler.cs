@@ -13,14 +13,14 @@ namespace WindowsFormsApplication7.Business.Profiling
         public static Profiler Instance = new Profiler();
         public ProfileSection root;
         public ProfileSection activeSection;
-        public string SelectedSection = "root";
-        public string MarkedSection = "root";
+        public string SelectedSection = "*";
+        public string MarkedSection = "*";
         public bool Enabled = true;
         public bool ReportCounters = false;
 
         public Profiler()
         {
-            root = new ProfileSection("root");
+            root = new ProfileSection("*");
             allSections.Add(root.Name, root);
             Clear();
         }
@@ -59,6 +59,9 @@ namespace WindowsFormsApplication7.Business.Profiling
             if (!Enabled) return;
             activeSection.Stopwatch.Stop();
             activeSection = activeSection.Parent;
+            if(activeSection == null)
+                activeSection = root;
+           
         }
 
         internal void EndStartSection(string sectionName)
@@ -71,7 +74,6 @@ namespace WindowsFormsApplication7.Business.Profiling
 
         public void ToggleMarkedSection()
         {
-            if (!Enabled) return;
             ProfileSection profileSection = allSections[SelectedSection];
             ProfileSection markedSection = allSections[MarkedSection];
             if (profileSection == markedSection)
@@ -121,8 +123,6 @@ namespace WindowsFormsApplication7.Business.Profiling
 
         internal void Clear()
         {
-            if (!Enabled) return;
-
             activeSection = root;
             allSections.Values.ToList().ForEach(s => s.Stopwatch.Reset());
             root.Stopwatch.Start();
@@ -140,5 +140,7 @@ namespace WindowsFormsApplication7.Business.Profiling
         {
             ReportCounters = !ReportCounters;
         }
+
+       
     }
 }

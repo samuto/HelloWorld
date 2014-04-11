@@ -10,24 +10,28 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     struct PositionChunk
     {
-        public int X;
-        public int Y;
-        public int Z;
+        public readonly int X;
+        public readonly int Y;
+        public readonly int Z;
+        public readonly object Key;
 
         public PositionChunk(int x, int y, int z)
         {
+            if (y < 0) throw new Exception("NO!");
+            if (y >= Chunk.MaxSizeY / 16) throw new Exception("NO!!!");
+
             this.X = x;
             this.Y = y;
             this.Z = z;
+            Key = X + "," + Y + "," + Z; ;
         }
 
         internal static PositionChunk CreateFrom(Vector3 pos)
         {
-            PositionChunk newChunk = new PositionChunk();
-
-            newChunk.X = MathLibrary.FloorToWorldGrid(pos.X / 16f);
-            newChunk.Y = MathLibrary.FloorToWorldGrid(pos.Y / 16f);
-            newChunk.Z = MathLibrary.FloorToWorldGrid(pos.Z / 16f);
+            PositionChunk newChunk = new PositionChunk(
+                MathLibrary.FloorToWorldGrid(pos.X / 16f),
+                MathLibrary.FloorToWorldGrid(pos.Y / 16f),
+                MathLibrary.FloorToWorldGrid(pos.Z / 16f));
 
             return newChunk;
         }
@@ -43,14 +47,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             positionBlock.X = positionBlock.X - X * 16;
             positionBlock.Y = positionBlock.Y - Y * 16;
             positionBlock.Z = positionBlock.Z - Z * 16;
-        }
-
-        public object Key
-        {
-            get
-            {
-                return X + "," + Y + "," + Z;
-            }
         }
 
         internal void GetMinCornerBlock(out PositionBlock positionBlock)
@@ -71,5 +67,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             return posChunk.X == X && posChunk.Y == Y && posChunk.Z == Z;
         }
+
+       
     }
 }

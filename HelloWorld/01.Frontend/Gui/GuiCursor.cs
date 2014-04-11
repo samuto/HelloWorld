@@ -10,10 +10,12 @@ namespace WindowsFormsApplication7.Frontend.Gui
 {
     class GuiCursor
     {
+        private Tessellator t = Tessellator.Instance;
+
         public void Render(float partialStep)
         {
+            t.ResetTransformation();
             string cursorText = "+";
-            Tessellator t = Tessellator.Instance;
             FontRenderer f = FontRenderer.Instance;
             t.StartDrawingAlphaTexturedQuads("ascii");
             Vector2 textSize = f.TextSize(cursorText);

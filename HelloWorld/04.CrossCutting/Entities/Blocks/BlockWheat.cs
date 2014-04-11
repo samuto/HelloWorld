@@ -17,7 +17,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
         {
         }
 
-        internal override int[] DroppedIds()
+        internal override int[] OnDroppedIds()
         {
             double dropChance = MathLibrary.GlobalRandom.NextDouble();
             double c = 0;
@@ -30,6 +30,25 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
             // 25% change of dropping 1x Wheat + 1x seed 
             else
                 return new int[] { ItemRepository.Wheat.Id, ItemRepository.Wheat.Id, ItemRepository.SeedsWheat.Id, ItemRepository.SeedsWheat.Id };
+        }
+
+        internal override void OnDestroy(PositionBlock pos)
+        {
+            Chunk chunk = World.Instance.GetChunk(PositionChunk.CreateFrom(pos));
+            PositionBlock localpos = pos;
+            chunk.Position.ConvertToLocalPosition(ref localpos);
+            int stage = chunk.MetaDataGetInt("stage", localpos);
+            if (stage != 7)
+            {
+                DropStack(new EntityStack(ItemRepository.SeedsWheat.Id, 1), pos);
+                return;
+            }
+            base.OnDestroy(pos);
+        }
+
+        internal override Entity CreateEntity()
+        {
+            return new Wheat();
         }
 
     }

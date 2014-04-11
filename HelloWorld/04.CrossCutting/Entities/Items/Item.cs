@@ -9,12 +9,8 @@ using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities.Items
 {
-    class Item
+    class Item : Entity
     {
-        public int Id;
-        public string Name;
-        public bool Consumable = false;
-
         public Item(int itemId, string name)
         {
             this.Id = ItemRepository.ItemIdOffset + itemId;
@@ -22,24 +18,34 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Items
             ItemRepository.Items[Id] = this;
         }
 
-
-        internal static Item FromId(int globalId)
+        internal new static Item FromId(int globalId)
         {
             return ItemRepository.Items[globalId];
         }
 
-        public virtual bool UseOnBlock(PositionBlock pos)
-        {
-            return false;
-        }
-
+        //
+        // setters // getters
+        //
         internal Item SetConsumable()
         {
             this.Consumable = true;
             return this;
         }
 
-        internal virtual void OnPunchedWith()
+        //
+        // events / default behaviour
+        //
+        public virtual bool OnUseOnBlock(PositionBlock pos)
+        {
+            return false;
+        }        
+
+        internal virtual bool OnUseOnPlayer()
+        {
+            return false;
+        }
+
+        internal void OnAfterAttack()
         {
             
         }

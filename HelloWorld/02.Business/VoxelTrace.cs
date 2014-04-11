@@ -23,7 +23,7 @@ namespace WindowsFormsApplication7.Business
             for (int i = 1; i < voxels.Count; i++)
             {
                 var v = voxels[i];
-                int impactBlockId = World.Instance.GetBlock((int)v.X, (int)v.Y, (int)v.Z);
+                int impactBlockId = World.Instance.GetBlock(PositionBlock.FromVector(v));
                 ImpactBlock = Block.FromId(impactBlockId);
                 if (impactBlockId != 0)
                 {

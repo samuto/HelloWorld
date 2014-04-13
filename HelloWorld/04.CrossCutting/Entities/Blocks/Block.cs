@@ -24,11 +24,12 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
         public bool HasStages;
         public int DropId;
         public float DropProbability = 1f;
+        public bool IsTransparent = false;
 
-        public Block(int blockId)
+        public Block()
         {
-            this.Id = blockId;
-            this.DropId = blockId;
+            this.Id = BlockRepository.NextId();
+            this.DropId = Id;
             BlockRepository.Blocks[Id] = this;
         }
 
@@ -177,9 +178,18 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
                     DropStack(stack, pos);
                 }
             }
-
         }
 
+        internal Block SetTransparent()
+        {
+            IsTransparent = true;
+            return this;
+        }
 
+        internal virtual bool 
+            FaceVisibleByNeighbor(int neighborBlockId)
+        {
+            return Block.FromId(neighborBlockId).IsTransparent; 
+        }
     }
 }

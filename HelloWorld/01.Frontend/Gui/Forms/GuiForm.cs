@@ -28,6 +28,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
         internal virtual void OnClose()
         {
             Visible = false;
+            Dispose();
         }
     }
 }

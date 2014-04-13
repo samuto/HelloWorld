@@ -14,8 +14,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
 {
     class BlockFurnace : Block
     {
-        public BlockFurnace(int blockId) : base(blockId) { }
-
+        
         internal override bool OnActivate(PositionBlock position)
         {
             Furnace furnace = (Furnace)World.Instance.GetBlockEntity(position);

@@ -6,6 +6,8 @@ float4x4 gView;
 float4x4 gProj; 
 Texture2DArray<float4> textureArray;
 
+float time;
+
 float3 lightDirection = float3(0,-1,0);
 // ---------------------------------
 //   input strcutures for shaders
@@ -82,12 +84,21 @@ PS_IN VS( VS_IN input )
 	output.col = input.col;
 
 	
+	input.normal = mul(input.normal, gWorld);
 	float3 L = normalize(-lightDirection);
     float diffuseLight = max(dot(input.normal, L), 0.5);
 	float alpha = input.col.w;
     output.col = input.col * diffuseLight;
 	output.col.w = alpha;
 	
+
+	// test
+	if(output.index > 65536)
+	{
+		output.index = output.index-65536;
+		output.pos.y = output.pos.y + (sin(input.pos.x+input.pos.z+time)*0.05);
+		//output.pos.x = output.pos.x + (sin(input.pos.y+input.pos.z+time)*0.03);
+	}
 	return output;
 }
 

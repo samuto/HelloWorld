@@ -28,9 +28,9 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
         internal override void OnLoad()
         {
             // init code here..
-            guiFuel = CreateAndBindGuiSlot(furnace.Fuel, 3, 5);
-            guiInput = CreateAndBindGuiSlot(furnace.Input, 3, 7);
-            guiProduct = CreateAndBindGuiSlot(furnace.Product, 5, 6);
+            guiFuel = CreateAndBindGuiSlot(furnace.Fuel, 0, 5);
+            guiInput = CreateAndBindGuiSlot(furnace.Input, 0, 7);
+            guiProduct = CreateAndBindGuiSlot(furnace.Product, 2, 6);
             furnace.Progress += new EventHandler(furnace_Progress);
             furnace.Changed += new EventHandler(furnace_Changed);
             base.OnLoad();
@@ -48,23 +48,18 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
             
         }
 
-        protected override void OnPickUp(Controls.GuiPanel guiSlot, Controls.GuiStackControl guiStack, Slot slot)
-        {
-            
-        }
-
         protected override bool OnBeforeTransfer(Controls.GuiPanel guiSlot, Controls.GuiStackControl guiStack, Slot slot)
         {
             if (slot == furnace.Fuel)
             {
                 // we can only use blocks as fuel if they have HOF greater than 0
-                return stackInHand.AsEntity.HeatOfCombustion > 0;
+                return stackInHand.AsEntity.HeatOfCombustion <= 0;
             }
             else if (slot == furnace.Product)
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         protected override void OnAfterTransfer(Controls.GuiPanel guiSlot, Controls.GuiStackControl guiStack, Slot slot)

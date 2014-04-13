@@ -88,7 +88,7 @@ namespace WindowsFormsApplication7.Frontend
                             blockPos.X = x;
                             blockPos.Y = y;
                             blockPos.Z = z;
-                            if (Block.FromId(chunk.SafeGetLocalBlock(x, y, z)).IsOpaque)
+                            if (!Block.FromId(chunk.SafeGetLocalBlock(x, y, z)).IsTransparent)
                                 blockRenderer.RenderBlock(blockPos, chunk);
                             else
                                 pass2Blocks.Add(blockPos);

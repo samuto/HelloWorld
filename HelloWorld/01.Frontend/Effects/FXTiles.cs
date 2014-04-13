@@ -16,7 +16,6 @@ namespace WindowsFormsApplication7._01.Frontend.Effects
     class FXTiles : FXBase
     {
         public static FXTiles Instance = new FXTiles();
-
         public FXTiles()
             : base("Tiles.fx")
         {
@@ -54,6 +53,8 @@ namespace WindowsFormsApplication7._01.Frontend.Effects
             effect.GetVariableByName("gView").AsMatrix().SetMatrix(Camera.Instance.View);
             effect.GetVariableByName("gProj").AsMatrix().SetMatrix(Camera.Instance.Projection);
             effect.GetVariableByName("textureArray").AsResource().SetResource(TileTextures.Instance.View);
+            effect.GetVariableByName("time").AsScalar().Set(TheGame.Instance.Time*50f);
+
             float timeOfDay = World.Instance.TimeOfDay;
             Vector3 lightDirection = new Vector3(0, 0, 0);
             DayWatch watch = DayWatch.Now;

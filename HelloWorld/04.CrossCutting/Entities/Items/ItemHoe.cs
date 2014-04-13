@@ -5,6 +5,7 @@ using System.Text;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business;
 using WindowsFormsApplication7.Business.Repositories;
+using WindowsFormsApplication7.Business.Geometry;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities.Items
 {
@@ -17,7 +18,14 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Items
 
         public override bool OnUseOnBlock(PositionBlock pos)
         {
-            World.Instance.SetBlock(pos, BlockRepository.FarmlandDry.Id);
+            int sourceBlockId = World.Instance.GetBlock(pos);
+            if (sourceBlockId == BlockRepository.DirtWithGrass.Id || sourceBlockId == BlockRepository.Dirt.Id)
+            {
+                if(MathLibrary.GlobalRandom.NextDouble() < 0.5)
+                    World.Instance.SetBlock(pos, BlockRepository.FarmlandDry.Id);
+                else
+                    World.Instance.SetBlock(pos, BlockRepository.FarmlandWet.Id);
+            }
             return true;
         }
     }

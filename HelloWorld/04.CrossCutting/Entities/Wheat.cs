@@ -19,20 +19,18 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal override void OnUpdate()
         {
-            int stage;
-            Dictionary<string, object> metaData;
-            metaData = Parent.GetBlockMetaData(PositionBlock);
-            if (!metaData.ContainsKey("stage"))
+            int stage = (int)Parent.GetBlockMetaData(PositionBlock, "stage");
+            if (stage < 7)
             {
-                metaData["stage"] = -1;
-            }
-            stage = (int)metaData["stage"];
-            if(stage < 7)
                 stage++;
-           
-            metaData["stage"] = stage;
+            }
+            Parent.SetBlockMetaData(PositionBlock, "stage", stage);
             Parent.Invalidate();
         }
 
+        internal override void OnInitialize()
+        {
+            Parent.SetBlockMetaData(PositionBlock, "stage", 0);
+        }
     }
 }

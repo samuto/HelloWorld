@@ -81,7 +81,10 @@ namespace WindowsFormsApplication7.Frontend
             DefineBlock(BlockRepository.CraftingTable.Id, "crafting_table_front", "crafting_table_side", "crafting_table_top", "planks_oak");
             DefineBlock(BlockRepository.FurnaceOff.Id, "furnace_front_off", "furnace_side", "furnace_top", "cobblestone");
             DefineBlock(BlockRepository.FurnaceOn.Id, "furnace_front_on", "furnace_side", "furnace_top", "cobblestone");
-            
+            DefineBlock(BlockRepository.Glass.Id, "glass");
+            DefineBlock(BlockRepository.Water.Id, "water");
+
+           
             // stage textures
             DefineStage(BlockRepository.Wheat.Id,"wheat_stage_0");
             DefineStage(BlockRepository.Wheat.Id,"wheat_stage_1");
@@ -91,6 +94,11 @@ namespace WindowsFormsApplication7.Frontend
             DefineStage(BlockRepository.Wheat.Id,"wheat_stage_5");
             DefineStage(BlockRepository.Wheat.Id,"wheat_stage_6");
             DefineStage(BlockRepository.Wheat.Id,"wheat_stage_7");
+
+            MakeWave(BlockRepository.Water.Id);
+            MakeWave(BlockRepository.TallGrass.Id);
+            MakeWaveForStage(BlockRepository.Wheat.Id);
+            
 
             // Define destroy blocks...
             DefineDestroyAndSelectionBlocks();
@@ -106,6 +114,24 @@ namespace WindowsFormsApplication7.Frontend
             BuildItemVertexBuffer(ItemRepository.Wheat.Id, "wheat");
             BuildItemVertexBuffer(ItemRepository.Bread.Id, "bread");
             BuildItemVertexBuffer(ItemRepository.Coal.Id, "coal");
+        }
+
+        private void MakeWaveForStage(int blockId)
+        {
+            List<int> textures = stageTextures[blockId];
+            for(int i=0; i<textures.Count; i++)
+            {
+                textures[i] =textures[i]+65536;
+            }
+        }
+
+
+        private void MakeWave(int key)
+        {
+            topBlockTextures[key] += 65536;
+            frontBlockTextures[key] += 65536;
+            sideBlockTextures[key] += 65536;
+            bottomBlockTextures[key] += 65536;
         }
 
         private void DefineStage(int blockId, string textureName)

@@ -78,5 +78,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             Parent.RemoveEntity(this);
         }
+
+        internal virtual void OnInitialize()
+        {
+
+        }
     }
 }

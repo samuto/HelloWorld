@@ -41,6 +41,7 @@ namespace WindowsFormsApplication7
         private Stopwatch sw = new Stopwatch();
         private Profiler p = Profiler.Instance;
         private bool showProfiler = true;
+        public float Time = 0f;
         public void Run()
         {
             this.Initialize();
@@ -142,6 +143,10 @@ namespace WindowsFormsApplication7
 
         private void Update()
         {
+            Time += 0.001f;
+            if (Time > Math.PI * 2.0)
+                Time -= (float)(Math.PI * 2.0);
+
             Log.Instance.Update();
             // get input
             Input.Instance.Update();

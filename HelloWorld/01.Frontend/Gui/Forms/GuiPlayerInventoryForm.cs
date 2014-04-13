@@ -10,27 +10,27 @@ using WindowsFormsApplication7.Frontend.Gui.Controls;
 
 namespace WindowsFormsApplication7.Frontend.Gui.Forms
 {
-    class GuiCraftingForm : GuiInventoryForm
+    class GuiPlayerInventoryForm : GuiInventoryForm
     {
-        private GuiPanel[] guiCraftingSlots = new GuiPanel[9];
+        private GuiPanel[] guiCraftingSlots = new GuiPanel[4];
         private GuiPanel guiProduct;
         private CraftingTable craftingTable = new CraftingTable();
 
-        public GuiCraftingForm()
+        public GuiPlayerInventoryForm()
         {
             Initialize();
         }
 
         private void Initialize()
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 4; i++)
             {
-                int x = i % 3;
-                int y = i / 3;
+                int x = i % 2;
+                int y = i / 2;
 
-                guiCraftingSlots[i] = CreateAndBindGuiSlot(craftingTable.Grid[y * 3 + x], x, 7 - y);
+                guiCraftingSlots[i] = CreateAndBindGuiSlot(craftingTable.Grid[y * 3 + x], x, 6 - y);
             }
-            guiProduct = CreateAndBindGuiSlot(craftingTable.Product, 5, 5);
+            guiProduct = CreateAndBindGuiSlot(craftingTable.Product, 3, 5);
         }
 
         protected override bool OnPickUp(Controls.GuiPanel guiSlot, Controls.GuiStackControl guiStack, Slot slot)
@@ -42,7 +42,6 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
             }
             else
             {
-                BindAll();
                 return false;
             }
         }
@@ -86,6 +85,17 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
             BindControl((GuiStackControl)guiProduct.Controls[0]);
             BindControl(guiStackInHand);
 
+        }
+
+        internal override void OnClose()
+        {
+            foreach (Slot slot in craftingTable.Grid)
+            {
+                if(!slot.Content.IsEmpty)
+                    player.ThrowStack(slot.Content);
+            }
+            base.OnClose();
+            
         }
     }
 }

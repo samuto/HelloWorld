@@ -129,8 +129,6 @@ namespace WindowsFormsApplication7.Frontend
 
         private void Setup3dCamera(float partialStep)
         {
-
-
             Camera.Instance.Enable3d = true;
             DepthStencilStateDescription dsStateDesc = new DepthStencilStateDescription()
             {

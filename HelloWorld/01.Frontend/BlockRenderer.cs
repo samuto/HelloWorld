@@ -20,7 +20,7 @@ namespace WindowsFormsApplication7.Frontend
     {
         private World world = World.Instance;
         private Tessellator t = Tessellator.Instance;
-            
+
         public BlockRenderer()
         {
         }
@@ -40,8 +40,12 @@ namespace WindowsFormsApplication7.Frontend
                 RenderCross(block, globalPosition, positionBlock, chunk);
             else if (block.Id == BlockRepository.Wheat.Id)
                 RenderHash(block, globalPosition, positionBlock, chunk);
+            else if (block.Id == BlockRepository.Water.Id)
+            {
+                RenderWater(block, globalPosition, positionBlock, chunk);
+            }
             else
-                RenderCube(block, globalPosition, positionBlock, chunk);
+                RenderCube(block, globalPosition, positionBlock, chunk, 1f);
         }
 
         private void RenderHash(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk)
@@ -63,7 +67,7 @@ namespace WindowsFormsApplication7.Frontend
             int z = positionBlock.Z;
             if (block.HasStages)
             {
-                int stage = chunk.MetaDataGetInt("stage", positionBlock);
+                int stage = (int)chunk.GetBlockMetaData(positionBlock, "stage");
                 t.ArrayIndex = TileTextures.Instance.GetStage(blockId, stage);
             }
             else
@@ -154,7 +158,7 @@ namespace WindowsFormsApplication7.Frontend
             t.ArrayIndex = -1;
         }
 
-        private void RenderCube(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk)
+        private void RenderCube(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk, float height)
         {
             Vector4 c1, c2, c3, c4, c5, c6;
             int blockId = block.Id;
@@ -172,12 +176,12 @@ namespace WindowsFormsApplication7.Frontend
             int y = positionBlock.Y;
             int z = positionBlock.Z;
             float reduction = 0.3f;
-            bool renderFront = !IsOpaque(chunk.SafeGetLocalBlock(x, y, z + 1));
-            bool renderBack = !IsOpaque(chunk.SafeGetLocalBlock(x, y, z - 1));
-            bool renderLeft = !IsOpaque(chunk.SafeGetLocalBlock(x - 1, y, z));
-            bool renderRight = !IsOpaque(chunk.SafeGetLocalBlock(x + 1, y, z));
-            bool renderTop = !IsOpaque(chunk.SafeGetLocalBlock(x, y + 1, z));
-            bool renderBottom = !IsOpaque(chunk.SafeGetLocalBlock(x, y - 1, z));
+            bool renderFront = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y, z + 1));
+            bool renderBack = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y, z - 1));
+            bool renderLeft = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x - 1, y, z));
+            bool renderRight = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x + 1, y, z));
+            bool renderTop = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y + 1, z));
+            bool renderBottom = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y - 1, z));
             if (renderFront)
             {
                 // front
@@ -199,8 +203,8 @@ namespace WindowsFormsApplication7.Frontend
 
                 Vector3 normal = new Vector3(0, 0, 1);
                 t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c1, s1), normal);
-                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c1, s2), normal);
-                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c1, s3), normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + height, vz + 1f, 1.0f), AdjustColor(c1, s2), normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + height, vz + 1f, 1.0f), AdjustColor(c1, s3), normal);
                 t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c1, s4), normal);
             }
 
@@ -225,8 +229,8 @@ namespace WindowsFormsApplication7.Frontend
 
                 Vector3 normal = new Vector3(0, 0, -1);
                 t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c2, s1), normal);
-                t.AddVertexWithColor(new Vector4(vx + 1, vy + 1f, vz + 0f, 1.0f), AdjustColor(c2, s2), normal);
-                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c2, s3), normal);
+                t.AddVertexWithColor(new Vector4(vx + 1, vy + height, vz + 0f, 1.0f), AdjustColor(c2, s2), normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + height, vz + 0f, 1.0f), AdjustColor(c2, s3), normal);
                 t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c2, s4), normal);
             }
 
@@ -251,8 +255,8 @@ namespace WindowsFormsApplication7.Frontend
 
                 Vector3 normal = new Vector3(-1, 0, 0);
                 t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c3, s1), normal);
-                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c3, s2), normal);
-                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c3, s3), normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + height, vz + 0f, 1.0f), AdjustColor(c3, s2), normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + height, vz + 1f, 1.0f), AdjustColor(c3, s3), normal);
                 t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c3, s4), normal);
             }
 
@@ -277,8 +281,8 @@ namespace WindowsFormsApplication7.Frontend
 
                 Vector3 normal = new Vector3(1, 0, 0);
                 t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), AdjustColor(c4, s1), normal);
-                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c4, s2), normal);
-                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c4, s3), normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + height, vz + 1f, 1.0f), AdjustColor(c4, s2), normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + height, vz + 0f, 1.0f), AdjustColor(c4, s3), normal);
                 t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), AdjustColor(c4, s4), normal);
             }
 
@@ -304,10 +308,10 @@ namespace WindowsFormsApplication7.Frontend
                 s4 = a7 || a8 || a1 ? reduction : 1f;
 
                 Vector3 normal = new Vector3(0, 1, 0);
-                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c5, s1), normal);
-                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c5, s2), normal);
-                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 0f, 1.0f), AdjustColor(c5, s3), normal);
-                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 1f, vz + 1f, 1.0f), AdjustColor(c5, s4), normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + height, vz + 1f, 1.0f), AdjustColor(c5, s1), normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + height, vz + 0f, 1.0f), AdjustColor(c5, s2), normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + height, vz + 0f, 1.0f), AdjustColor(c5, s3), normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + height, vz + 1f, 1.0f), AdjustColor(c5, s4), normal);
             }
 
             if (renderBottom)
@@ -339,9 +343,151 @@ namespace WindowsFormsApplication7.Frontend
             t.ArrayIndex = -1;
         }
 
+        private float WaterLevel(Chunk chunk, PositionBlock positionBlock, int offsetX, int offsetY, int offsetZ)
+        {
+            object o = chunk.GetBlockMetaData(new PositionBlock(positionBlock.X + offsetX, positionBlock.Y + offsetY, positionBlock.Z + offsetZ), "waterlvl");
+            float thisLevel = o == null ? 0 : (int)o / (float)Water.WaterStartLevel;
+            object o2 = chunk.GetBlockMetaData(new PositionBlock(positionBlock.X + offsetX, positionBlock.Y + offsetY + 1, positionBlock.Z + offsetZ), "waterlvl");
+            float topLevel = o2 == null ? 0 : 1;
+            return Math.Max(thisLevel, topLevel);
+        }
+
+        private void RenderWater(Block block, PositionBlock globalPosition, PositionBlock positionBlock, Chunk chunk)
+        {
+            Vector4 c1, c2, c3, c4, c5, c6;
+            int blockId = block.Id;
+            Vector4[] blockColors = block.BlockColors;
+            c1 = blockColors[0];
+            c2 = blockColors[1];
+            c3 = blockColors[2];
+            c4 = blockColors[3];
+            c5 = blockColors[4];
+            c6 = blockColors[5];
+            float vx = globalPosition.X;
+            float vy = globalPosition.Y;
+            float vz = globalPosition.Z;
+            int x = positionBlock.X;
+            int y = positionBlock.Y;
+            int z = positionBlock.Z;
+
+            // front
+            float height0 = WaterLevel(chunk, positionBlock, -1, 0, -1);
+            float height1 = WaterLevel(chunk, positionBlock, 0, 0, -1);
+            float height2 = WaterLevel(chunk, positionBlock, 1, 0, -1);
+            float height3 = WaterLevel(chunk, positionBlock, -1, 0, 0);
+            float height4 = WaterLevel(chunk, positionBlock, 0, 0, 0);
+            float height5 = WaterLevel(chunk, positionBlock, 1, 0, 0);
+            float height6 = WaterLevel(chunk, positionBlock, -1, 0, 1);
+            float height7 = WaterLevel(chunk, positionBlock, 0, 0, 1);
+            float height8 = WaterLevel(chunk, positionBlock, 1, 0, 1);
+            float height10 = WaterLevel(chunk, positionBlock, -1, 1, -1);
+            float height11 = WaterLevel(chunk, positionBlock, 0, 1, -1);
+            float height12 = WaterLevel(chunk, positionBlock, 1, 1, -1);
+            float height13 = WaterLevel(chunk, positionBlock, -1, 1, 0);
+            float height14 = WaterLevel(chunk, positionBlock, 0, 1, 0);
+            float height15 = WaterLevel(chunk, positionBlock, 1, 1, 0);
+            float height16 = WaterLevel(chunk, positionBlock, -1, 1, 1);
+            float height17 = WaterLevel(chunk, positionBlock, 0, 1, 1);
+            float height18 = WaterLevel(chunk, positionBlock, 1, 1, 1);
+
+            float h1 = WaterAvg(height3, height4, height6, height7);
+            float h2 = WaterAvg(height0, height1, height3, height4);
+            float h3 = WaterAvg(height1, height2, height4, height5);
+            float h4 = WaterAvg(height4, height5, height7, height8);
+            if (height13 + height14 + height16 + height17 > 0) h1 = 1f;
+            if (height10 + height11 + height13 + height14 > 0) h2 = 1f;
+            if (height11 + height12 + height14 + height15 > 0) h3 = 1f;
+            if (height14 + height15 + height17 + height18 > 0) h4 = 1f;
+
+            bool renderFront = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y, z + 1));
+            bool renderBack = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y, z - 1));
+            bool renderLeft = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x - 1, y, z));
+            bool renderRight = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x + 1, y, z));
+            bool renderTop = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y + 1, z));
+            bool renderBottom = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y - 1, z));
+            Vector3 normal;
+            if (renderFront)
+            {
+                t.ArrayIndex = TileTextures.Instance.FrontIndex(blockId);
+                normal = new Vector3(0, 0, 1);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c1, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + h1, vz + 1f, 1.0f), c1, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + h4, vz + 1f, 1.0f), c1, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c1, normal);
+            }
+
+            if (renderBack)
+            {
+                // back
+                t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+                normal = new Vector3(0, 0, -1);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c2, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1, vy + h3, vz + 0f, 1.0f), c2, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + h2, vz + 0f, 1.0f), c2, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c2, normal);
+            }
+
+            if (renderLeft)
+            {
+                //left
+                t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+                normal = new Vector3(-1, 0, 0);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c3, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + h2, vz + 0f, 1.0f), c3, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + h1, vz + 1f, 1.0f), c3, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c3, normal);
+            }
+
+
+            if (renderRight)
+            {
+                //right
+                t.ArrayIndex = TileTextures.Instance.SideIndex(blockId);
+                normal = new Vector3(1, 0, 0);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c4, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + h4, vz + 1f, 1.0f), c4, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + h3, vz + 0f, 1.0f), c4, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c4, normal);
+            }
+
+
+            if (renderTop)
+            {
+                //top
+                t.ArrayIndex = TileTextures.Instance.TopIndex(blockId);
+                normal = new Vector3(0, 1, 0);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + h1, vz + 1f, 1.0f), c5, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + h2, vz + 0f, 1.0f), c5, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + h3, vz + 0f, 1.0f), c5, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + h4, vz + 1f, 1.0f), c5, normal);
+            }
+
+
+
+            if (renderBottom)
+            {
+                //bottom
+                t.ArrayIndex = TileTextures.Instance.BottomIndex(blockId);
+                normal = new Vector3(0, -1, 0);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 0f, 1.0f), c6, normal);
+                t.AddVertexWithColor(new Vector4(vx + 0f, vy + 0f, vz + 1f, 1.0f), c6, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 1f, 1.0f), c6, normal);
+                t.AddVertexWithColor(new Vector4(vx + 1f, vy + 0f, vz + 0f, 1.0f), c6, normal);
+            }
+            t.ArrayIndex = -1;
+        }
+
+        private float WaterAvg(float f1, float f2, float f3, float f4)
+        {
+            float c = (f1 == 0 ? 0 : 1) + (f2 == 0 ? 0 : 1) + (f3 == 0 ? 0 : 1) + (f4 == 0 ? 0 : 1);
+            if (c == 0) return 0;
+            return (f1 + f2 + f3 + f4) / c;
+
+        }
+
         private bool IsOpaque(int blockId)
         {
-            return Block.FromId(blockId).IsOpaque;
+            return !Block.FromId(blockId).IsTransparent;
         }
 
 

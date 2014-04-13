@@ -28,7 +28,6 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
         {
             base.OnClose();
             player.ThrowStack(stackInHand);
-            Dispose();
         }
 
         internal override void OnLoad()
@@ -92,13 +91,19 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
 
        
 
-        protected virtual void OnPickUp(GuiPanel guiSlot, GuiStackControl guiStack, Slot slot)
+        protected virtual bool OnPickUp(GuiPanel guiSlot, GuiStackControl guiStack, Slot slot)
         {
+            return false;
+        }
+
+        protected virtual void OnAfterPickUp(GuiPanel guiSlot, GuiStackControl guiStack, Slot slot)
+        {
+            
         }
 
         protected virtual bool OnBeforeTransfer(GuiPanel guiSlot, GuiStackControl guiStack, Slot slot)
         {
-            return true;
+            return false;
         }
         protected virtual void OnAfterTransfer(GuiPanel guiSlot, GuiStackControl guiStack, Slot slot)
         { 
@@ -121,16 +126,20 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
 
             if (pickingUp)
             {
-                int transferCount = leftMouse ? selectedSlot.Content.Count : selectedSlot.Content.Count / 2;
-                selectedSlot.Content.TransferEntities(stackInHand, transferCount);
-                BindControl(guiStackInHand);
-                BindControl(guiSelectedStack);
-                OnPickUp(guiSelectedSlot, guiSelectedStack, selectedSlot);
+                if (!OnPickUp(guiSelectedSlot, guiSelectedStack, selectedSlot))
+                {
+                    int transferCount = leftMouse ? selectedSlot.Content.Count : selectedSlot.Content.Count / 2;
+                    selectedSlot.Content.TransferEntities(stackInHand, transferCount);
+                    BindControl(guiStackInHand);
+                    BindControl(guiSelectedStack);
+                    OnAfterPickUp(guiSelectedSlot, guiSelectedStack, selectedSlot);
+                }
+
             }
             else
             {
 
-                if (OnBeforeTransfer(guiSelectedSlot, guiSelectedStack, selectedSlot))
+                if (!OnBeforeTransfer(guiSelectedSlot, guiSelectedStack, selectedSlot))
                 {
                     int transferCount = leftMouse ? stackInHand.Count : 1;
                     int beforeCount = stackInHand.Count;

@@ -12,12 +12,24 @@ using WindowsFormsApplication7.Frontend.Gui.Forms;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
 {
-    class BlockCraftingTable : Block
+    class BlockWater : Block
     {
-        internal override bool OnActivate(PositionBlock position)
+        internal override bool FaceVisibleByNeighbor(int neighborBlockId)
         {
-            TheGame.Instance.OpenGui(new GuiCraftingForm());
+            if (neighborBlockId == BlockRepository.Water.Id)
+                return false;
             return true;
         }
+
+        internal override Entity CreateEntity()
+        {
+            return new Water();
+        }
+
+        internal override int[] OnDroppedIds()
+        {
+            return new int[0];
+        }
+       
     }
 }

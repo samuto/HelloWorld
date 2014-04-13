@@ -38,7 +38,12 @@ namespace WindowsFormsApplication7.Business.Landscape
                         }
                         if (globalY == 64)
                         {
-                            chunk.SetLocalBlock(x, y, z, BlockRepository.DirtWithGrass.Id);
+                            if (chunk.Position.X == 1 && chunk.Position.Z == -1 && globalY == 64)
+                            {
+                                //chunk.SafeSetLocalBlock(x, y, z, BlockRepository.Water.Id);
+                            }
+                            else 
+                                chunk.SetLocalBlock(x, y, z, BlockRepository.DirtWithGrass.Id);
                             continue;
                         }
 
@@ -60,8 +65,9 @@ namespace WindowsFormsApplication7.Business.Landscape
                         }
                         else if (chunk.Position.X == -1 && chunk.Position.Z == -1 && globalY < 16 - x - z + 65)
                         {
-                            chunk.SafeSetLocalBlock(15-x, y, 15-z, globalY == 16 - x - z + 64 ? BlockRepository.CobbleStone.Id : BlockRepository.Stone.Id);
+                            chunk.SafeSetLocalBlock(15 - x, y, 15 - z, globalY == 16 - x - z + 64 ? BlockRepository.CobbleStone.Id : BlockRepository.Stone.Id);
                         }
+                        
                         else if (chunk.Position.X == -2 && chunk.Position.Z == -3 && globalY > 64 && globalY < 68)
                         {
                             if (x % 2 + z % 2 == 0)

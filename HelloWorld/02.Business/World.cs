@@ -33,12 +33,12 @@ namespace WindowsFormsApplication7.Business
             chunkCache.Update(Player.Position, GameSettings.CachingRadius);
 
             // update entities
-            p.EndStartSection("Entities"); 
+            p.EndStartSection("Entities");
             Player.OnUpdate();
             FlyingCamera.OnUpdate();
             Sun.OnUpdate();
             Moon.OnUpdate();
-           
+
             // calculate voxel ray
             p.EndStartSection("voxelray");
             Vector3 direction = Player.Direction;
@@ -88,7 +88,7 @@ namespace WindowsFormsApplication7.Business
             int blockId = chunk.GetLocalBlock(pos.X, pos.Y, pos.Z);
             return blockId;
         }
-      
+
         internal int GetBlock(int x, int y, int z)
         {
             PositionBlock pos = new PositionBlock(x, y, z);
@@ -107,7 +107,6 @@ namespace WindowsFormsApplication7.Business
         {
             PositionBlock pos = new PositionBlock(x, y, z);
             SetBlock(pos, blockId);
-            
         }
 
         internal bool ReplaceBlock(PositionBlock pos, int oldId, int newId)
@@ -138,6 +137,28 @@ namespace WindowsFormsApplication7.Business
             return entity;
         }
 
-       
+
+
+        internal object GetBlockMetaData(PositionBlock pos, string variable)
+        {
+            if (pos.Y < 0) return null;
+            if (pos.Y >= Chunk.MaxSizeY) return null;
+            PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
+            Chunk chunk = GetChunk(positionChunk);
+            positionChunk.ConvertToLocalPosition(ref pos);
+            return chunk.GetBlockMetaData(pos, variable);
+        }
+
+        
+
+        internal void SetBlockMetaData(PositionBlock pos, string variable, object value)
+        {
+            if (pos.Y < 0) return;
+            if (pos.Y >= Chunk.MaxSizeY) return;
+            PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
+            Chunk chunk = GetChunk(positionChunk);
+            positionChunk.ConvertToLocalPosition(ref pos);
+            chunk.SetBlockMetaData(pos, variable, value);
+        }
     }
 }

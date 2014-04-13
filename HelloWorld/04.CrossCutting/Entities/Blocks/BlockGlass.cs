@@ -12,12 +12,18 @@ using WindowsFormsApplication7.Frontend.Gui.Forms;
 
 namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
 {
-    class BlockCraftingTable : Block
+    class BlockGlass : Block
     {
-        internal override bool OnActivate(PositionBlock position)
+        internal override bool FaceVisibleByNeighbor(int neighborBlockId)
         {
-            TheGame.Instance.OpenGui(new GuiCraftingForm());
-            return true;
+            if (neighborBlockId == Id)
+                return false;
+            return Block.FromId(neighborBlockId).IsTransparent;
+        }
+
+        internal override void OnDestroy(PositionBlock pos)
+        {
+            
         }
     }
 }

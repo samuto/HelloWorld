@@ -14,6 +14,7 @@ namespace WindowsFormsApplication7.Business.Recipes
         public FurnaceRecipes()
         {
             AddRecipe(new Recepe().Input("1", BlockRepository.CobbleStone.Id).Output(BlockRepository.Stone.Id, 1));
+            AddRecipe(new Recepe().Input("1", BlockRepository.Sand.Id).Output(BlockRepository.Glass.Id, 1));
         }
     }
 }

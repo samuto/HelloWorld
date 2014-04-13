@@ -35,17 +35,24 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             EyePosition = new Vector3(0, AABB.Max.Y - 0.1f, 0);
             Speed = 0.15f;
 
-            Inventory.Slots[9].Content.ReplaceWith(BlockRepository.Wood.Id, 64);
-            Inventory.Slots[10].Content.ReplaceWith(BlockRepository.CobbleStone.Id, 64);
-            Inventory.Slots[11].Content.ReplaceWith(ItemRepository.Coal.Id, 64);
-            Inventory.Slots[0].Content.ReplaceWith(BlockRepository.FurnaceOff.Id, 1);
+
             Inventory.Slots[2].Content.ReplaceWith(ItemRepository.StonePickAxe.Id, 1);
             Inventory.Slots[3].Content.ReplaceWith(ItemRepository.StoneAxe.Id, 1);
             Inventory.Slots[4].Content.ReplaceWith(ItemRepository.StoneShovel.Id, 1);
             Inventory.Slots[5].Content.ReplaceWith(ItemRepository.StoneHoe.Id, 1);
-            Inventory.Slots[6].Content.ReplaceWith(ItemRepository.SeedsWheat.Id, 64);
-            Inventory.Slots[7].Content.ReplaceWith(ItemRepository.Bread.Id, 64);
-            Inventory.Slots[8].Content.ReplaceWith(BlockRepository.Diamond.Id, 1);
+
+            Inventory.Slots[9].Content.ReplaceWith(BlockRepository.Glass.Id, 64);
+            Inventory.Slots[10].Content.ReplaceWith(BlockRepository.Water.Id, 64);
+
+            Inventory.Slots[18].Content.ReplaceWith(BlockRepository.Wood.Id, 64);
+            Inventory.Slots[19].Content.ReplaceWith(BlockRepository.Stone.Id, 64);
+            Inventory.Slots[20].Content.ReplaceWith(BlockRepository.CobbleStone.Id, 64);
+            Inventory.Slots[21].Content.ReplaceWith(BlockRepository.Plank.Id, 64);
+
+            Inventory.Slots[23].Content.ReplaceWith(ItemRepository.Wheat.Id, 64);
+            Inventory.Slots[24].Content.ReplaceWith(ItemRepository.SeedsWheat.Id, 64);
+            Inventory.Slots[25].Content.ReplaceWith(ItemRepository.Coal.Id, 64);
+           
 
             collisionSystem = new CollisionComplex(this);
         }
@@ -340,8 +347,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             if (prevKeyboardState.IsPressed(Key.E) && !inGuiMode)
             {
                 //open player inventory gui...
-                //TheGame.Instance.OpenGui(new GuiTestForm());
-                TheGame.Instance.OpenGui(new GuiCraftingForm());
+                TheGame.Instance.OpenGui(new GuiPlayerInventoryForm());
             }
             else if (prevKeyboardState.IsPressed(Key.D1))
             {

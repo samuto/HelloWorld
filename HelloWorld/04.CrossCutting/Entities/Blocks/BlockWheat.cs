@@ -12,11 +12,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
 {
     class BlockWheat : Block
     {
-        public BlockWheat(int blockId)
-            : base(blockId)
-        {
-        }
-
+        
         internal override int[] OnDroppedIds()
         {
             double dropChance = MathLibrary.GlobalRandom.NextDouble();
@@ -37,7 +33,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
             Chunk chunk = World.Instance.GetChunk(PositionChunk.CreateFrom(pos));
             PositionBlock localpos = pos;
             chunk.Position.ConvertToLocalPosition(ref localpos);
-            int stage = chunk.MetaDataGetInt("stage", localpos);
+            int stage = (int)chunk.GetBlockMetaData(localpos, "stage");
             if (stage != 7)
             {
                 DropStack(new EntityStack(ItemRepository.SeedsWheat.Id, 1), pos);

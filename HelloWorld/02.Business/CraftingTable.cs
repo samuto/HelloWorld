@@ -34,7 +34,7 @@ namespace WindowsFormsApplication7.Business
         {
             TestRecipe();
             EntityStack createdProduct = Product.Content;
-            if (createdProduct == null) return null;
+            if (createdProduct.IsEmpty) return null;
             
             // Craft it!
             Product.Content.Clear();

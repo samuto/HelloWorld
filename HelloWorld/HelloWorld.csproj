@@ -54,6 +54,8 @@
     <Compile Include="01.Frontend\Effects\FXSimple.cs" />
     <Compile Include="01.Frontend\FontRenderer.cs" />
     <Compile Include="01.Frontend\Gui\Controls\GuiLabel.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiCraftingForm.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiPlayerInventoryForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiTestForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiInventoryForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiFurnaceForm.cs" />
@@ -73,6 +75,9 @@
     <Compile Include="02.Business\CollisionSimple.cs" />
     <Compile Include="02.Business\Recipes\RecipesBase.cs" />
     <Compile Include="02.Business\Recipes\FurnaceRecipes.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockGlass.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockWater.cs" />
+    <Compile Include="04.CrossCutting\Entities\Water.cs" />
     <Compile Include="04.CrossCutting\Entities\Wheat.cs" />
     <Compile Include="04.CrossCutting\Entities\Furnace.cs" />
     <Compile Include="02.Business\Geometry\AxisAlignBoundingBox.cs" />
@@ -122,7 +127,6 @@
     <Compile Include="01.Frontend\Camera.cs" />
     <Compile Include="04.CrossCutting\Entities\Chunk.cs" />
     <Compile Include="01.Frontend\Resources.cs" />
-    <Compile Include="01.Frontend\Gui\Forms\GuiCraftingForm.cs" />
     <Compile Include="04.CrossCutting\Log.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -169,6 +173,9 @@
     <Content Include="01.Frontend\Textures\Blocks\cobblestone.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="01.Frontend\Textures\Blocks\water.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="01.Frontend\Textures\Blocks\crafting_table_front.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -194,6 +201,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\furnace_top.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="01.Frontend\Textures\Blocks\glass.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="01.Frontend\Textures\Blocks\selection_box.png">

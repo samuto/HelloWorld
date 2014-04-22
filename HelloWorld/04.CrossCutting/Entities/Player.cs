@@ -33,7 +33,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             AABB = new AxisAlignedBoundingBox(new Vector3(-0.4f, 0f, -0.4f), new Vector3(0.4f, 1.7f, 0.4f));
             EyePosition = new Vector3(0, AABB.Max.Y - 0.1f, 0);
-            Speed = 0.15f;
+            //Speed = 0.15f;
+            Speed = 0.5f;
 
 
             Inventory.Slots[2].Content.ReplaceWith(ItemRepository.StonePickAxe.Id, 1);
@@ -54,7 +55,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Inventory.Slots[25].Content.ReplaceWith(ItemRepository.Coal.Id, 64);
            
 
-            collisionSystem = new CollisionComplex(this);
+            //collisionSystem = new CollisionComplex(this);
+            accGravity = new Vector3();
         }
 
        
@@ -125,6 +127,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             float radius = 0.5f;
             collectArea.Min -= new Vector3(radius, radius, radius);
             collectArea.Max += new Vector3(radius, radius, radius);
+            collectArea.CapToWorldBounds();
+
             PositionChunk minChunk = PositionChunk.CreateFrom(collectArea.Min);
             PositionChunk maxChunk = PositionChunk.CreateFrom(collectArea.Max);
             PositionChunk chunkPos;
@@ -348,6 +352,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             {
                 //open player inventory gui...
                 TheGame.Instance.OpenGui(new GuiPlayerInventoryForm());
+                //TheGame.Instance.OpenGui(new GuiTestForm());
             }
             else if (prevKeyboardState.IsPressed(Key.D1))
             {
@@ -384,6 +389,34 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             else if (prevKeyboardState.IsPressed(Key.D9))
             {
                 SelectedSlotId = 8;
+            }
+            if (prevKeyboardState.IsPressed(Key.W))
+            {
+                MoveForward();
+            }
+            if (prevKeyboardState.IsPressed(Key.S))
+            {
+                MoveBackward();
+            }
+            if (prevKeyboardState.IsPressed(Key.A))
+            {
+                MoveLeft();
+            }
+            if (prevKeyboardState.IsPressed(Key.D))
+            {
+                MoveRight();
+            }
+            if (prevKeyboardState.IsPressed(Key.F))
+            {
+                MoveDown();
+            }
+            if (prevKeyboardState.IsPressed(Key.R))
+            {
+                MoveUp();
+            }
+            if (prevKeyboardState.IsPressed(Key.Space))
+            {
+                Jump();
             }
         }
 

@@ -67,7 +67,7 @@ namespace WindowsFormsApplication7.Frontend
             int z = positionBlock.Z;
             if (block.HasStages)
             {
-                int stage = (int)chunk.GetBlockMetaData(positionBlock, "stage");
+                int stage = (int)((float)chunk.GetBlockMetaData(positionBlock, "stage") * block.MaxStage);
                 t.ArrayIndex = TileTextures.Instance.GetStage(blockId, stage);
             }
             else
@@ -345,10 +345,11 @@ namespace WindowsFormsApplication7.Frontend
 
         private float WaterLevel(Chunk chunk, PositionBlock positionBlock, int offsetX, int offsetY, int offsetZ)
         {
-            object o = chunk.GetBlockMetaData(new PositionBlock(positionBlock.X + offsetX, positionBlock.Y + offsetY, positionBlock.Z + offsetZ), "waterlvl");
-            float thisLevel = o == null ? 0 : (int)o / (float)Water.WaterStartLevel;
-            object o2 = chunk.GetBlockMetaData(new PositionBlock(positionBlock.X + offsetX, positionBlock.Y + offsetY + 1, positionBlock.Z + offsetZ), "waterlvl");
-            float topLevel = o2 == null ? 0 : 1;
+            Water water = chunk.GetBlockEntityFromPosition(new PositionBlock(positionBlock.X + offsetX, positionBlock.Y + offsetY, positionBlock.Z + offsetZ)) as Water;
+            float thisLevel = water == null ? 0 : water.GetWaterLevel();
+            water = chunk.GetBlockEntityFromPosition(new PositionBlock(positionBlock.X + offsetX, positionBlock.Y + offsetY + 1, positionBlock.Z + offsetZ)) as Water;
+            float topLevel = water == null ? 0 : 1;
+            
             return Math.Max(thisLevel, topLevel);
         }
 
@@ -356,13 +357,6 @@ namespace WindowsFormsApplication7.Frontend
         {
             Vector4 c1, c2, c3, c4, c5, c6;
             int blockId = block.Id;
-            Vector4[] blockColors = block.BlockColors;
-            c1 = blockColors[0];
-            c2 = blockColors[1];
-            c3 = blockColors[2];
-            c4 = blockColors[3];
-            c5 = blockColors[4];
-            c6 = blockColors[5];
             float vx = globalPosition.X;
             float vy = globalPosition.Y;
             float vz = globalPosition.Z;
@@ -390,14 +384,32 @@ namespace WindowsFormsApplication7.Frontend
             float height17 = WaterLevel(chunk, positionBlock, 0, 1, 1);
             float height18 = WaterLevel(chunk, positionBlock, 1, 1, 1);
 
+            
             float h1 = WaterAvg(height3, height4, height6, height7);
             float h2 = WaterAvg(height0, height1, height3, height4);
             float h3 = WaterAvg(height1, height2, height4, height5);
             float h4 = WaterAvg(height4, height5, height7, height8);
+
             if (height13 + height14 + height16 + height17 > 0) h1 = 1f;
             if (height10 + height11 + height13 + height14 > 0) h2 = 1f;
             if (height11 + height12 + height14 + height15 > 0) h3 = 1f;
             if (height14 + height15 + height17 + height18 > 0) h4 = 1f;
+
+            Water water = chunk.GetBlockEntityFromPosition(new PositionBlock(positionBlock.X, positionBlock.Y, positionBlock.Z)) as Water;
+            bool waterMainSource = water == null ? false : water.GetWaterLevel()==1f;
+            
+            Vector4[] blockColors = block.BlockColors;
+            if (waterMainSource)
+            {
+                Vector4 newcol = new Vector4(0.2f, 0.2f, 0.2f, 1f);
+                blockColors = new Vector4[] {newcol,newcol,newcol,newcol,newcol,newcol};
+            }   
+            c1 = blockColors[0];
+            c2 = blockColors[1];
+            c3 = blockColors[2];
+            c4 = blockColors[3];
+            c5 = blockColors[4];
+            c6 = blockColors[5];
 
             bool renderFront = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y, z + 1));
             bool renderBack = block.FaceVisibleByNeighbor(chunk.SafeGetLocalBlock(x, y, z - 1));

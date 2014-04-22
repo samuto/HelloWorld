@@ -25,6 +25,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
         public int DropId;
         public float DropProbability = 1f;
         public bool IsTransparent = false;
+        public int MaxStage = 0;
 
         public Block()
         {
@@ -75,9 +76,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
         }
 
 
-        internal Block SetHasStages()
+        internal Block SetMaxStage(int maxStage)
         {
             HasStages = true;
+            MaxStage = maxStage;
             return this;
         }
 
@@ -186,10 +188,23 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
             return this;
         }
 
-        internal virtual bool 
-            FaceVisibleByNeighbor(int neighborBlockId)
+        internal virtual bool FaceVisibleByNeighbor(int neighborBlockId)
         {
             return Block.FromId(neighborBlockId).IsTransparent; 
         }
+
+        internal void UpdateBlock(Chunk chunk, PositionBlock pos)
+        {
+            Entity entity = this.CreateEntity();
+            if (entity != null)
+            {
+                entity.Parent = chunk;
+                entity.BlockPosition = pos;
+                entity.OnUpdate();
+            }
+
+        }
+
+       
     }
 }

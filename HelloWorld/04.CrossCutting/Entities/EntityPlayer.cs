@@ -67,7 +67,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal override void OnUpdate()
         {
             UpdateDirection();
-            if (TheGame.Instance.IsEntityControlled(this) && TheGame.Instance.Mode == TheGame.GameMode.InGame)
+            if (TheGame.Instance.Mode == TheGame.GameMode.InGame)
             {
                 UpdateViewAngles();
             }
@@ -76,7 +76,11 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Vector3 response = Position;
             if (collisionSystem != null)
                 response = collisionSystem.Resolve(this);
-            
+            else
+            {
+                response = Position + Velocity;
+                Velocity *= 0.5f;
+            }
             PrevPosition = Position;
             Position.X = response.X;
             Position.Y = response.Y;

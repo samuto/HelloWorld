@@ -27,7 +27,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         public EntityTypeEnum EntityType = EntityTypeEnum.NoUpdate;
 
         public Chunk Parent;
-        public PositionBlock PositionBlock = new PositionBlock(-1,-1,-1);
+        public PositionBlock BlockPosition = new PositionBlock(-1,-1,-1);
 
         public enum EntityTypeEnum
         {

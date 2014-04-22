@@ -30,7 +30,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
 
                 guiCraftingSlots[i] = CreateAndBindGuiSlot(craftingTable.Grid[y * 3 + x], x, 7 - y);
             }
-            guiProduct = CreateAndBindGuiSlot(craftingTable.Product, 5, 5);
+            guiProduct = CreateAndBindGuiSlot(craftingTable.Product, 4, 6);
         }
 
         protected override bool OnPickUp(Controls.GuiPanel guiSlot, Controls.GuiStackControl guiStack, Slot slot)

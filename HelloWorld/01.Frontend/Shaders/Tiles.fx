@@ -96,7 +96,7 @@ PS_IN VS( VS_IN input )
 	if(output.index > 65536)
 	{
 		output.index = output.index-65536;
-		output.pos.y = output.pos.y + (sin(input.pos.x+input.pos.z+time)*0.05);
+		output.pos.y = output.pos.y + (sin(input.pos.x+input.pos.z+time)*0.07);
 		//output.pos.x = output.pos.x + (sin(input.pos.y+input.pos.z+time)*0.03);
 	}
 	return output;

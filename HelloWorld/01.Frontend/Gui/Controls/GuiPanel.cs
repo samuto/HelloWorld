@@ -8,7 +8,6 @@ namespace WindowsFormsApplication7.Frontend.Gui.Controls
 {
     class GuiPanel : GuiControl
     {
-        public event EventHandler<EventArgs> OnClick;
         private Vector4 ColorActivated = new Vector4(0.5f, 0.5f, 0.5f, 1);
         private Vector4 ColorDeactivated = new Vector4(0.4f, 0.4f, 0.4f, 1);
 
@@ -27,11 +26,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Controls
             Color = ColorDeactivated;
         }
 
-        internal override void OnMouseDown()
-        {
-            if(OnClick != null)
-                OnClick(this, new EventArgs());
-        }
+        
 
 
         internal void ClearControls()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SlimDX;
+using WindowsFormsApplication7.CrossCutting.Entities;
 
 namespace WindowsFormsApplication7.Business.Geometry
 {
@@ -57,6 +58,18 @@ namespace WindowsFormsApplication7.Business.Geometry
         {
             Min = Vector3.Add(Min, vector);
             Max = Vector3.Add(Max, vector);
+        }
+
+        internal void CapToWorldBounds()
+        {
+            if (Min.Y < 0)
+                Min.Y = 0;
+            if (Min.Y >= Chunk.MaxSizeY)
+                Min.Y = Chunk.MaxSizeY - 1;
+            if (Max.Y < 0)
+                Max.Y = 0;
+            if (Max.Y >= Chunk.MaxSizeY)
+                Max.Y = Chunk.MaxSizeY - 1;
         }
     }
 }

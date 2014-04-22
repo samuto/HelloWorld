@@ -29,7 +29,6 @@ namespace WindowsFormsApplication7
         }
 
         public static TheGame Instance = new TheGame();
-        public EntityPlayer entityToControl;
         public int CurrentTick = 0;
         public GameMode Mode = GameMode.InGame;
         public GuiForm ActiveGui = null;
@@ -42,11 +41,12 @@ namespace WindowsFormsApplication7
         private Profiler p = Profiler.Instance;
         private bool showProfiler = true;
         public float Time = 0f;
+
         public void Run()
         {
             this.Initialize();
             form.DesktopLocation = new Point(10, 10);
-           
+
             MessagePump.Run(form, () =>
             {
                 this.RunGameLoop();
@@ -57,6 +57,13 @@ namespace WindowsFormsApplication7
             this.Dispose();
         }
 
+        public IntPtr FormHandle
+        {
+            get
+            {
+                return form.Handle;
+            }
+        }
 
         private void Initialize()
         {
@@ -67,12 +74,10 @@ namespace WindowsFormsApplication7
             float scale = 3f;
             form.ClientSize = new Size((int)(320f * scale), (int)(240f * scale));
 
-            GlobalRenderer.Instance.Initialize(form);
-            World.Instance.Player.PrevPosition = World.Instance.Player.Position = new Vector3(0, 66, -20);
-            World.Instance.FlyingCamera.Position = new Vector3(10, 70, -25);
-            entityToControl = World.Instance.Player;
-            Camera.Instance.AttachTo(entityToControl);
+            GlobalRenderer.Instance.InitializeRenderer();
             Input.Instance.Initialize();
+
+            NewGame(new WorldConfiguration());
         }
 
         private void Dispose()
@@ -100,7 +105,7 @@ namespace WindowsFormsApplication7
             p.EndStartSection("render");
             GlobalRenderer.Instance.ClearTarget();
             GlobalRenderer.Instance.Render(partialStep);
-           
+
             // render 2d gui
             p.EndStartSection("2dgui");
             if (ActiveGui != null)
@@ -122,7 +127,7 @@ namespace WindowsFormsApplication7
             GlobalRenderer.Instance.Commit();
 
             // display debuginfo in widows caption
-            
+
             while (GetTime() >= this.debugUpdateTime + 1d)
             {
                 form.Text = this.fpsCounter + " fps (" + CurrentTick + ")";
@@ -154,74 +159,40 @@ namespace WindowsFormsApplication7
             GuiScaling.Instance.Update();
 
             // handle input
-            KeyboardState prevKeyboardState = Input.Instance.CurrentInput.KeyboardState;
-            KeyboardState keyboardState = Input.Instance.LastInput.KeyboardState;
+            KeyboardState keyboardState = Input.Instance.CurrentInput.KeyboardState;
+            KeyboardState prevKeyboardState = Input.Instance.LastInput.KeyboardState;
             MouseState mouseState = Input.Instance.CurrentInput.MouseState;
 
-            if (prevKeyboardState.IsPressed(Key.Comma))
-            {
-                entityToControl = World.Instance.FlyingCamera;
-                Camera.Instance.AttachTo(entityToControl);
-            }
-            else if (prevKeyboardState.IsPressed(Key.Period))
-            {
-                entityToControl = World.Instance.Player;
-                Camera.Instance.AttachTo(entityToControl);
-            }
 
-            if (prevKeyboardState.IsPressed(Key.F11))
+            if (prevKeyboardState.IsPressed(Key.O) && keyboardState.IsReleased(Key.O))
+            {
+                OpenGui(new GuiOptionsForm()); 
+            }
+            if (prevKeyboardState.IsPressed(Key.F11) && keyboardState.IsReleased(Key.F11))
             {
                 GlobalRenderer.Instance.ToggleFullScreen();
-            } 
-            if (prevKeyboardState.IsPressed(Key.W))
-            {
-                entityToControl.MoveForward();
             }
-            if (prevKeyboardState.IsPressed(Key.S))
-            {
-                entityToControl.MoveBackward();
-            }
-            if (prevKeyboardState.IsPressed(Key.A))
-            {
-                entityToControl.MoveLeft();
-            }
-            if (prevKeyboardState.IsPressed(Key.D))
-            {
-                entityToControl.MoveRight();
-            }
-            if (prevKeyboardState.IsPressed(Key.F))
-            {
-                entityToControl.MoveDown();
-            }
-            if (prevKeyboardState.IsPressed(Key.R))
-            {
-                entityToControl.MoveUp();
-            }
-            if (prevKeyboardState.IsPressed(Key.Space))
-            {
-                entityToControl.Jump();
-            }
-            if (prevKeyboardState.IsPressed(Key.Escape) && Mode == GameMode.Gui)
+            if (prevKeyboardState.IsPressed(Key.Escape) && keyboardState.IsReleased(Key.Escape) && Mode == GameMode.Gui)
             {
                 CloseGui();
             }
-            else if (prevKeyboardState.IsReleased(Key.V) && keyboardState.IsPressed(Key.V))
+            else if (keyboardState.IsReleased(Key.V) && prevKeyboardState.IsPressed(Key.V))
             {
                 p.ToggleReport();
             }
-            else if (prevKeyboardState.IsReleased(Key.C) && keyboardState.IsPressed(Key.C))
+            else if (keyboardState.IsReleased(Key.C) && prevKeyboardState.IsPressed(Key.C))
             {
                 showProfiler = !showProfiler;
             }
-            else if (prevKeyboardState.IsReleased(Key.Z) && keyboardState.IsPressed(Key.Z))
+            else if (keyboardState.IsReleased(Key.Z) && prevKeyboardState.IsPressed(Key.Z))
             {
                 p.ToggleMarkedSection();
             }
-            else if (prevKeyboardState.IsReleased(Key.X) && keyboardState.IsPressed(Key.X))
+            else if (keyboardState.IsReleased(Key.X) && prevKeyboardState.IsPressed(Key.X))
             {
                 p.SelectedSection = p.MarkedSection;
             }
-            else if (prevKeyboardState.IsReleased(Key.Backspace) && keyboardState.IsPressed(Key.Backspace))
+            else if (keyboardState.IsReleased(Key.Backspace) && prevKeyboardState.IsPressed(Key.Backspace))
             {
                 int index = p.SelectedSection.LastIndexOf(".");
                 if (index >= 0)
@@ -281,9 +252,14 @@ namespace WindowsFormsApplication7
             }
         }
 
-        internal bool IsEntityControlled(EntityPlayer entity)
+        internal void NewGame(WorldConfiguration config)
         {
-            return entityToControl == entity;
+            World.Instance.Initialize(config);
+            GlobalRenderer.Instance.InitializeWorld();
+            while (Mode == GameMode.Gui)
+            {
+                CloseGui();
+            }
         }
     }
 }

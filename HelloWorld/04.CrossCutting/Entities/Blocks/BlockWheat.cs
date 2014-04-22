@@ -33,8 +33,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
             Chunk chunk = World.Instance.GetChunk(PositionChunk.CreateFrom(pos));
             PositionBlock localpos = pos;
             chunk.Position.ConvertToLocalPosition(ref localpos);
-            int stage = (int)chunk.GetBlockMetaData(localpos, "stage");
-            if (stage != 7)
+            float stage = (float)chunk.GetBlockMetaData(localpos, "stage");
+            if (stage != 1f)
             {
                 DropStack(new EntityStack(ItemRepository.SeedsWheat.Id, 1), pos);
                 return;

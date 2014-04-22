@@ -54,6 +54,7 @@
     <Compile Include="01.Frontend\Effects\FXSimple.cs" />
     <Compile Include="01.Frontend\FontRenderer.cs" />
     <Compile Include="01.Frontend\Gui\Controls\GuiLabel.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiOptionsForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiCraftingForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiPlayerInventoryForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiTestForm.cs" />
@@ -73,10 +74,17 @@
     <Compile Include="01.Frontend\VertexBuffer.cs" />
     <Compile Include="02.Business\CollisionComplex.cs" />
     <Compile Include="02.Business\CollisionSimple.cs" />
+    <Compile Include="02.Business\Landscape\GeneratorBiome.cs" />
+    <Compile Include="02.Business\Landscape\GeneratorBase.cs" />
+    <Compile Include="02.Business\Landscape\GeneratorFlat.cs" />
+    <Compile Include="02.Business\Landscape\NoiseGen.cs" />
+    <Compile Include="02.Business\WorldConfiguration.cs" />
     <Compile Include="02.Business\Recipes\RecipesBase.cs" />
     <Compile Include="02.Business\Recipes\FurnaceRecipes.cs" />
     <Compile Include="04.CrossCutting\Entities\Blocks\BlockGlass.cs" />
     <Compile Include="04.CrossCutting\Entities\Blocks\BlockWater.cs" />
+    <Compile Include="04.CrossCutting\Entities\Blocks\BlockFarmland.cs" />
+    <Compile Include="04.CrossCutting\Entities\Farmland.cs" />
     <Compile Include="04.CrossCutting\Entities\Water.cs" />
     <Compile Include="04.CrossCutting\Entities\Wheat.cs" />
     <Compile Include="04.CrossCutting\Entities\Furnace.cs" />
@@ -111,7 +119,7 @@
     <Compile Include="04.CrossCutting\Entities\Blocks\Block.cs" />
     <Compile Include="02.Business\Repositories\BlockRepository.cs" />
     <Compile Include="02.Business\ChunkCache.cs" />
-    <Compile Include="02.Business\Landscape\ChunkGenerator.cs" />
+    <Compile Include="02.Business\Landscape\GeneratorDebug.cs" />
     <Compile Include="03.DataAccess\ChunkStorage.cs" />
     <Compile Include="02.Business\GameSettings.cs" />
     <Compile Include="02.Business\MathLibrary.cs" />

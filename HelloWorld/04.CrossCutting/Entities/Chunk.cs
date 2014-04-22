@@ -52,8 +52,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 if (entity != null)
                 {
                     entity.Parent = this;
+                    entity.BlockPosition = new PositionBlock(x, y, z);
                     entity.AddToParent();
-                    entity.PositionBlock = new PositionBlock(x, y, z);
                     entity.OnInitialize();
                 }
             }
@@ -93,13 +93,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 int y = MathLibrary.GlobalRandom.Next(0, 16);
                 int z = MathLibrary.GlobalRandom.Next(0, 16);
                 Block block = Block.FromId(GetLocalBlock(x, y, z));
-                Entity entity = block.CreateEntity();
-                if (entity != null)
-                {
-                    entity.Parent = this;
-                    entity.PositionBlock = new PositionBlock(x, y, z);
-                    entity.OnUpdate();
-                }
+                block.UpdateBlock(this, new PositionBlock(x, y, z));
             }
 
             for (int i = 0; i < 64; i++)
@@ -111,13 +105,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                     int y = (test >> 4) & 0x0f;
                     int z = test & 0x0f;
                     Block block = Block.FromId(GetLocalBlock(x, y, z));
-                    Entity entity = block.CreateEntity();
-                    if (entity != null)
-                    {
-                        entity.Parent = this;
-                        entity.PositionBlock = new PositionBlock(x, y, z);
-                        entity.OnUpdate();
-                    }
+                    block.UpdateBlock(this, new PositionBlock(x, y, z));
                     break;
                 }
 
@@ -127,37 +115,43 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         public void InvalidateMeAndNeighbors()
         {
             Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z - 1)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 0)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 1)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z + 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 1)).Invalidate();
 
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z - 1)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 0)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 1)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z + 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 1)).Invalidate();
 
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z - 1)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 0)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 1)).Invalidate();
             World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z + 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 1)).Invalidate();
 
+            if (Position.Y > 0)
+            {
+                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z - 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 0)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z - 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 0)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z - 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 0)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 1)).Invalidate();
+            }
+            if (Position.Y < Chunk.MaxSizeY)
+            {
+                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z - 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 0)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z - 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 0)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z - 1)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 0)).Invalidate();
+                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 1)).Invalidate();
 
+            }
         }
 
         public byte GetLocalBlock(int x, int y, int z)
@@ -244,7 +238,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal Entity GetBlockEntity(PositionBlock localPos)
         {
-            return blockEntityFullUpdate.Where(e => e.PositionBlock.SameAs(localPos)).FirstOrDefault();
+            return blockEntityFullUpdate.Where(e => e.BlockPosition.SameAs(localPos)).FirstOrDefault();
         }
 
         public IEnumerable<EntityStack> StackEntities { get { return (IEnumerable<EntityStack>)stackEntities; } }
@@ -335,6 +329,36 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 chunkMetaData.Add(key, new Dictionary<string, object>());
             }
             chunkMetaData[key][variable] = value;
+        }
+
+
+        internal Entity GetBlockEntityFromPosition(PositionBlock pos)
+        {
+            int x = pos.X;
+            int y = pos.Y;
+            int z = pos.Z;
+            if (x < 0 || x >= 16 ||
+               y < 0 || y >= 16 ||
+               z < 0 || z >= 16)
+            {
+                PositionBlock globalPosition;
+                Position.GetGlobalPositionBlock(out globalPosition, x, y, z);
+                return World.Instance.GetBlockEntityFromPosition(globalPosition);
+            }
+            return RawGetBlockEntityFromPosition(x, y, z);
+           
+        }
+
+        private Entity RawGetBlockEntityFromPosition(int x, int y, int z)
+        {
+            Block block = Block.FromId(GetLocalBlock(x, y, z));
+            Entity entity = block.CreateEntity();
+            if (entity != null)
+            {
+                entity.Parent = this;
+                entity.BlockPosition = new PositionBlock(x, y, z);
+            }
+            return entity;
         }
     }
 }

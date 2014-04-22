@@ -41,6 +41,7 @@ namespace WindowsFormsApplication7.Frontend
                 EyePosition = Interpolate.EyePosition(attachedEntity, partialStep);
                 Vector3 target = Vector3.Add(EyePosition, Direction * 5f);
                 View = Matrix.LookAtRH(EyePosition, target, new Vector3(0, 1, 0));
+                
                 Projection = Matrix.PerspectiveFovRH(45.0f, (float)TheGame.Instance.Width / (float)TheGame.Instance.Height, 0.05f, 200f);
                 frustum = new BoundingFrustum(Matrix.Multiply(View, Projection));
             }

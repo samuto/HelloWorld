@@ -21,10 +21,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Items
             int sourceBlockId = World.Instance.GetBlock(pos);
             if (sourceBlockId == BlockRepository.DirtWithGrass.Id || sourceBlockId == BlockRepository.Dirt.Id)
             {
-                if(MathLibrary.GlobalRandom.NextDouble() < 0.5)
-                    World.Instance.SetBlock(pos, BlockRepository.FarmlandDry.Id);
-                else
-                    World.Instance.SetBlock(pos, BlockRepository.FarmlandWet.Id);
+                World.Instance.SetBlock(pos, BlockRepository.FarmlandDry.Id);
             }
             return true;
         }

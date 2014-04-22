@@ -19,18 +19,24 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal override void OnUpdate()
         {
-            int stage = (int)Parent.GetBlockMetaData(PositionBlock, "stage");
-            if (stage < 7)
+            float stage = (float)Parent.GetBlockMetaData(BlockPosition, "stage");
+            if (stage < 1)
             {
-                stage++;
+                int sourceBlockId = Parent.SafeGetLocalBlock(BlockPosition.X, BlockPosition.Y - 1, BlockPosition.Z);
+                if (sourceBlockId == BlockRepository.FarmlandWet.Id)
+                    stage += 0.25f;
+                else
+                    stage += 0.05f;
             }
-            Parent.SetBlockMetaData(PositionBlock, "stage", stage);
+            if (stage > 1f)
+                stage = 1f;
+            Parent.SetBlockMetaData(BlockPosition, "stage", stage);
             Parent.Invalidate();
         }
 
         internal override void OnInitialize()
         {
-            Parent.SetBlockMetaData(PositionBlock, "stage", 0);
+            Parent.SetBlockMetaData(BlockPosition, "stage", 0f);
         }
     }
 }

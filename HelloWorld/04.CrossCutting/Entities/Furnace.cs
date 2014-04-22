@@ -82,7 +82,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 return;
             // change block to furnaceon
             on = true; 
-            Parent.SetLocalBlock(PositionBlock.X, PositionBlock.Y, PositionBlock.Z, BlockRepository.FurnaceOn.Id, false);
+            Parent.SetLocalBlock(BlockPosition.X, BlockPosition.Y, BlockPosition.Z, BlockRepository.FurnaceOn.Id, false);
             Parent.Invalidate();
         }
 
@@ -92,7 +92,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 return;
             // change block to furnace (off)
             on = false; 
-            Parent.SetLocalBlock(PositionBlock.X, PositionBlock.Y, PositionBlock.Z, BlockRepository.FurnaceOff.Id, false);
+            Parent.SetLocalBlock(BlockPosition.X, BlockPosition.Y, BlockPosition.Z, BlockRepository.FurnaceOff.Id, false);
             Parent.Invalidate();
         }
 

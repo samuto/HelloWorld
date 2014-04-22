@@ -18,7 +18,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Items
 
         public override bool OnUseOnBlock(PositionBlock pos)
         {
-            if (World.Instance.GetBlock(pos) != BlockRepository.FarmlandDry.Id)
+            int sourceBlockId = World.Instance.GetBlock(pos);
+            if (sourceBlockId != BlockRepository.FarmlandDry.Id && sourceBlockId != BlockRepository.FarmlandWet.Id)
                 return false;
             World.Instance.SetBlock(pos.X, pos.Y+1, pos.Z, BlockRepository.Wheat.Id);
             return true;

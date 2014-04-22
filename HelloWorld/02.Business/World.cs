@@ -7,6 +7,7 @@ using WindowsFormsApplication7.Business.Landscape;
 using WindowsFormsApplication7.DataAccess;
 using WindowsFormsApplication7.Business.Profiling;
 using SlimDX;
+using WindowsFormsApplication7.Frontend;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -16,16 +17,16 @@ namespace WindowsFormsApplication7.Business
 
         // entities
         public static float TicksPrDay = 5000;
-        public Player Player = new Player();
-        public FlyingCamera FlyingCamera = new FlyingCamera();
-        public Sun Sun = new Sun();
-        public Moon Moon = new Moon();
-        private ChunkCache chunkCache = new ChunkCache();
-        private ChunkStorage storage = new ChunkStorage();
-        private ChunkGenerator generator = new ChunkGenerator();
-        private Profiler p = Profiler.Instance;
+        public Player Player;
+        public Entity entityToControl;
+        public Sun Sun;
+        public Moon Moon;
+        private ChunkCache chunkCache;
+        private ChunkStorage storage;
+        private ChunkGeneratorBase generator;
         public VoxelTrace PlayerVoxelTrace = new VoxelTrace();
-
+        private Profiler p = Profiler.Instance;
+        
         internal void Update()
         {
             p.StartSection("ChunkCache");
@@ -35,7 +36,6 @@ namespace WindowsFormsApplication7.Business
             // update entities
             p.EndStartSection("Entities");
             Player.OnUpdate();
-            FlyingCamera.OnUpdate();
             Sun.OnUpdate();
             Moon.OnUpdate();
 
@@ -159,6 +159,28 @@ namespace WindowsFormsApplication7.Business
             Chunk chunk = GetChunk(positionChunk);
             positionChunk.ConvertToLocalPosition(ref pos);
             chunk.SetBlockMetaData(pos, variable, value);
+        }
+
+        internal Entity GetBlockEntityFromPosition(PositionBlock pos)
+        {
+            if (pos.Y < 0) return null;
+            if (pos.Y >= Chunk.MaxSizeY) return null;
+            PositionChunk positionChunk = PositionChunk.CreateFrom(pos);
+            Chunk chunk = GetChunk(positionChunk);
+            positionChunk.ConvertToLocalPosition(ref pos);
+            return chunk.GetBlockEntityFromPosition(pos);
+        }
+
+        internal void Initialize(WorldConfiguration config)
+        {
+            Sun = new Sun();
+            Moon = new Moon();
+            chunkCache = new ChunkCache();
+            storage = new ChunkStorage();
+            generator = config.Generator;
+            Player = new Player();
+            Player.PrevPosition = World.Instance.Player.Position = new Vector3(0, 66, -20);
+            entityToControl = Player;
         }
     }
 }

@@ -12,8 +12,8 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
 {
     class GuiInventoryForm : GuiForm
     {
-        protected const float slotSize = itemSize + 2;
-        protected const float itemSize = 16;
+        protected const float slotSize = GuiScaling.ItemSize;
+        
         protected Inventory inventory = World.Instance.Player.Inventory;
         protected Player player = World.Instance.Player;
 
@@ -34,7 +34,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
         {
             // Create gui stack in hand and bind it to local variable
             guiStackInHand = new GuiStackControl();
-            guiStackInHand.Size = new SlimDX.Vector2(itemSize, itemSize);
+            guiStackInHand.Size = new SlimDX.Vector2(GuiScaling.ItemSize, GuiScaling.ItemSize);
             guiStackInHand.Tag = stackInHand;
             guiStackInHand.AttachToCursor();
             BindControl(guiStackInHand);
@@ -57,7 +57,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
         {
             GuiPanel panel = new GuiPanel()
             {
-                Location = new SlimDX.Vector2((x + 1) * slotSize, (y + 1) * slotSize),
+                Location = new SlimDX.Vector2(x * slotSize, y * slotSize),
                 Size = new SlimDX.Vector2(slotSize, slotSize),
                 Text = "",
                 Tag = slot
@@ -68,7 +68,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
 
             // add moveable control...
             GuiStackControl guiStack = new GuiStackControl();
-            guiStack.Size = new SlimDX.Vector2(itemSize, itemSize);
+            guiStack.Size = new SlimDX.Vector2(GuiScaling.ItemSize, GuiScaling.ItemSize);
             guiStack.Tag = slot.Content;
             panel.AddControl(guiStack);
             guiStack.CenterInParent();

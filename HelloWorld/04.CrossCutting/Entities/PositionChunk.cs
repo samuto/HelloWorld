@@ -68,6 +68,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return posChunk.X == X && posChunk.Y == Y && posChunk.Z == Z;
         }
 
+
+
        
     }
 }

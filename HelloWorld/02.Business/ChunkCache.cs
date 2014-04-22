@@ -27,6 +27,8 @@ namespace WindowsFormsApplication7.Business
             Vector3 minPos = Vector3.Add(position, new Vector3(-blockRadius, -blockRadius, -blockRadius));
             Vector3 maxPos = Vector3.Add(position, new Vector3(blockRadius, blockRadius, blockRadius));
             if (minPos.Y < 0) minPos.Y = 0;
+            if (minPos.Y > (Chunk.MaxSizeY - 1)) minPos.Y = Chunk.MaxSizeY - 1;
+            if (maxPos.Y < 0) maxPos.Y = 0;
             if (maxPos.Y > (Chunk.MaxSizeY - 1)) maxPos.Y = Chunk.MaxSizeY - 1;
             PositionChunk minChunk = PositionChunk.CreateFrom(minPos);
             PositionChunk maxChunk = PositionChunk.CreateFrom(maxPos);

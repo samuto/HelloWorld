@@ -9,6 +9,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Controls
 {
     class GuiControl
     {
+        public event EventHandler<EventArgs> OnClick;
         public object Tag;
         private Vector2 location;
         public Vector2 Size;
@@ -216,6 +217,8 @@ namespace WindowsFormsApplication7.Frontend.Gui.Controls
 
         internal virtual void OnMouseDown()
         {
+            if (OnClick != null)
+                OnClick(this, new EventArgs());
         }
 
         internal virtual void OnMouseUp()

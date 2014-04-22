@@ -23,8 +23,8 @@ namespace WindowsFormsApplication7.Frontend
     {
         public Color4 BackgroundColor = new Color4(Color.White);
         public static GlobalRenderer Instance = new GlobalRenderer();
-        private ChunkCacheRenderer chunkCacheRenderer = new ChunkCacheRenderer();
-        private EntityRenderers entityRenderers = new EntityRenderers();
+        private ChunkCacheRenderer chunkCacheRenderer;
+        private EntityRenderers entityRenderers;
         private RenderTargetView renderView;
         private DepthStencilView depthView;
         private Texture2D backBuffer;
@@ -34,6 +34,79 @@ namespace WindowsFormsApplication7.Frontend
         private HeadUpDisplay headUpDisplay;
         private Tessellator t = Tessellator.Instance;
         private Profiler p = Profiler.Instance;
+
+        internal void InitializeRenderer()
+        {
+            // setup directx
+            var desc = new SwapChainDescription()
+            {
+                BufferCount = 1,
+                ModeDescription = new ModeDescription(TheGame.Instance.Width, TheGame.Instance.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
+                IsWindowed = true,
+                OutputHandle = TheGame.Instance.FormHandle,
+                SampleDescription = new SampleDescription(1, 0),
+                SwapEffect = SwapEffect.Discard,
+                Usage = Usage.RenderTargetOutput,
+            };
+            Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, desc, out device, out swapChain);
+
+            Factory factory = swapChain.GetParent<Factory>();
+            factory.SetWindowAssociation(TheGame.Instance.FormHandle, WindowAssociationFlags.IgnoreAll);
+
+            backBuffer = Texture2D.FromSwapChain<Texture2D>(swapChain, 0);
+            renderView = new RenderTargetView(device, backBuffer);
+
+
+            // setup depth buffer
+            Format depthFormat = Format.D32_Float;
+            Texture2DDescription depthBufferDesc = new Texture2DDescription
+            {
+                ArraySize = 1,
+                BindFlags = BindFlags.DepthStencil,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = depthFormat,
+                Height = TheGame.Instance.Height,
+                Width = TheGame.Instance.Width,
+                MipLevels = 1,
+                OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0),
+                Usage = ResourceUsage.Default
+            };
+
+            depthBuffer = new Texture2D(device, depthBufferDesc);
+
+            DepthStencilViewDescription dsViewDesc = new DepthStencilViewDescription
+            {
+                ArraySize = 0,
+                Format = depthFormat,
+                Dimension = DepthStencilViewDimension.Texture2D,
+                MipSlice = 0,
+                Flags = 0,
+                FirstArraySlice = 0
+            };
+
+            depthView = new DepthStencilView(device, depthBuffer, dsViewDesc);
+
+            DepthStencilStateDescription dsStateDesc = new DepthStencilStateDescription()
+            {
+                IsDepthEnabled = true,
+                IsStencilEnabled = false,
+                DepthWriteMask = DepthWriteMask.All,
+                DepthComparison = Comparison.Less,
+            };
+
+            DepthStencilState depthState = DepthStencilState.FromDescription(device, dsStateDesc);
+
+
+
+            // setup render targets
+            device.ImmediateContext.OutputMerger.DepthStencilState = depthState;
+            device.ImmediateContext.OutputMerger.SetTargets(depthView, renderView);
+            device.ImmediateContext.Rasterizer.SetViewports(new Viewport(0, 0, TheGame.Instance.Width, TheGame.Instance.Height, 0.0f, 0.01f));
+
+            t.Initialize(1024 * 1024 * 10, device);
+            TileTextures.Instance.Initialize();
+        }
 
         internal void ClearTarget()
         {
@@ -55,7 +128,6 @@ namespace WindowsFormsApplication7.Frontend
             // 3D: render entities
             p.EndStartSection("entities");
             entityRenderers.GetRenderer(World.Instance.Player).Render(partialStep);
-            entityRenderers.GetRenderer(World.Instance.FlyingCamera).Render(partialStep);
             entityRenderers.GetRenderer(World.Instance.Sun).Render(partialStep);
             entityRenderers.GetRenderer(World.Instance.Moon).Render(partialStep);
             RenderPlayerRayImpact(partialStep);
@@ -148,79 +220,12 @@ namespace WindowsFormsApplication7.Frontend
             swapChain.SetFullScreenState(isFull, null);
         }
 
-        
-        internal void Initialize(SlimDX.Windows.RenderForm form)
+        internal void InitializeWorld()
         {
-            // setup directx
-            var desc = new SwapChainDescription()
-            {
-                BufferCount = 1,
-                ModeDescription = new ModeDescription(form.ClientSize.Width, form.ClientSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                IsWindowed = true,
-                OutputHandle = form.Handle,
-                SampleDescription = new SampleDescription(1, 0),
-                SwapEffect = SwapEffect.Discard,
-                Usage = Usage.RenderTargetOutput,
-            };
-            Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, desc, out device, out swapChain);
-
-            Factory factory = swapChain.GetParent<Factory>();
-            factory.SetWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAll);
-
-            backBuffer = Texture2D.FromSwapChain<Texture2D>(swapChain, 0);
-            renderView = new RenderTargetView(device, backBuffer);
-
-
-            // setup depth buffer
-            Format depthFormat = Format.D32_Float;
-            Texture2DDescription depthBufferDesc = new Texture2DDescription
-            {
-                ArraySize = 1,
-                BindFlags = BindFlags.DepthStencil,
-                CpuAccessFlags = CpuAccessFlags.None,
-                Format = depthFormat,
-                Height = TheGame.Instance.Height,
-                Width = TheGame.Instance.Width,
-                MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.None,
-                SampleDescription = new SampleDescription(1, 0),
-                Usage = ResourceUsage.Default
-            };
-
-            depthBuffer = new Texture2D(device, depthBufferDesc);
-
-            DepthStencilViewDescription dsViewDesc = new DepthStencilViewDescription
-            {
-                ArraySize = 0,
-                Format = depthFormat,
-                Dimension = DepthStencilViewDimension.Texture2D,
-                MipSlice = 0,
-                Flags = 0,
-                FirstArraySlice = 0
-            };
-
-            depthView = new DepthStencilView(device, depthBuffer, dsViewDesc);
-
-            DepthStencilStateDescription dsStateDesc = new DepthStencilStateDescription()
-            {
-                IsDepthEnabled = true,
-                IsStencilEnabled = false,
-                DepthWriteMask = DepthWriteMask.All,
-                DepthComparison = Comparison.Less,
-            };
-
-            DepthStencilState depthState = DepthStencilState.FromDescription(device, dsStateDesc);
-
-
-
-            // setup render targets
-            device.ImmediateContext.OutputMerger.DepthStencilState = depthState;
-            device.ImmediateContext.OutputMerger.SetTargets(depthView, renderView);
-            device.ImmediateContext.Rasterizer.SetViewports(new Viewport(0, 0, form.ClientSize.Width, form.ClientSize.Height, 0.0f, 0.01f));
-
-            t.Initialize(1024 * 1024 * 10, device);
-            TileTextures.Instance.Initialize();
+            chunkCacheRenderer = new ChunkCacheRenderer();
+            entityRenderers = new EntityRenderers();
             headUpDisplay = new HeadUpDisplay();
+            Camera.Instance.AttachTo(World.Instance.Player);
         }
 
         internal void Dispose()

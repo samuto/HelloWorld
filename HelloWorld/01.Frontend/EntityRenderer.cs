@@ -26,7 +26,7 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Build()
         {
-            
+
             t.StartDrawingColoredQuads();
             Vector4 c = entity.Color;
             Vector3 min = entity.AABB.Min;
@@ -85,13 +85,35 @@ namespace WindowsFormsApplication7.Frontend
         {
             t.ResetTransformation();
             Vector3 position = Interpolate.Position(entity, partialStep);
-            if (entity != TheGame.Instance.entityToControl)
+            if (entity != World.Instance.Player)
             {
                 t.StartDrawingColoredQuads();
                 Camera.Instance.World = Matrix.Multiply(Matrix.RotationYawPitchRoll(entity.Yaw, 0, 0), Matrix.Translation(position));
                 t.Draw(buffer);
             }
-           
+
+            if (typeof(Player) == entity.GetType())
+            {
+                Player p = World.Instance.Player;
+                Vector3 pos = p.Position + p.EyePosition;
+                int blockId = World.Instance.GetBlock((int)pos.X, (int)pos.Y, (int)pos.Z);
+                if (blockId == BlockRepository.Water.Id)
+                {
+                    t.StartDrawingColoredQuads();
+                    Camera.Instance.World = Matrix.Identity;
+                    Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(new Vector3(-0.5f, -0.5f, -1.2f)));
+                    Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.RotationYawPitchRoll(p.Yaw - (float)Math.PI, -p.Pitch, 0));
+                    Camera.Instance.World = Matrix.Multiply(Camera.Instance.World, Matrix.Translation(pos));
+            
+                    Vector3 normal = new Vector3(0, 0, 1);
+                    Vector4 c1 = new Vector4(0,0,1, 0.5f);
+                    t.AddVertexWithColor(new Vector4(0f, 0f, 1f, 1.0f), c1, normal);
+                    t.AddVertexWithColor(new Vector4(0f, 1f, 1f, 1.0f), c1, normal);
+                    t.AddVertexWithColor(new Vector4(1f, 1f, 1f, 1.0f), c1, normal);
+                    t.AddVertexWithColor(new Vector4(1f, 0f, 1f, 1.0f), c1, normal);
+                    t.Draw();
+                }
+            }
             if (typeof(Player) == entity.GetType() && World.Instance.Player.DestroyProgress > 0)
             {
                 t.StartDrawingTiledQuads2();

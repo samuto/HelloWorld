@@ -7,11 +7,11 @@ using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Business.Landscape
 {
-    class ChunkGenerator
+    class DebugGenerator : ChunkGeneratorBase
     {
         bool disableRecursivecalls = false;
 
-        internal void Generate(Chunk chunk)
+        internal override void Generate(Chunk chunk)
         {
             if (disableRecursivecalls)
                 return;

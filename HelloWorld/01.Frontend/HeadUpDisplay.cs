@@ -33,7 +33,7 @@ namespace WindowsFormsApplication7.Frontend
             for (int i = 0; i < labels.Length; i++)
             {
                 labels[i] = new Label();
-                labels[i].Color = new Vector4(1f, 1f, 0.5f, 1);
+                labels[i].Color = new Vector4(1f, 1f, 0.2f, 1);
             }
 
             t.StartDrawingColoredQuads();

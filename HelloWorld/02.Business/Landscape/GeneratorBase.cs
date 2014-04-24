@@ -7,8 +7,12 @@ using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Business.Landscape
 {
-    abstract class ChunkGeneratorBase
+    abstract class GeneratorBase
     {
         internal abstract void Generate(Chunk chunk);
+
+        internal virtual void Decorate(Chunk chunk)
+        {
+        }
     }
 }

@@ -7,11 +7,11 @@ using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Business.Landscape
 {
-    class BiomeGenerator : ChunkGeneratorBase
+    class GeneratorBiome : GeneratorBase
     {
-        float[] noise3D;
-        float[] noise2D;
-        Chunk chunk;
+        private float[] noise3D;
+        private float[] noise2D;
+        private Chunk chunk;
 
         internal override void Generate(Chunk chunk)
         {
@@ -33,38 +33,25 @@ namespace WindowsFormsApplication7.Business.Landscape
                         if (height == 0)
                         {
                             chunk.SetLocalBlock(x, y, z, BlockRepository.BedRock.Id);
-                            continue;
-                        }
-                        else if (height <= 5)
-                        {
-                            // -1...0
-                            float limit = CalcOffset(height, 1, 5) - 1f;
-                            float limit2 = CalcOffset(height+1, 1, 5) - 1f;
-                            Magic(height, x, y, z, BlockRepository.Stone.Id, BlockRepository.Stone.Id, limit, limit2);
-                        }
-                        else if (height <= 30)
-                        {
-                            // 0
-                            Magic(height, x, y, z, BlockRepository.Stone.Id, BlockRepository.Stone.Id);
                         }
                         else if (height <= 60)
                         {
-                            // 0...-0.5
-                            float limit = CalcOffset(height, 30, 60) * -0.5f;
-                            float limit2 = CalcOffset(height+1, 30, 60) * -0.5f;
-                            Magic(height, x, y, z, BlockRepository.Stone.Id, BlockRepository.Stone.Id, limit, limit2);
+                            chunk.SetLocalBlock(x, y, z, BlockRepository.Stone.Id);
                         }
                         else if (height <= 80)
                         {
-                            // -0.5...1
-                            float limit = CalcOffset(height, 60, 80) * 1.5f - 0.5f;
-                            float limit2 = CalcOffset(height+1, 60, 80) * 1.5f - 0.5f;
-                            Magic(height, x, y, z, BlockRepository.Stone.Id, BlockRepository.DirtWithGrass.Id, limit, limit2);
-
+                            float limit = CalcOffset(height, 60, 80) * 2f - 1f;
+                            Magic(height, x, y, z, BlockRepository.Stone.Id, limit);
                         }
                     }
                 }
             }
+        }
+
+        internal override void Decorate(Chunk chunk)
+        {
+            DecoratorBiome decorator = new DecoratorBiome();
+            decorator.Decorate(this);
         }
 
         private float CalcOffset(float height, float min, float max)
@@ -78,16 +65,12 @@ namespace WindowsFormsApplication7.Business.Landscape
         }
 
 
-        internal void Magic(float height, int x, int y, int z, int blockId, int blockIdTop, float limit = 0, float limit2=0)
+        internal void Magic(float height, int x, int y, int z, int blockId, float limit = 0)
         {
             float n1 = Terp(noise3D, x, y, z);
             if (n1 > limit)
             {
-                float n2 = Terp(noise3D, x, y+1, z);
-                if (n2 > limit2)
-                    chunk.SetLocalBlock(x, y, z, blockId);
-                else
-                    chunk.SetLocalBlock(x, y, z, blockIdTop);
+                chunk.SetLocalBlock(x, y, z, blockId);
             }
         }
 

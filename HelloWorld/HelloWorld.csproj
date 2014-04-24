@@ -74,6 +74,7 @@
     <Compile Include="01.Frontend\VertexBuffer.cs" />
     <Compile Include="02.Business\CollisionComplex.cs" />
     <Compile Include="02.Business\CollisionSimple.cs" />
+    <Compile Include="02.Business\Landscape\DecoratorBiome.cs" />
     <Compile Include="02.Business\Landscape\GeneratorBiome.cs" />
     <Compile Include="02.Business\Landscape\GeneratorBase.cs" />
     <Compile Include="02.Business\Landscape\GeneratorFlat.cs" />

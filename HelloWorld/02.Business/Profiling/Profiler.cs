@@ -48,7 +48,6 @@ namespace WindowsFormsApplication7.Business.Profiling
                 allSections.Add(child.Name, child);
                 activeSection.Children.Add(child);
                 child.Parent = activeSection;
-
             }
             activeSection = child;
             child.Stopwatch.Start();
@@ -59,9 +58,10 @@ namespace WindowsFormsApplication7.Business.Profiling
             if (!Enabled) return;
             activeSection.Stopwatch.Stop();
             activeSection = activeSection.Parent;
-            if(activeSection == null)
+            if (activeSection == null)
+            {
                 activeSection = root;
-           
+            }
         }
 
         internal void EndStartSection(string sectionName)
@@ -89,25 +89,24 @@ namespace WindowsFormsApplication7.Business.Profiling
         }
 
 
-
+        int lastTick = 0;
         internal string Report()
         {
+            float updateCount = TheGame.Instance.CurrentTick - lastTick;
+            lastTick = TheGame.Instance.CurrentTick;
             StringBuilder sb = new StringBuilder();
-
-            int padding = 40;
+            int padding = 20;
             if (ReportCounters)
             {
                 padding = 10;
                 foreach (var pair in Counters.Instance.AllCounters)
                 {
-                    sb.AppendLine(string.Format("{0} = {1}", pair.Key.PadRight(padding), pair.Value));
-
+                    sb.AppendLine(string.Format("{0} = {1}", pair.Key.PadRight(padding), pair.Value / updateCount));
                 }
                 return sb.ToString(); ;
             }
             else
             {
-
                 ProfileSection profileSection = allSections[SelectedSection];
                 ProfileSection markedSection = allSections[MarkedSection];
                 string line = string.Format("{0} : {1:000.}% ({2}ms)", ((profileSection == markedSection ? "=> " : "") + profileSection.Name).PadRight(padding), profileSection.Stopwatch.ElapsedMilliseconds * 100f / root.Stopwatch.ElapsedMilliseconds, profileSection.Stopwatch.ElapsedMilliseconds);
@@ -130,7 +129,6 @@ namespace WindowsFormsApplication7.Business.Profiling
         }
 
 
-
         internal void ToggleEnabled()
         {
             Enabled = !Enabled;
@@ -140,7 +138,5 @@ namespace WindowsFormsApplication7.Business.Profiling
         {
             ReportCounters = !ReportCounters;
         }
-
-       
     }
 }

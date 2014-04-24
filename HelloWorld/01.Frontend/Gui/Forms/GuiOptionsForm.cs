@@ -65,11 +65,11 @@ namespace WindowsFormsApplication7.Frontend.Gui.Forms
         {
             WorldConfiguration config = new WorldConfiguration();
             if(generators[0] == "FLAT")
-                config.Generator = new FlatGenerator();
+                config.Generator = new GeneratorFlat();
             else if (generators[0] == "DEBUG")
-                config.Generator = new DebugGenerator();
+                config.Generator = new GeneratorDebug();
             else if (generators[0] == "BIOME")
-                config.Generator = new BiomeGenerator();
+                config.Generator = new GeneratorBiome();
             TheGame.Instance.NewGame(config);
         }
     }

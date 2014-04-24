@@ -45,7 +45,7 @@ namespace WindowsFormsApplication7
         public void Run()
         {
             this.Initialize();
-            form.DesktopLocation = new Point(10, 10);
+            form.DesktopLocation = new Point(10, 600);
 
             MessagePump.Run(form, () =>
             {
@@ -71,7 +71,7 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("Hello World");
-            float scale = 3f;
+            float scale = 1f;
             form.ClientSize = new Size((int)(320f * scale), (int)(240f * scale));
 
             GlobalRenderer.Instance.InitializeRenderer();

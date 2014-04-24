@@ -36,7 +36,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return newChunk;
         }
 
-
         internal static PositionChunk CreateFrom(PositionBlock positionBlock)
         {
             return CreateFrom(new Vector3(positionBlock.X, positionBlock.Y, positionBlock.Z));
@@ -70,6 +69,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
 
 
-       
+
     }
 }

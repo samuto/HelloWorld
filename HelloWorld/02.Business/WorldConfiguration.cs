@@ -14,6 +14,6 @@ namespace WindowsFormsApplication7.Business
 {
     class WorldConfiguration
     {
-        public ChunkGeneratorBase Generator = new DebugGenerator();
+        public GeneratorBase Generator = new GeneratorDebug();
     }
 }

@@ -129,7 +129,7 @@ namespace WindowsFormsApplication7.Frontend
             
             Counters.Instance.Increment("chunks in view range");
             Chunk chunk = cachedChunks.GetChunk(new PositionChunk(x, y, z));
-            if (!ChunkRenderer.InsideViewFrustum(chunk)) return;
+            if (chunk == null || !ChunkRenderer.InsideViewFrustum(chunk)) return;
             Counters.Instance.Increment("chunks rendered");
             
             // get chunkrenderer for this chunk (create new of it does not exist)

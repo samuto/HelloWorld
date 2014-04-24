@@ -23,7 +23,7 @@ namespace WindowsFormsApplication7.Business
         public Moon Moon;
         private ChunkCache chunkCache;
         private ChunkStorage storage;
-        private ChunkGeneratorBase generator;
+        private GeneratorBase generator;
         public VoxelTrace PlayerVoxelTrace = new VoxelTrace();
         private Profiler p = Profiler.Instance;
         
@@ -71,11 +71,6 @@ namespace WindowsFormsApplication7.Business
                 storage.AddChunk(chunk);
             }
             return chunk;
-        }
-
-        internal void Generate(Chunk chunk)
-        {
-            generator.Generate(chunk);
         }
 
         internal int GetBlock(PositionBlock pos)
@@ -181,6 +176,16 @@ namespace WindowsFormsApplication7.Business
             Player = new Player();
             Player.PrevPosition = World.Instance.Player.Position = new Vector3(0, 66, -20);
             entityToControl = Player;
+        }
+
+        internal void Decorate(Chunk chunk)
+        {
+            generator.Decorate(chunk);
+        }
+
+        internal void Generate(Chunk chunk)
+        {
+            generator.Generate(chunk);
         }
     }
 }

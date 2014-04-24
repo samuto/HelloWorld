@@ -19,15 +19,21 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         private byte[] blocks = new byte[16 * 16 * 16];
         private Dictionary<int, Dictionary<string, object>> chunkMetaData = new Dictionary<int, Dictionary<string, object>>();
         public bool IsDirty = true;
-        private bool initialized;
         private List<EntityStack> stackEntities = new List<EntityStack>();
         private List<Entity> blockEntityFullUpdate = new List<Entity>();
         private Stopwatch stopwatch = new Stopwatch();
+        public enum StageEnum
+        {
+            GenerateLandscape,
+            DecorateLandscape,
+            Update,
+        }
+        public StageEnum Stage;
 
         public Chunk()
         {
             stopwatch.Start();
-
+            Stage = StageEnum.GenerateLandscape;
         }
 
         public void RenewLease()
@@ -73,12 +79,43 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
 
         int test = 0;
-        public void Update()
+        public bool Update(bool allowHeavyTask)
         {
-            if (!initialized)
+            if (Stage == StageEnum.Update)
             {
-                Initialize();
+                UpdateLogic();
             }
+            else if (Stage == StageEnum.DecorateLandscape)
+            {
+                if (allowHeavyTask)
+                {
+                    if (AllNeighborsNotInStage(StageEnum.GenerateLandscape) && Position.Y == Chunk.MaxSizeY/16f-1)
+                    {
+                        DecorateLandscape();
+                        allowHeavyTask = false;
+                    }
+                }
+            }
+            else if (Stage == StageEnum.GenerateLandscape)
+            {
+                if (allowHeavyTask)
+                {
+                    GenerateBasicLandscape();
+                    allowHeavyTask = false;
+                }
+            }
+            return allowHeavyTask;
+        }
+
+
+        private void MakeNeighborsDirty()
+        {
+            InvalidateMeAndNeighbors();
+            Stage = StageEnum.Update;
+        }
+
+        private void UpdateLogic()
+        {
             foreach (EntityStack stack in stackEntities)
             {
                 stack.OnUpdate();
@@ -108,50 +145,57 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                     block.UpdateBlock(this, new PositionBlock(x, y, z));
                     break;
                 }
-
             }
+        }
+
+        private void DecorateLandscape()
+        {
+            // decorate landscape..
+            World.Instance.Decorate(this);
+
+
+            // mark neighbors as dirty and set next stage
+            MakeNeighborsDirty();
+            Stage = StageEnum.Update;
         }
 
         public void InvalidateMeAndNeighbors()
         {
-            Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 0, Position.Z + 1)).Invalidate();
-
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 0, Position.Z + 1)).Invalidate();
-
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z - 1)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z + 0)).Invalidate();
-            World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 0, Position.Z + 1)).Invalidate();
-
-            if (Position.Y > 0)
+            for (int dx = -1; dx <= 1; dx++)
             {
-                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z - 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 0)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y - 1, Position.Z + 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z - 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 0)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y - 1, Position.Z + 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z - 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 0)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y - 1, Position.Z + 1)).Invalidate();
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        if (Position.Y <= 0)
+                            break;
+                        else if (Position.Y >= Chunk.MaxSizeY / 16f - 1)
+                            break;
+                        World.Instance.GetChunk(new PositionChunk(Position.X + dx, Position.Y + dy, Position.Z + dz)).Invalidate();
+                    }
+                }
             }
-            if (Position.Y < Chunk.MaxSizeY)
-            {
-                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z - 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 0)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X - 1, Position.Y + 1, Position.Z + 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z - 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 0)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 0, Position.Y + 1, Position.Z + 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z - 1)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 0)).Invalidate();
-                World.Instance.GetChunk(new PositionChunk(Position.X + 1, Position.Y + 1, Position.Z + 1)).Invalidate();
+        }
 
+        public bool AllNeighborsNotInStage(StageEnum expectedStage)
+        {
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        if (Position.Y <= 0)
+                            break;
+                        else if (Position.Y >= Chunk.MaxSizeY / 16f - 1)
+                            break;
+                        Chunk chunk = World.Instance.GetChunk(new PositionChunk(Position.X + dx, Position.Y + dy, Position.Z + dz));
+                        if (chunk.Stage == expectedStage)
+                            return false;
+                    }
+                }
             }
+            return true;
         }
 
         public byte GetLocalBlock(int x, int y, int z)
@@ -202,14 +246,11 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             return false;
         }
 
-        private void Initialize()
+        private void GenerateBasicLandscape()
         {
             World.Instance.Generate(this);
-            initialized = true;
+            Stage = StageEnum.DecorateLandscape;
         }
-
-
-
 
         internal SlimDX.BoundingBox GetBoundingBox()
         {
@@ -346,7 +387,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 return World.Instance.GetBlockEntityFromPosition(globalPosition);
             }
             return RawGetBlockEntityFromPosition(x, y, z);
-           
+
         }
 
         private Entity RawGetBlockEntityFromPosition(int x, int y, int z)

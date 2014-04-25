@@ -12,7 +12,7 @@ namespace WindowsFormsApplication7.Business.Repositories
     {
         public static Block[] Blocks = new Block[256];
         public static int id = 0;
-        public static Block Air = new Block().ResetOpaque().SetTransparent();
+        public static Block Air = new Block().ResetOpaque().SetTransparent().NoDrop();
         public static Block Dirt = new Block().SetDensity(50);
         public static Block DirtWithGrass = new Block().SetDensity(Dirt.Density).SetDropId(Dirt.Id).SetTopColor(Color.FromArgb(170, 255, 100));
         public static Block CobbleStone = new Block().SetDensity(100).SetEnergyToTransform(10);
@@ -31,7 +31,7 @@ namespace WindowsFormsApplication7.Business.Repositories
         public static BlockCraftingTable CraftingTable = (BlockCraftingTable)new BlockCraftingTable().SetDensity(Wood.Density);
         public static BlockFurnace FurnaceOff = (BlockFurnace)new BlockFurnace().SetDensity(CobbleStone.Density);
         public static BlockFurnace FurnaceOn = (BlockFurnace)new BlockFurnace().SetDensity(CobbleStone.Density).SetDropId(FurnaceOff.Id);
-        public static BlockGlass Glass = (BlockGlass)new BlockGlass().SetTransparent();
+        public static BlockGlass Glass = (BlockGlass)new BlockGlass().SetTransparent().NoDrop();
         public static BlockWater Water = (BlockWater)new BlockWater().SetTransparent().SetBlockColor(Color.White).ResetOpaque();
 
 

@@ -24,7 +24,6 @@ namespace WindowsFormsApplication7.Frontend
         public Color4 BackgroundColor = new Color4(Color.White);
         public static GlobalRenderer Instance = new GlobalRenderer();
         private ChunkCacheRenderer chunkCacheRenderer;
-        private EntityRenderers entityRenderers;
         private RenderTargetView renderView;
         private DepthStencilView depthView;
         private Texture2D backBuffer;
@@ -122,15 +121,20 @@ namespace WindowsFormsApplication7.Frontend
             Setup3dCamera(partialStep);
 
             // 3D: render chunks
-            p.StartSection("chunkcache");
+            p.StartSection("chunkspass1");
             chunkCacheRenderer.Render();
 
             // 3D: render entities
             p.EndStartSection("entities");
-            entityRenderers.GetRenderer(World.Instance.Player).Render(partialStep);
-            entityRenderers.GetRenderer(World.Instance.Sun).Render(partialStep);
-            entityRenderers.GetRenderer(World.Instance.Moon).Render(partialStep);
+            foreach (Entity entity in World.Instance.globalEntities)
+            {
+                entity.GetRenderer().Render(partialStep);
+            }
             RenderPlayerRayImpact(partialStep);
+
+            p.EndStartSection("chunkspass2");
+            chunkCacheRenderer.RenderPass2();
+
 
             // Render 2d stuff
             p.EndStartSection("2d");
@@ -223,7 +227,6 @@ namespace WindowsFormsApplication7.Frontend
         internal void InitializeWorld()
         {
             chunkCacheRenderer = new ChunkCacheRenderer();
-            entityRenderers = new EntityRenderers();
             headUpDisplay = new HeadUpDisplay();
             Camera.Instance.AttachTo(World.Instance.Player);
         }

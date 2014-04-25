@@ -13,12 +13,16 @@ namespace WindowsFormsApplication7.Frontend
 {
     class EntityRenderer
     {
-        private EntityPlayer entity;
+        public float Yaw = 0;
+        public float Pitch = 0;
+        public float PrevYaw = 0;
+        public float PrevPitch = 0;
+        private Entity entity;
         private VertexBuffer buffer;
         private int vertexCount;
         private Tessellator t = Tessellator.Instance;
 
-        public EntityRenderer(EntityPlayer entity)
+        public EntityRenderer(Entity entity)
         {
             this.entity = entity;
             Build();

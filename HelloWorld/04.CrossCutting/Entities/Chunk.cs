@@ -13,15 +13,18 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Chunk
     {
+        public bool HeavyTaskAllowed;
+        public bool HeavyTaskExecuted;
         public const int timeout = 30 * 1000;
         public const int MaxSizeY = 128;
         public PositionChunk Position;
+        public bool IsDirty = true;
         private byte[] blocks = new byte[16 * 16 * 16];
         private Dictionary<int, Dictionary<string, object>> chunkMetaData = new Dictionary<int, Dictionary<string, object>>();
-        public bool IsDirty = true;
         private List<EntityStack> stackEntities = new List<EntityStack>();
         private List<Entity> blockEntityFullUpdate = new List<Entity>();
         private Stopwatch stopwatch = new Stopwatch();
+
         public enum StageEnum
         {
             GenerateLandscape,
@@ -36,7 +39,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Stage = StageEnum.GenerateLandscape;
         }
 
-        public void RenewLease()
+        private void RenewLease()
         {
             stopwatch.Restart();
         }
@@ -79,32 +82,30 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
 
         int test = 0;
-        public bool Update(bool allowHeavyTask)
+        public void Update()
         {
+            HeavyTaskExecuted = false;
+            RenewLease();
             if (Stage == StageEnum.Update)
             {
                 UpdateLogic();
             }
             else if (Stage == StageEnum.DecorateLandscape)
             {
-                if (allowHeavyTask)
+                if (HeavyTaskAllowed)
                 {
-                    if (AllNeighborsNotInStage(StageEnum.GenerateLandscape) && Position.Y == Chunk.MaxSizeY/16f-1)
-                    {
-                        DecorateLandscape();
-                        allowHeavyTask = false;
-                    }
+                    DecorateLandscape();
+                    HeavyTaskExecuted = true;
                 }
             }
             else if (Stage == StageEnum.GenerateLandscape)
             {
-                if (allowHeavyTask)
+                if (HeavyTaskAllowed)
                 {
                     GenerateBasicLandscape();
-                    allowHeavyTask = false;
+                    HeavyTaskExecuted = true;
                 }
             }
-            return allowHeavyTask;
         }
 
 
@@ -284,8 +285,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         public IEnumerable<EntityStack> StackEntities { get { return (IEnumerable<EntityStack>)stackEntities; } }
 
-
-
         internal void AddEntity(Entity entity)
         {
             switch (entity.EntityType)
@@ -295,6 +294,10 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                     break;
 
                 case Entity.EntityTypeEnum.EntityStackFullUpdate:
+                    if (((EntityStack)entity).Id == 0)
+                    {
+                        int k = 8;
+                    }
                     stackEntities.Add((EntityStack)entity);
                     break;
             }

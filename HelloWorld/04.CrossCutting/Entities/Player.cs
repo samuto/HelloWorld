@@ -33,9 +33,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             AABB = new AxisAlignedBoundingBox(new Vector3(-0.4f, 0f, -0.4f), new Vector3(0.4f, 1.7f, 0.4f));
             EyePosition = new Vector3(0, AABB.Max.Y - 0.1f, 0);
-            //Speed = 0.15f;
-            Speed = 0.5f;
-
+            Speed = 0.15f;
 
             Inventory.Slots[2].Content.ReplaceWith(ItemRepository.StonePickAxe.Id, 1);
             Inventory.Slots[3].Content.ReplaceWith(ItemRepository.StoneAxe.Id, 1);
@@ -54,9 +52,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Inventory.Slots[24].Content.ReplaceWith(ItemRepository.SeedsWheat.Id, 64);
             Inventory.Slots[25].Content.ReplaceWith(ItemRepository.Coal.Id, 64);
            
-
-            //collisionSystem = new CollisionComplex(this);
-            accGravity = new Vector3();
+            collisionSystem = new CollisionComplex(this);
         }
 
        
@@ -434,6 +430,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal void ThrowStack(EntityStack stack)
         {
             // drop items in crafting table and in hand...
+            if (stack.IsEmpty)
+                return;
             stack.Position = Position + EyePosition;
             stack.Position.Y -= (float)(MathLibrary.GlobalRandom.NextDouble() * 0.5f);
             stack.Velocity = Direction * 0.1f;

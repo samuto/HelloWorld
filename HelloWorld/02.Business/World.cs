@@ -17,10 +17,9 @@ namespace WindowsFormsApplication7.Business
 
         // entities
         public static float TicksPrDay = 5000;
+        public List<Entity> globalEntities = new List<Entity>();
         public Player Player;
         public Entity entityToControl;
-        public Sun Sun;
-        public Moon Moon;
         private ChunkCache chunkCache;
         private ChunkStorage storage;
         private GeneratorBase generator;
@@ -35,16 +34,16 @@ namespace WindowsFormsApplication7.Business
 
             // update entities
             p.EndStartSection("Entities");
-            Player.OnUpdate();
-            Sun.OnUpdate();
-            Moon.OnUpdate();
+            foreach (Entity entity in globalEntities)
+            {
+                entity.OnUpdate();
+            }
+            p.EndSection();
 
             // calculate voxel ray
-            p.EndStartSection("voxelray");
             Vector3 direction = Player.Direction;
             Vector3 eye = Vector3.Add(Player.EyePosition, Player.Position);
             PlayerVoxelTrace.Update(eye, direction);
-            p.EndSection();
 
         }
 
@@ -168,14 +167,15 @@ namespace WindowsFormsApplication7.Business
 
         internal void Initialize(WorldConfiguration config)
         {
-            Sun = new Sun();
-            Moon = new Moon();
             chunkCache = new ChunkCache();
             storage = new ChunkStorage();
             generator = config.Generator;
             Player = new Player();
-            Player.PrevPosition = World.Instance.Player.Position = new Vector3(0, 66, -20);
+            Player.PrevPosition = World.Instance.Player.Position = new Vector3(0, 100, -20);
             entityToControl = Player;
+            globalEntities.Add(new Sun());
+            globalEntities.Add(new Moon());
+            globalEntities.Add(Player);
         }
 
         internal void Decorate(Chunk chunk)

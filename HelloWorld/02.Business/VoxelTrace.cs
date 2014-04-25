@@ -5,6 +5,7 @@ using System.Text;
 using SlimDX;
 using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
+using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -25,7 +26,7 @@ namespace WindowsFormsApplication7.Business
                 var v = voxels[i];
                 int impactBlockId = World.Instance.GetBlock(PositionBlock.FromVector(v));
                 ImpactBlock = Block.FromId(impactBlockId);
-                if (impactBlockId != 0)
+                if (impactBlockId != 0 && impactBlockId != BlockRepository.Water.Id)
                 {
                     ImpactPosition = voxels[i];
                     BuildPosition = voxels[i-1];

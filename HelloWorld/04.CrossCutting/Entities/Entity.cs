@@ -17,6 +17,15 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class Entity
     {
+        public Vector3 PrevPosition = new Vector3(0, 0, 0);
+        public Vector3 Position = new Vector3(0, 0, 0);
+        public AxisAlignedBoundingBox AABB = new AxisAlignedBoundingBox(new Vector3(-0.5f, 0f, -0.5f), new Vector3(0.5f, 1f, 0.5f));
+        public float Yaw = 0;
+        public float Pitch = 0;
+        public float PrevYaw = 0;
+        public float PrevPitch = 0;
+        public Vector4 Color = new Vector4(1, 1, 1, 1);
+        
         public int Id;
         public float HeatOfCombustion = 0f;
         public float EnergyToTransform = 0f;
@@ -82,6 +91,11 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         internal virtual void OnInitialize()
         {
 
+        }
+
+        internal virtual EntityRenderer GetRenderer()
+        {
+            return new EntityRenderer(this);
         }
     }
 }

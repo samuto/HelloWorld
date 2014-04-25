@@ -10,6 +10,7 @@ using WindowsFormsApplication7.CrossCutting.Entities;
 using WindowsFormsApplication7.Business.Profiling;
 using System.Diagnostics;
 using WindowsFormsApplication7.CrossCutting.Entities.Blocks;
+using WindowsFormsApplication7.Business.Repositories;
 
 namespace WindowsFormsApplication7.Frontend
 {
@@ -88,9 +89,10 @@ namespace WindowsFormsApplication7.Frontend
                             blockPos.X = x;
                             blockPos.Y = y;
                             blockPos.Z = z;
-                            if (!Block.FromId(chunk.SafeGetLocalBlock(x, y, z)).IsTransparent)
+                            Block block = Block.FromId(chunk.SafeGetLocalBlock(x, y, z));
+                            if (!block.IsTransparent)
                                 blockRenderer.RenderBlock(blockPos, chunk);
-                            else
+                            else if(block.Id != BlockRepository.Air.Id)
                                 pass2Blocks.Add(blockPos);
                         }
                     }

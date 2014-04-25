@@ -144,6 +144,11 @@ namespace WindowsFormsApplication7.CrossCutting.Entities.Blocks
             return this;
         }
 
+        internal Block NoDrop()
+        {
+            SetDropProbability(0f);
+            return this;
+        }
 
         internal Block SetDropProbability(float chance)
         {

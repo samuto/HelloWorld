@@ -8,6 +8,7 @@ namespace WindowsFormsApplication7.Business.Geometry
     static class MathLibrary
     {
         public static Random GlobalRandom = new Random(1234);
+        public const float Math2Pi = (float)Math.PI * 2f;
 
         public static int FloorToWorldGrid(float posF)
         {

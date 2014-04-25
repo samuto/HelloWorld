@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="01.Frontend\EntityRenderes.cs" />
     <Compile Include="01.Frontend\Effects\FXTiles.cs" />
     <Compile Include="01.Frontend\Effects\FXTexture.cs" />
     <Compile Include="01.Frontend\Effects\FXBase.cs" />
@@ -85,6 +84,8 @@
     <Compile Include="04.CrossCutting\Entities\Blocks\BlockGlass.cs" />
     <Compile Include="04.CrossCutting\Entities\Blocks\BlockWater.cs" />
     <Compile Include="04.CrossCutting\Entities\Blocks\BlockFarmland.cs" />
+    <Compile Include="04.CrossCutting\Entities\EntityStatic.cs" />
+    <Compile Include="04.CrossCutting\Entities\EntityMoveable.cs" />
     <Compile Include="04.CrossCutting\Entities\Farmland.cs" />
     <Compile Include="04.CrossCutting\Entities\Water.cs" />
     <Compile Include="04.CrossCutting\Entities\Wheat.cs" />

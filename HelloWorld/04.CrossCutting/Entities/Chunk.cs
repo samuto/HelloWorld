@@ -16,7 +16,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         public bool HeavyTaskAllowed;
         public bool HeavyTaskExecuted;
         public const int timeout = 30 * 1000;
-        public const int MaxSizeY = 128;
+        public const int MaxSizeY = 256;
         public PositionChunk Position;
         public bool IsDirty = true;
         private byte[] blocks = new byte[16 * 16 * 16];

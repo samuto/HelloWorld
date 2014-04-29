@@ -45,7 +45,7 @@ namespace WindowsFormsApplication7
         public void Run()
         {
             this.Initialize();
-            form.DesktopLocation = new Point(10, 10);
+            form.DesktopLocation = new Point(10, 600);
 
             MessagePump.Run(form, () =>
             {
@@ -71,7 +71,7 @@ namespace WindowsFormsApplication7
             debugUpdateTime = GetTime();
 
             form = new RenderForm("Hello World");
-            float scale = 3f;
+            float scale = 1f;
             form.ClientSize = new Size((int)(320f * scale), (int)(240f * scale));
 
             GlobalRenderer.Instance.InitializeRenderer();
@@ -115,7 +115,6 @@ namespace WindowsFormsApplication7
             p.EndSection();
 
             p.EndSection(); // end root-section
-            GlobalRenderer.Instance.ProfilerSnapshot();
 
             // render profiler info
             if (showProfiler)
@@ -128,13 +127,14 @@ namespace WindowsFormsApplication7
             GlobalRenderer.Instance.Commit();
 
             // display debuginfo in widows caption
-            p.Clear();
             while (GetTime() >= this.debugUpdateTime + 1d)
             {
                 form.Text = this.fpsCounter + " fps (" + CurrentTick + ")";
                 this.debugUpdateTime += 1d;
                 this.fpsCounter = 0;
+                GlobalRenderer.Instance.ProfilerSnapshot();
             }
+            p.Clear();
 
             // update frame counter
             this.fpsCounter++;

@@ -17,18 +17,14 @@ namespace WindowsFormsApplication1
         public Form1()
         {
             InitializeComponent();
-          
         }
-
-        
 
         private void button2_Click(object sender, EventArgs e)
         {
-            string sourcePath = @"C:\Users\ba2676\Desktop\LushCraft\assets\minecraft\textures";
+            string sourcePath = @"C:\Users\ba2676\Desktop\jolicraft_6685327\assets\minecraft\textures";
             string destPath = @"C:\Users\ba2676\Desktop\GitHub\HelloWorld\Test\bin\Debug\..\..\..\HelloWorld\01.Frontend\Textures";
             CopyDir("Blocks", sourcePath, destPath);
             CopyDir("Items", sourcePath, destPath);
-
         }
 
         private void CopyDir(string subdir, string sourcePath, string destPath)
@@ -46,9 +42,6 @@ namespace WindowsFormsApplication1
                     
                 }
             }
-
-            
-
         }
     }
 }

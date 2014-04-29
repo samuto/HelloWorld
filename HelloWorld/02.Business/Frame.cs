@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using WindowsFormsApplication7.CrossCutting;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -32,7 +33,10 @@ namespace WindowsFormsApplication7.Business
             newTime = ElapsedSecondsSinceGameStart();
             frameTime = newTime - currentTime;
             if (frameTime > 0.25)
-                frameTime = 0.25;	  // note: max frame time to avoid spiral of death
+            {
+                Log.Instance.Debug("WOW! we have trouble catching up");
+                //frameTime = 0.25;	  // note: max frame time to avoid spiral of death
+            }
             currentTime = newTime;
             accumulator += frameTime;
         }

@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="01.Frontend\Gui\Forms\GuiGenerateWorldForm.cs" />
     <Compile Include="01.Frontend\PlayerRenderer.cs" />
     <Compile Include="01.Frontend\Effects\FXTiles.cs" />
     <Compile Include="01.Frontend\Effects\FXTexture.cs" />

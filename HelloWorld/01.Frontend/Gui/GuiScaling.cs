@@ -13,15 +13,15 @@ namespace WindowsFormsApplication7.Frontend.Gui
         public Vector3 Translate3 = new Vector3();
         public float Scale;
         public Vector2 Translate2 = new Vector2();
-        private const float guiWidth = 9 * 16;
-        private const float guiHeight = 9 * 16;
+        public const float Width = 9 * 16;
+        public const float Height = 9 * 16;
         public const float ItemSize = 16;
 
         internal void Update()
         {
             // set scale
-            float scaleX = (TheGame.Instance.Width / guiWidth);
-            float scaleY = (TheGame.Instance.Height / guiHeight);
+            float scaleX = (TheGame.Instance.Width / Width);
+            float scaleY = (TheGame.Instance.Height / Height);
             Scale = Math.Min(scaleX, scaleY);
             if (Scale < 1f)
                 Scale = 1f;
@@ -30,8 +30,8 @@ namespace WindowsFormsApplication7.Frontend.Gui
             Scale3.Z = Scale;
             
             // set translate
-            float translateX = (TheGame.Instance.Width - guiWidth * Scale) / 2f;
-            float translateY = (TheGame.Instance.Height - guiHeight * Scale) / 2f;
+            float translateX = (TheGame.Instance.Width - Width * Scale) / 2f;
+            float translateY = (TheGame.Instance.Height - Height * Scale) / 2f;
 
             Translate2.X = Translate3.X = translateX;
             Translate2.Y = Translate3.Y = translateY;

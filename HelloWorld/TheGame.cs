@@ -220,7 +220,7 @@ namespace WindowsFormsApplication7
             CurrentTick++;
         }
 
-        private void CloseGui()
+        public void CloseGui()
         {
             // Close gui
             ActiveGui.OnClose();
@@ -263,6 +263,7 @@ namespace WindowsFormsApplication7
             {
                 CloseGui();
             }
+            OpenGui(new GuiGenerateWorldForm());
         }
     }
 }

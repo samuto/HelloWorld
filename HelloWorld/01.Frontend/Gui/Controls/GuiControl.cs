@@ -131,6 +131,10 @@ namespace WindowsFormsApplication7.Frontend.Gui.Controls
             this.Location = (Parent.Size - this.Size) / 2f;
         }
 
+        internal virtual void OnUpdate()
+        {
+
+        }
 
         internal void Update()
         {
@@ -139,6 +143,7 @@ namespace WindowsFormsApplication7.Frontend.Gui.Controls
                 SkipUpdate = false;
                 return;
             }
+            OnUpdate();
             bool mouseLeft = Input.Instance.CurrentInput.MouseState.IsPressed(0);
             bool mouseRight = Input.Instance.CurrentInput.MouseState.IsPressed(1);
             bool mouseLeftPrev = Input.Instance.LastInput.MouseState.IsPressed(0);

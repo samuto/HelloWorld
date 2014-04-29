@@ -47,12 +47,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="01.Frontend\PlayerRenderer.cs" />
     <Compile Include="01.Frontend\Effects\FXTiles.cs" />
     <Compile Include="01.Frontend\Effects\FXTexture.cs" />
     <Compile Include="01.Frontend\Effects\FXBase.cs" />
     <Compile Include="01.Frontend\Effects\FXSimple.cs" />
     <Compile Include="01.Frontend\FontRenderer.cs" />
     <Compile Include="01.Frontend\Gui\Controls\GuiLabel.cs" />
+    <Compile Include="01.Frontend\Gui\Forms\GuiDebugForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiOptionsForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiCraftingForm.cs" />
     <Compile Include="01.Frontend\Gui\Forms\GuiPlayerInventoryForm.cs" />
@@ -73,6 +75,11 @@
     <Compile Include="01.Frontend\VertexBuffer.cs" />
     <Compile Include="02.Business\CollisionComplex.cs" />
     <Compile Include="02.Business\CollisionSimple.cs" />
+    <Compile Include="02.Business\ChunkPointer.cs" />
+    <Compile Include="02.Business\ChunkColumn.cs" />
+    <Compile Include="02.Business\Landscape\DecoratorHouse.cs" />
+    <Compile Include="02.Business\Landscape\DecoratorBush.cs" />
+    <Compile Include="02.Business\Landscape\DecoratorTree.cs" />
     <Compile Include="02.Business\Landscape\DecoratorBiome.cs" />
     <Compile Include="02.Business\Landscape\GeneratorBiome.cs" />
     <Compile Include="02.Business\Landscape\GeneratorBase.cs" />

@@ -37,13 +37,12 @@ namespace WindowsFormsApplication7.Frontend
             }
 
             t.StartDrawingColoredQuads();
-            float m = 0.05f;
             Vector4 Color1 = new Vector4(0.1f, 0.1f, 0.1f, 1);
             t.AddVertexWithColor(new Vector4(0, 0, 0f, 1f), Color1);
             t.AddVertexWithColor(new Vector4(0, 1, 0f, 1f), Color1);
             t.AddVertexWithColor(new Vector4(1, 1, 0f, 1f), Color1);
             t.AddVertexWithColor(new Vector4(1, 0, 0f, 1f), Color1);
-         background = t.GetVertexBuffer();
+            background = t.GetVertexBuffer();
         }
 
         private void GenerateHealthBuffer()
@@ -96,7 +95,7 @@ namespace WindowsFormsApplication7.Frontend
                 t.AddVertexWithColor(new Vector4(posx + 0f, 9f, 0f, 1.0f), color);
                 t.AddVertexWithColor(new Vector4(posx + 9f, 9f, 0f, 1.0f), color);
                 t.AddVertexWithColor(new Vector4(posx + 9f, 0f, 0f, 1.0f), color);
-                if (i > (int)(player.Hunger/10f)-1)
+                if (i > (int)(player.Hunger / 10f) - 1)
                 {
                     t.SetTextureQuad(new Vector2(texX + pixel * 4f * 9f, texY), 9f * pixel, 9f * pixel);
                     t.AddVertexWithColor(new Vector4(posx + 0f, 0f, 0f, 1.0f), color);
@@ -181,6 +180,7 @@ namespace WindowsFormsApplication7.Frontend
             }
             VertexBuffer.Dispose(ref healthBuffer);
             VertexBuffer.Dispose(ref hungerBuffer);
+            VertexBuffer.Dispose(ref background);
         }
     }
 }

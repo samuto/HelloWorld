@@ -93,9 +93,5 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         }
 
-        internal virtual EntityRenderer GetRenderer()
-        {
-            return new EntityRenderer(this);
-        }
     }
 }

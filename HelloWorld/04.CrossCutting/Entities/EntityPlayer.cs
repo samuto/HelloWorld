@@ -48,7 +48,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Vector3.Add(ref Velocity, ref accGravity, out Velocity);
 
             Vector3 response = Position;
-            if (collisionSystem != null)
+            if (collisionSystem != null && CollisionEnabled)
                 response = collisionSystem.Resolve(this);
             else
             {

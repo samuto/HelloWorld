@@ -128,10 +128,14 @@ namespace WindowsFormsApplication7.Frontend
             p.EndStartSection("entities");
             foreach (Entity entity in World.Instance.globalEntities)
             {
-                entity.GetRenderer().Render(partialStep);
+                EntityRenderer renderer = GetRenderer(entity);
+                if (renderer != null)
+                {
+                    renderer.Render(partialStep);
+                    renderer.Dispose();
+                }
             }
             RenderPlayerRayImpact(partialStep);
-
             p.EndStartSection("chunkspass2");
             chunkCacheRenderer.RenderPass2();
 
@@ -142,6 +146,15 @@ namespace WindowsFormsApplication7.Frontend
             RenderCrossHair();
             RenderHeadUpDisplay();
             p.EndSection();
+        }
+
+        private EntityRenderer GetRenderer(Entity entity)
+        {
+            Type t = entity.GetType();
+            if (t == typeof(Player))
+                return new PlayerRenderer(entity);
+            else
+                return new EntityRenderer(entity);
         }
 
         private void RenderHeadUpDisplay()
@@ -171,7 +184,8 @@ namespace WindowsFormsApplication7.Frontend
             if (!World.Instance.PlayerVoxelTrace.Hit)
                 return;
             t.ResetTransformation();
-            t.StartDrawingTiledQuadsWTF();
+            //t.StartDrawingTiledQuadsWTF();
+            t.StartDrawingTiledQuadsPass2();
             Vector4 buildPos = World.Instance.PlayerVoxelTrace.ImpactPosition;
             t.Translate.X = buildPos.X + 0.5f;
             t.Translate.Y = buildPos.Y + 0.5f;
@@ -256,11 +270,11 @@ namespace WindowsFormsApplication7.Frontend
         private VertexBuffer profileVertexBuffer;
         internal void ProfilerSnapshot()
         {
-            if (profileVertexBuffer != null)
-                profileVertexBuffer.Dispose();
+            VertexBuffer.Dispose(ref profileVertexBuffer);
 
             t.ResetTransformation();
             FontRenderer f = FontRenderer.Instance;
+            Player player = World.Instance.Player;
             f.BeginBatch();
             f.CharScale = 1;
             string report = p.Report();
@@ -274,37 +288,60 @@ namespace WindowsFormsApplication7.Frontend
                     y -= f.LineHeight;
                 }
             }
-            
+
             // log...
-            y = TheGame.Instance.Height - f.LineHeight * 10f;
+            y -= f.LineHeight;
 
             if (World.Instance.PlayerVoxelTrace.Hit)
             {
-                string line = string.Format("impact:    x={0}y={1}z={2} ({3})",
-                        World.Instance.PlayerVoxelTrace.ImpactPosition.X.ToString().PadRight(5),
-                        World.Instance.PlayerVoxelTrace.ImpactPosition.Y.ToString().PadRight(5),
-                        World.Instance.PlayerVoxelTrace.ImpactPosition.Z.ToString().PadRight(5),
-                        World.Instance.PlayerVoxelTrace.ImpactBlock.Id);
+                Vector4 impactpos = World.Instance.PlayerVoxelTrace.ImpactPosition;
+                string line = string.Format(GetVectorAsString("impactpos", impactpos));
                 f.RenderTextShadow(line, 0, y);
                 y -= f.LineHeight;
             }
             else
             {
-                f.RenderTextShadow("no impact", 0, y);
+                f.RenderTextShadow("impactpos", 0, y);
                 y -= f.LineHeight;
+
+                Vector3 pos = new Vector3(player.Position.X, player.Position.Y, player.Position.Z);
+                if (pos.Y > Chunk.MaxSizeY - 1)
+                    pos.Y = Chunk.MaxSizeY - 1;
+                else if (pos.Y < 0)
+                    pos.Y = 0;
+                PositionChunk chunkPos = PositionChunk.CreateFrom(pos);
+                Vector3 chunkPos3 = new Vector3(chunkPos.X, chunkPos.Y, chunkPos.Z);
+                f.RenderTextShadow(string.Format(GetVectorAsString("chunkpos", chunkPos3)), 0, y);
+                y -= f.LineHeight;
+                ChunkCache cache = World.Instance.GetCachedChunks();
+                Chunk c = cache.GetChunk(chunkPos);
+                if (c != null)
+                {
+                    f.RenderTextShadow(string.Format("chunk.Stage      = {0}", c.Stage.ToString()), 0, y);
+                    y -= f.LineHeight;
+                    f.RenderTextShadow(string.Format("chunk.col.stage  = {0}", c.Column.Stage.ToString()), 0, y);
+                    y -= f.LineHeight;
+                    f.RenderTextShadow(string.Format("chunk.col.active = {0}", c.Column.Active.ToString()), 0, y);
+                    y -= f.LineHeight;
+                    f.RenderTextShadow(string.Format("cache.alleighbors= {0}", cache.AllNeighborColumns(c.Column).Where(cc => cc != null).Count()), 0, y);
+                    y -= f.LineHeight;
+                    
+                    List<Chunk> chunks = new List<Chunk>();
+                    for (int i = 0; i < 8; i++)
+                    {
+                        chunks.Add(cache.GetChunk(new PositionChunk(c.Position.X, i, c.Position.Z)));
+
+                    }
+                }
             }
-            f.RenderTextShadow(string.Format("direction: x={0}z={2}y={1}",
-                        World.Instance.Player.Direction.X.ToString("#.##").PadRight(5),
-                        World.Instance.Player.Direction.Y.ToString("#.##").PadRight(5),
-                        World.Instance.Player.Direction.Z.ToString("#.##").PadRight(5)), 0, y);
+            f.RenderTextShadow(GetVectorAsString("direction", player.Direction), 0, y);
+
             y -= f.LineHeight;
-            f.RenderTextShadow(string.Format("position: x={0}z={2}y={1}",
-                       World.Instance.Player.Position.X.ToString("#.##").PadRight(5),
-                       World.Instance.Player.Position.Y.ToString("#.##").PadRight(5),
-                       World.Instance.Player.Position.Z.ToString("#.##").PadRight(5)), 0, y);
+            f.RenderTextShadow(GetVectorAsString("position", player.Position), 0, y);
+
             y -= f.LineHeight;
             y -= f.LineHeight;
-            string[] lastLines = Log.Instance.Last(30);
+            string[] lastLines = Log.Instance.Last(70);
             foreach (string line in lastLines)
             {
                 f.RenderTextShadow(line, 0, y);
@@ -312,6 +349,19 @@ namespace WindowsFormsApplication7.Frontend
             }
             f.StopBatch();
             profileVertexBuffer = t.GetVertexBuffer();
+        }
+
+        private string GetVectorAsString(string name, Vector4 vector4)
+        {
+            return GetVectorAsString(name, new Vector3(vector4.X, vector4.Y, vector4.Z));
+        }
+        private string GetVectorAsString(string name, Vector3 vector3)
+        {
+            return string.Format("{0}: x={1:+0000.00;-0000.00}  z={2:+0000.00;-0000.00}  y={3:+0000.00;-0000.00}",
+                        name.PadRight(10),
+                        vector3.X,
+                        vector3.Y,
+                        vector3.Z);
         }
 
         internal void RenderGui(float partialStep)
@@ -325,8 +375,8 @@ namespace WindowsFormsApplication7.Frontend
             FontRenderer.Instance.CharScale = 1f;
         }
 
-       
 
-       
+
+
     }
 }

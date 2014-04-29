@@ -6,6 +6,7 @@ using WindowsFormsApplication7.CrossCutting.Entities;
 using SlimDX;
 using WindowsFormsApplication7.Business.Profiling;
 using WindowsFormsApplication7.Business.Geometry;
+using WindowsFormsApplication7.CrossCutting;
 
 namespace WindowsFormsApplication7.Business
 {
@@ -14,33 +15,31 @@ namespace WindowsFormsApplication7.Business
         public PositionChunk LastCenterChunk = new PositionChunk();
         public List<Chunk> OrderedChunks;
         private Dictionary<object, Chunk> cachedChunks = new Dictionary<object, Chunk>();
+        public Dictionary<object, ChunkColumn> ChunkColumns = new Dictionary<object, ChunkColumn>();
+
         private Profiler p = Profiler.Instance;
         public bool IsDirty;
 
         public ChunkCache()
         {
-
         }
 
-        internal void Update(Vector3 centerPos, float blockRadius)
+        internal void Update(Vector3 centerPos)
         {
-            float chunkUpdateDistSquared = (int)((blockRadius * blockRadius) / 256f);
+
+            float chunkRadius = (int)((GameSettings.CachingRadius) / 16f);
+            float chunkRadiusSquared = chunkRadius * chunkRadius;
             Vector3 centerBlockPos = new Vector3(
                 MathLibrary.FloorToWorldGrid(centerPos.X),
                 MathLibrary.FloorToWorldGrid(centerPos.Y),
                 MathLibrary.FloorToWorldGrid(centerPos.Z));
-            // cap it to world
             if (centerBlockPos.Y > Chunk.MaxSizeY - 1)
                 centerBlockPos.Y = Chunk.MaxSizeY - 1;
             else if (centerBlockPos.Y < 0)
                 centerBlockPos.Y = 0;
-            Vector3 minPos = Vector3.Add(centerPos, new Vector3(-blockRadius, 0, -blockRadius));
-            Vector3 maxPos = Vector3.Add(centerPos, new Vector3(blockRadius, 0, blockRadius));
-            minPos.Y = 0;
-            maxPos.Y = Chunk.MaxSizeY - 1;
-            PositionChunk minChunk = PositionChunk.CreateFrom(minPos);
-            PositionChunk maxChunk = PositionChunk.CreateFrom(maxPos);
             PositionChunk centerChunk = PositionChunk.CreateFrom(centerBlockPos);
+            PositionChunk minChunk = new PositionChunk(centerChunk.X - (int)chunkRadius, 0, centerChunk.Z - (int)chunkRadius);
+            PositionChunk maxChunk = new PositionChunk(centerChunk.X + (int)chunkRadius, Chunk.MaxSizeY / 16 - 1, centerChunk.Z + (int)chunkRadius);
 
             // add all chunks within blockradius
             if (!centerChunk.SameAs(LastCenterChunk))
@@ -53,7 +52,7 @@ namespace WindowsFormsApplication7.Business
                         int dx = x - centerChunk.X;
                         int dz = z - centerChunk.Z;
                         double chunkCurrentDistSquared = dx * dx + dz * dz;
-                        if (chunkCurrentDistSquared > chunkUpdateDistSquared)
+                        if (chunkCurrentDistSquared > chunkRadiusSquared)
                             continue;
                         for (int y = minChunk.Y; y <= maxChunk.Y; y++)
                         {
@@ -69,13 +68,16 @@ namespace WindowsFormsApplication7.Business
                 {
                     float dx = c.Position.X - centerChunk.X;
                     float dz = c.Position.Z - centerChunk.Z;
-                    return dx * dx + dz * dz <= chunkUpdateDistSquared;
+                    return dx * dx + dz * dz <= chunkRadiusSquared;
                 }).OrderBy(c =>
                 {
                     float dx = c.Position.X - centerChunk.X;
-                    float dy = c.Position.Y - centerChunk.Y;
                     float dz = c.Position.Z - centerChunk.Z;
-                    return dx * dx + dy * dy + dz * dz;
+                    return dx * dx + dz * dz;
+                }).ThenBy(c =>
+                {
+                    float dy = c.Position.Y - centerChunk.Y;
+                    return dy * dy;
                 }).ToList();
 
                 IsDirty = true;
@@ -83,8 +85,13 @@ namespace WindowsFormsApplication7.Business
 
             // update chunks...
             bool allowHeavyTask = true;
+            foreach (var column in ChunkColumns.Values)
+            {
+                column.Active = false;
+            }
             foreach (Chunk chunk in OrderedChunks)
             {
+                chunk.Column = GetChunkColumn(chunk.Position);
                 chunk.HeavyTaskAllowed = allowHeavyTask;
                 chunk.Update();
                 if (chunk.HeavyTaskExecuted)
@@ -112,8 +119,32 @@ namespace WindowsFormsApplication7.Business
                 pair.Value.Dipose();
                 cachedChunks.Remove(pair.Key);
             });
+            // remove unused columnds
+            var columnsToRemove = ChunkColumns.Where(pair => pair.Value.Active == false).ToList();
+            columnsToRemove.ForEach(pair =>
+            {
+                ChunkColumns.Remove(pair.Key);
+            });
 
             LastCenterChunk = centerChunk;
+        }
+
+        private ChunkColumn GetChunkColumn(PositionChunk chunkPos)
+        {
+            PositionChunk columnPos = new PositionChunk(chunkPos.X, 0, chunkPos.Z);
+            ChunkColumn column;
+            if (ChunkColumns.ContainsKey(columnPos.Key))
+            {
+                column = ChunkColumns[columnPos.Key];
+            }
+            else
+            {
+                column = new ChunkColumn(columnPos.X, columnPos.Z);
+                ChunkColumns.Add(columnPos.Key, column);
+                column.InitializeStage();
+            }
+            column.Active = true;
+            return column;
         }
 
         internal Chunk GetChunk(PositionChunk positionChunk)
@@ -129,6 +160,31 @@ namespace WindowsFormsApplication7.Business
             {
                 return cachedChunks.Count;
             }
+        }
+
+        internal List<ChunkColumn> AllNeighborColumns(ChunkColumn chunkColumn)
+        {
+            Vector2[] deltas = new Vector2[] { 
+                new Vector2(-1,-1),
+                new Vector2(0,-1),
+                new Vector2(1,-1),
+                new Vector2(-1,0),
+                new Vector2(1,0),
+                new Vector2(-1,1),
+                new Vector2(0,1),
+                new Vector2(1,1),
+            };
+            List<ChunkColumn> neighbors = new List<ChunkColumn>();
+            foreach (Vector2 delta in deltas)
+            {
+                PositionChunk chunkPos = new PositionChunk(chunkColumn.Position.X + (int)delta.X, 0, chunkColumn.Position.Z + (int)delta.Y);
+                if (ChunkColumns.ContainsKey(chunkPos.Key))
+                    neighbors.Add(ChunkColumns[chunkPos.Key]);
+                else
+                    neighbors.Add(null);
+
+            }
+            return neighbors;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace WindowsFormsApplication7.Frontend
             if (Enable3d)
             {
                 Direction = Interpolate.Vector(attachedEntity.PrevDirection, attachedEntity.Direction, partialStep);
-                EyePosition = Interpolate.EyePosition(attachedEntity, partialStep);
+                EyePosition = Interpolate.Vector(attachedEntity.PrevPosition, attachedEntity.Position, partialStep) + attachedEntity.EyePosition;
                 Vector3 target = Vector3.Add(EyePosition, Direction * 5f);
                 View = Matrix.LookAtRH(EyePosition, target, new Vector3(0, 1, 0));
                 

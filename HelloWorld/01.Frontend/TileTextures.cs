@@ -165,6 +165,14 @@ namespace WindowsFormsApplication7.Frontend
                 tileIndex,
                 BlockColors);
             }
+            alpha = 1f;
+            BlockColors = new Vector4[] { 
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha),
+                new Vector4(1,1,1,alpha)};
             tileIndex = indexMap["selection_box"];
             selectionBlockBuffer = GenerateBlockBuffers(
             tileIndex,
@@ -176,19 +184,6 @@ namespace WindowsFormsApplication7.Frontend
             BlockColors);
         }
 
-        private VertexBuffer Generate2dVertexBuffer(string name)
-        {
-            t.StartDrawingTiledQuads();
-            Vector4 c1 = new Vector4(1, 1, 1, 1);
-            t.ArrayIndex = indexMap[name];
-            Vector3 normal = new Vector3(0, 0, 1);
-            float s = 1f;
-            t.AddVertexWithColor(new Vector4(0f, 0f, 0, 1.0f), c1, normal);
-            t.AddVertexWithColor(new Vector4(0f, s, 0, 1.0f), c1, normal);
-            t.AddVertexWithColor(new Vector4(s, s, 0, 1.0f), c1, normal);
-            t.AddVertexWithColor(new Vector4(s, 0f, 0, 1.0f), c1, normal);
-            return t.GetVertexBuffer();
-        }
 
         private void BuildItemVertexBuffer(int itemId, string name)
         {

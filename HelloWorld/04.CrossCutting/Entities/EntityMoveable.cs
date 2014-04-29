@@ -17,7 +17,8 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 {
     class EntityMoveable : Entity
     {
-        public Vector3 accGravity = new Vector3(0, -0.02f, 0);
+        public static Vector3 defaultGravity = new Vector3(0, -0.02f, 0);
+        public Vector3 accGravity = defaultGravity;
         public Vector3 Velocity = new Vector3(0, 0, 0);
         public Vector3 Direction = new Vector3();
         public Vector3 PrevDirection = new Vector3();
@@ -30,6 +31,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         protected bool moveUp = false;
         protected bool moveDown = false;
         protected ICollisionSystem collisionSystem = null;
+        public bool CollisionEnabled = true;
 
         internal void UpdateDirection()
         {
@@ -53,7 +55,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             if (Yaw < 0f)
                 Yaw += MathLibrary.Math2Pi;
             Pitch += deltaPitch;
-            float limit = MathLibrary.Math2Pi / 4f - 0.1f;
+            float limit = MathLibrary.Math2Pi / 4f - 0.01f;
             if (Pitch > limit)
                 Pitch = limit;
             if (Pitch < -limit)

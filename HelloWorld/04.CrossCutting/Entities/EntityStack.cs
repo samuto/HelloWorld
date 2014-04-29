@@ -107,10 +107,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal bool TransferAll(EntityStack destinationStack)
         {
-            if (Id == 0 || destinationStack.Id == 0)
-            {
-                int k = 8;
-            }
+            
             if (destinationStack.Count + Count > 64)
                 return false;
             TransferEntities(destinationStack, Count);

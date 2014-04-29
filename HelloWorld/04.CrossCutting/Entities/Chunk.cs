@@ -24,19 +24,20 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         private List<EntityStack> stackEntities = new List<EntityStack>();
         private List<Entity> blockEntityFullUpdate = new List<Entity>();
         private Stopwatch stopwatch = new Stopwatch();
+        public ChunkColumn Column;
 
-        public enum StageEnum
+        public enum ChunkStageEnum
         {
-            GenerateLandscape,
-            DecorateLandscape,
-            Update,
+            NotGenerated,
+            Generated,
+            Update
         }
-        public StageEnum Stage;
+        public ChunkStageEnum Stage;
 
         public Chunk()
         {
             stopwatch.Start();
-            Stage = StageEnum.GenerateLandscape;
+            Stage = ChunkStageEnum.NotGenerated;
         }
 
         private void RenewLease()
@@ -86,33 +87,30 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
         {
             HeavyTaskExecuted = false;
             RenewLease();
-            if (Stage == StageEnum.Update)
+            if (Stage == ChunkStageEnum.Update)
             {
                 UpdateLogic();
             }
-            else if (Stage == StageEnum.DecorateLandscape)
+            else if (Column.Stage == ChunkColumn.ColumnStageEnum.AllNeighborsGenerated)
             {
                 if (HeavyTaskAllowed)
                 {
-                    DecorateLandscape();
+                    Column.Decorate();
                     HeavyTaskExecuted = true;
                 }
             }
-            else if (Stage == StageEnum.GenerateLandscape)
+            else if (Stage == ChunkStageEnum.NotGenerated)
             {
                 if (HeavyTaskAllowed)
                 {
-                    GenerateBasicLandscape();
+                    World.Instance.Generator(this).Generate(this);
+                    Stage = ChunkStageEnum.Generated;
+                    Column.OnChunkGenerated();
                     HeavyTaskExecuted = true;
                 }
             }
-        }
+           
 
-
-        private void MakeNeighborsDirty()
-        {
-            InvalidateMeAndNeighbors();
-            Stage = StageEnum.Update;
         }
 
         private void UpdateLogic()
@@ -149,16 +147,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        private void DecorateLandscape()
-        {
-            // decorate landscape..
-            World.Instance.Decorate(this);
-
-
-            // mark neighbors as dirty and set next stage
-            MakeNeighborsDirty();
-            Stage = StageEnum.Update;
-        }
+        
 
         public void InvalidateMeAndNeighbors()
         {
@@ -168,9 +157,9 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                 {
                     for (int dy = -1; dy <= 1; dy++)
                     {
-                        if (Position.Y <= 0)
+                        if (Position.Y + dy <= 0)
                             break;
-                        else if (Position.Y >= Chunk.MaxSizeY / 16f - 1)
+                        else if (Position.Y + dy >= Chunk.MaxSizeY / 16f - 1)
                             break;
                         World.Instance.GetChunk(new PositionChunk(Position.X + dx, Position.Y + dy, Position.Z + dz)).Invalidate();
                     }
@@ -178,26 +167,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
         }
 
-        public bool AllNeighborsNotInStage(StageEnum expectedStage)
-        {
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                for (int dz = -1; dz <= 1; dz++)
-                {
-                    for (int dy = -1; dy <= 1; dy++)
-                    {
-                        if (Position.Y <= 0)
-                            break;
-                        else if (Position.Y >= Chunk.MaxSizeY / 16f - 1)
-                            break;
-                        Chunk chunk = World.Instance.GetChunk(new PositionChunk(Position.X + dx, Position.Y + dy, Position.Z + dz));
-                        if (chunk.Stage == expectedStage)
-                            return false;
-                    }
-                }
-            }
-            return true;
-        }
 
         public byte GetLocalBlock(int x, int y, int z)
         {
@@ -246,13 +215,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             }
             return false;
         }
-
-        private void GenerateBasicLandscape()
-        {
-            World.Instance.Generate(this);
-            Stage = StageEnum.DecorateLandscape;
-        }
-
+      
         internal SlimDX.BoundingBox GetBoundingBox()
         {
             PositionBlock minGlobalPos, maxGlobalPos;
@@ -294,10 +257,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
                     break;
 
                 case Entity.EntityTypeEnum.EntityStackFullUpdate:
-                    if (((EntityStack)entity).Id == 0)
-                    {
-                        int k = 8;
-                    }
                     stackEntities.Add((EntityStack)entity);
                     break;
             }

@@ -45,7 +45,18 @@ namespace WindowsFormsApplication7.Frontend
 
             pass2ChunkRenderers.Clear();
             cachedChunks = World.Instance.GetCachedChunks();
-            Counters.Instance.SetValue("total cached", cachedChunks.Count);
+            if (cachedChunks.Count != 0)
+            {
+                Counters.Instance.SetValue("c.all     ", cachedChunks.Count);
+                Counters.Instance.SetValue("c.notgen  ", cachedChunks.OrderedChunks.Where(c => c.Stage == Chunk.ChunkStageEnum.NotGenerated).Count());
+                Counters.Instance.SetValue("c.gen     ", cachedChunks.OrderedChunks.Where(c => c.Stage == Chunk.ChunkStageEnum.Generated).Count());
+                Counters.Instance.SetValue("c.upd     ", cachedChunks.OrderedChunks.Where(c => c.Stage == Chunk.ChunkStageEnum.Update).Count());
+                Counters.Instance.SetValue("col.all   ", cachedChunks.ChunkColumns.Values.Count());
+                Counters.Instance.SetValue("col.notgen", cachedChunks.ChunkColumns.Values.Where(c => c.Stage == ChunkColumn.ColumnStageEnum.NotGenerated).Count());
+                Counters.Instance.SetValue("col.gen   ", cachedChunks.ChunkColumns.Values.Where(c => c.Stage == ChunkColumn.ColumnStageEnum.Generated).Count());
+                Counters.Instance.SetValue("col.rdygen", cachedChunks.ChunkColumns.Values.Where(c => c.Stage == ChunkColumn.ColumnStageEnum.AllNeighborsGenerated).Count());
+                Counters.Instance.SetValue("col.deco  ", cachedChunks.ChunkColumns.Values.Where(c => c.Stage == ChunkColumn.ColumnStageEnum.Decorated).Count());
+            }
 
             if (cachedChunks.Count == 0)
                 return;
@@ -60,6 +71,12 @@ namespace WindowsFormsApplication7.Frontend
                     float dy = c.Position.Y - cachedChunks.LastCenterChunk.Y;
                     float dz = c.Position.Z - cachedChunks.LastCenterChunk.Z;
                     return dx * dx + dy * dy + dz * dz <= viewRadiusSquared;
+                }).OrderBy(c =>
+                {
+                    float dx = c.Position.X - cachedChunks.LastCenterChunk.X;
+                    float dy = c.Position.Y - cachedChunks.LastCenterChunk.Y;
+                    float dz = c.Position.Z - cachedChunks.LastCenterChunk.Z;
+                    return dx * dx + dy * dy + dz * dz;
                 }).ToList();
                 cachedChunks.IsDirty = false;
             }
@@ -100,7 +117,8 @@ namespace WindowsFormsApplication7.Frontend
                 chunkRenderers.Add(key, chunkRenderer);
             }
             forceCachedRendering |= chunkRenderer.Render(forceCachedRendering);
-            pass2ChunkRenderers.Add(chunkRenderer);
+            if(chunkRenderer.HasPass2())
+                pass2ChunkRenderers.Add(chunkRenderer);
         }
     }
 }

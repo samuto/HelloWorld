@@ -17,12 +17,12 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Dispose()
         {
-            if (Disposed)
+            if(Vertices == null)
                 return;
-            if (Vertices != null && !Vertices.Disposed)
+            if (!Vertices.Disposed)
                 Vertices.Dispose();
             Vertices = null;
-            Disposed = true;
+            VertexCount = 0;
         }
 
         internal static void Dispose(ref VertexBuffer buffer)

@@ -49,7 +49,7 @@ namespace WindowsFormsApplication7.Frontend
             if (pass2VertexBuffer.Vertices != null)
             {
                 t.StartDrawingTiledQuadsPass2();
-                t.Draw(pass2VertexBuffer.Vertices, pass2VertexBuffer.VertexCount);
+                t.Draw(pass2VertexBuffer);
             }
         }
 
@@ -63,8 +63,8 @@ namespace WindowsFormsApplication7.Frontend
             if ((pass1VertexBuffer.Disposed || chunk.IsDirty) && !forceCachedRendering)
             {
                 // pass1
-                pass1VertexBuffer.Dispose();
-                pass2VertexBuffer.Dispose();
+                VertexBuffer.Dispose(ref pass1VertexBuffer);
+                VertexBuffer.Dispose(ref pass2VertexBuffer);
                 chunk.IsDirty = true;
 
                 // rebuild vertices for cunk
@@ -100,6 +100,7 @@ namespace WindowsFormsApplication7.Frontend
                 pass1VertexBuffer = t.GetVertexBuffer();
 
                 // generate vertex buffer for pass2
+                t.StartDrawingTiledQuadsPass2();
                 foreach (PositionBlock pass2BlockPos in pass2Blocks)
                 {
                     blockRenderer.RenderBlock(pass2BlockPos, chunk);
@@ -115,7 +116,7 @@ namespace WindowsFormsApplication7.Frontend
             if (pass1VertexBuffer.Vertices != null)
             {
                 t.StartDrawingTiledQuads();
-                t.Draw(pass1VertexBuffer.Vertices, pass1VertexBuffer.VertexCount);
+                t.Draw(pass1VertexBuffer);
             }
             // draw entities in chunk
             foreach (EntityStack stack in chunk.StackEntities)
@@ -170,6 +171,11 @@ namespace WindowsFormsApplication7.Frontend
             {
                 return stopwatch.ElapsedMilliseconds > timeout;
             }
+        }
+
+        internal bool HasPass2()
+        {
+            return pass2VertexBuffer.VertexCount > 0;
         }
     }
 }

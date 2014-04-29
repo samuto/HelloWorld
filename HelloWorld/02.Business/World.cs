@@ -30,7 +30,7 @@ namespace WindowsFormsApplication7.Business
         {
             p.StartSection("ChunkCache");
             // update landscape
-            chunkCache.Update(Player.Position, GameSettings.CachingRadius);
+            chunkCache.Update(Player.Position);
 
             // update entities
             p.EndStartSection("Entities");
@@ -178,14 +178,10 @@ namespace WindowsFormsApplication7.Business
             globalEntities.Add(Player);
         }
 
-        internal void Decorate(Chunk chunk)
-        {
-            generator.Decorate(chunk);
-        }
 
-        internal void Generate(Chunk chunk)
+        internal GeneratorBase Generator(Chunk chunk)
         {
-            generator.Generate(chunk);
+            return generator;
         }
     }
 }

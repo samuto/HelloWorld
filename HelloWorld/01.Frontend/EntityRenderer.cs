@@ -17,10 +17,10 @@ namespace WindowsFormsApplication7.Frontend
         public float Pitch = 0;
         public float PrevYaw = 0;
         public float PrevPitch = 0;
-        private Entity entity;
-        private VertexBuffer buffer;
-        private int vertexCount;
-        private Tessellator t = Tessellator.Instance;
+        protected Entity entity;
+        protected VertexBuffer buffer;
+        protected int vertexCount;
+        protected Tessellator t = Tessellator.Instance;
 
         public EntityRenderer(Entity entity)
         {
@@ -30,7 +30,6 @@ namespace WindowsFormsApplication7.Frontend
 
         internal void Build()
         {
-
             t.StartDrawingColoredQuads();
             Vector4 c = entity.Color;
             Vector3 min = entity.AABB.Min;
@@ -85,10 +84,10 @@ namespace WindowsFormsApplication7.Frontend
             buffer = t.GetVertexBuffer();
         }
 
-        internal void Render(float partialStep)
+        internal virtual void Render(float partialStep)
         {
             t.ResetTransformation();
-            Vector3 position = Interpolate.Position(entity, partialStep);
+            Vector3 position = Interpolate.Vector(entity.PrevPosition, entity.Position, partialStep);
             if (entity != World.Instance.Player)
             {
                 t.StartDrawingColoredQuads();

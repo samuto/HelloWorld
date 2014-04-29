@@ -80,13 +80,7 @@ namespace WindowsFormsApplication7.Frontend
             Reset();
         }
 
-        public void Draw(SlimDX.Direct3D11.Buffer vertices, int count)
-        {
-            VertexCount = count;
-            DrawBuffer(vertices);
-            Reset();
-        }
-
+     
         public void Draw(VertexBuffer vertexBuffer)
         {
             VertexCount = vertexBuffer.VertexCount;

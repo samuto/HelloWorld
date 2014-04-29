@@ -51,7 +51,7 @@ namespace WindowsFormsApplication7.Business.Landscape
         internal override void Decorate(Chunk chunk)
         {
             DecoratorBiome decorator = new DecoratorBiome();
-            decorator.Decorate(this);
+            decorator.Decorate(chunk);
         }
 
         private float CalcOffset(float height, float min, float max)

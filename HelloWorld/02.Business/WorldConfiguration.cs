@@ -14,6 +14,6 @@ namespace WindowsFormsApplication7.Business
 {
     class WorldConfiguration
     {
-        public GeneratorBase Generator = new GeneratorDebug();
+        public GeneratorBase Generator = new GeneratorBiome();
     }
 }

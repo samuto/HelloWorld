@@ -34,6 +34,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             AABB = new AxisAlignedBoundingBox(new Vector3(-0.4f, 0f, -0.4f), new Vector3(0.4f, 1.7f, 0.4f));
             EyePosition = new Vector3(0, AABB.Max.Y - 0.1f, 0);
             Speed = 0.15f;
+            
 
             Inventory.Slots[2].Content.ReplaceWith(ItemRepository.StonePickAxe.Id, 1);
             Inventory.Slots[3].Content.ReplaceWith(ItemRepository.StoneAxe.Id, 1);

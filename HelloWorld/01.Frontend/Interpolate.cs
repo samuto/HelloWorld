@@ -9,28 +9,6 @@ namespace WindowsFormsApplication7.Frontend
 {
     class Interpolate
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="partialStep">1.0 if this is previous tick position, 0.0 if this is current tick position</param>
-        /// <returns></returns>
-        internal static SlimDX.Vector3 Position(Entity entity, float partialStep)
-        {
-            float p1 = partialStep;
-            float p2 = (1-partialStep);
-            return new Vector3(
-                entity.Position.X * p1 + entity.PrevPosition.X * p2,
-                entity.Position.Y * p1 + entity.PrevPosition.Y * p2,
-                entity.Position.Z * p1 + entity.PrevPosition.Z * p2
-                );
-        }
-
-        internal static Vector3 EyePosition(EntityPlayer attachedEntity, float partialStep)
-        {
-            return Vector3.Add(attachedEntity.EyePosition, Interpolate.Position(attachedEntity, partialStep));
-        }
-
         internal static Vector2 Vector(Vector2 current, Vector2 last, float partialStep)
         {
             float p1 = partialStep;

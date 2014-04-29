@@ -92,7 +92,6 @@ namespace WindowsFormsApplication7.Business.Profiling
         int lastTick = 0;
         internal string Report()
         {
-            float updateCount = TheGame.Instance.CurrentTick - lastTick;
             lastTick = TheGame.Instance.CurrentTick;
             StringBuilder sb = new StringBuilder();
             int padding = 20;
@@ -101,7 +100,7 @@ namespace WindowsFormsApplication7.Business.Profiling
                 padding = 10;
                 foreach (var pair in Counters.Instance.AllCounters)
                 {
-                    sb.AppendLine(string.Format("{0} = {1}", pair.Key.PadRight(padding), pair.Value / updateCount));
+                    sb.AppendLine(string.Format("{0} = {1}", pair.Key.PadRight(padding), pair.Value));
                 }
                 return sb.ToString(); ;
             }

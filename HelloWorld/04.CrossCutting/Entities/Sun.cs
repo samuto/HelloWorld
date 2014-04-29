@@ -36,7 +36,7 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             Color = c.ToVector4();
 
             Position.X += World.Instance.Player.Position.X;
-            Position.Y += World.Instance.Player.Position.Y;
+            Position.Y += 0;
             Position.Z += World.Instance.Player.Position.Z;
         }
 

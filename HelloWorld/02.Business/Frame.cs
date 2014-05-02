@@ -34,7 +34,7 @@ namespace WindowsFormsApplication7.Business
             frameTime = newTime - currentTime;
             if (frameTime > 0.25)
             {
-                Log.Instance.Debug("WOW! we have trouble catching up");
+                Log.Instance.Debug("WOW! we have trouble catching up. frameTime  = " + frameTime);
                 //frameTime = 0.25;	  // note: max frame time to avoid spiral of death
             }
             currentTime = newTime;

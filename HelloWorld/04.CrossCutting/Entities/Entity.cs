@@ -53,7 +53,6 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
             else if(IsBlock(id))
                 return Block.FromId(id);
             throw new Exception("Unknown entity type");
-                    
         }
 
         internal Entity SetHeatOfCombustion(float heatOfCombustion)
@@ -64,13 +63,12 @@ namespace WindowsFormsApplication7.CrossCutting.Entities
 
         internal static bool IsBlock(int id)
         {
-                return id > 0 && id < ItemRepository.ItemIdOffset;
-            
+            return id > 0 && id < ItemRepository.ItemIdOffset;
         }
 
         internal static bool IsItem(int id)
         {
-                return id >= ItemRepository.ItemIdOffset;
+            return id >= ItemRepository.ItemIdOffset;
         }
 
         internal virtual void OnUpdate()
